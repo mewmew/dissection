@@ -357,18 +357,22 @@ db 0x00
 
 plt:
 
+plt_0:
+; push qword [rel 0x2001a8] ; FF35A2012000
 	db 0xFF
 	db 0x35
 	db 0xA2
 	db 0x01
 	db 0x20
 	db 0x00
+; jmp qword [rel 0x2001b0]  ; FF25A4012000
 	db 0xFF
 	db 0x25
 	db 0xA4
 	db 0x01
 	db 0x20
 	db 0x00
+; nop dword [rax+0x0]       ; 0F1F4000
 	db 0x0F
 	db 0x1F
 	db 0x40
@@ -376,42 +380,46 @@ plt:
 
 pltentsize equ $ - plt
 
-; jmp qword [rel 0x2001a8]           ; FF25A2012000
-; push qword 0x0                     ; 6800000000
-; jmp qword 0xfffffffffffffff0       ; E9E0FFFFFF
-
+plt_1:
+; jmp qword [rel 0x2001b8]  ; FF25A2012000
 	db 0xFF
 	db 0x25
 	db 0xA2
 	db 0x01
 	db 0x20
 	db 0x00
+
+; push qword 0x0            ; 6800000000
 	db 0x68
 	db 0x00
 	db 0x00
 	db 0x00
 	db 0x00
+
+; jmp qword 0x0             ; E9E0FFFFFF
 	db 0xE9
 	db 0xE0
 	db 0xFF
 	db 0xFF
 	db 0xFF
 
-; jmp qword [rel 0x2001b0]           ; FF259A012000
-; push qword 0x1                     ; 6801000000
-; jmp qword 0xfffffffffffffff0       ; E9D0FFFFFF
-
+plt_2:
+; jmp qword [rel 0x2001c0]  ; FF259A012000
 	db 0xFF
 	db 0x25
 	db 0x9A
 	db 0x01
 	db 0x20
 	db 0x00
+
+; push qword 0x1            ; 6801000000
 	db 0x68
 	db 0x01
 	db 0x00
 	db 0x00
 	db 0x00
+
+; jmp qword 0x0             ; E9D0FFFFFF
 	db 0xE9
 	db 0xD0
 	db 0xFF
@@ -576,9 +584,9 @@ dynamicsize equ $ - dynamic
 
 got_plt:
 
-	dq 0x00000000006002B0
-	dq 0x0000000000000000
-	dq 0x0000000000000000
+	dq BASE + 2*MB + dyn_0.tag
+	dq 0
+	dq 0
 	dq 0x0000000000400266
 	dq 0x0000000000400276
 

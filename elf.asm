@@ -290,38 +290,29 @@ db 0x00
 
 gnu_version_r:
 
-db 0x01
-db 0x00
-db 0x01
-db 0x00
-db 0x01
-db 0x00
-db 0x00
-db 0x00
-db 0x10
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x75
-db 0x1A
-db 0x69
-db 0x09
-db 0x00
-db 0x00
-db 0x02
-db 0x00
-db 0x17
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
+verneed_0:
+  .version: ; Version of structure
+	dw 0x0001
+  .cnt:     ; Number of associated verneed array entries
+	dw 0x0001
+  .file:    ; Offset to the file name string in the section header
+	dd 0x00000001
+  .aux:     ; Offset to a corresponding entry in the vernaux array
+	dd 0x00000010
+  .next:    ; Offset to the next verneed entry
+	dd 0
+
+verneed_1:
+  .version: ; Version of structure
+	dw 0x1A75
+  .cnt:     ; Number of associated verneed array entries
+	dw 0x0969
+  .file:    ; Offset to the file name string in the section header
+	dd 0x00020000
+  .aux:     ; Offset to a corresponding entry in the vernaux array
+	dd 0x00000017
+  .next:    ; Offset to the next verneed entry
+	dd 0
 
 gnu_version_rsize equ $ - gnu_version_r
 

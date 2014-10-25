@@ -1018,7 +1018,7 @@ shdr_1:
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
-	dq 0x0000000000000001
+	dq 0x1
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
@@ -1041,7 +1041,7 @@ shdr_2:
   .info: ; Additional section information
 	dd 0x000000001
   .addralign: ; Section alignment
-	dq 0x0000000000000008
+	dq 0x8
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000018
 
@@ -1064,7 +1064,7 @@ shdr_3:
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
-	dq 0x0000000000000001
+	dq 0x1
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
@@ -1087,7 +1087,7 @@ shdr_4:
   .info: ; Additional section information
 	dd 0x000000001
   .addralign: ; Section alignment
-	dq 0x0000000000000008
+	dq 0x8
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
@@ -1110,7 +1110,7 @@ shdr_5:
   .info: ; Additional section information
 	dd 0x000000006
   .addralign: ; Section alignment
-	dq 0x0000000000000008
+	dq 0x8
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000018
 
@@ -1133,7 +1133,7 @@ shdr_6:
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
-	dq 0x0000000000000010
+	dq 0x10
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000010
 
@@ -1156,7 +1156,7 @@ shdr_7:
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
-	dq 0x0000000000000010
+	dq 0x10
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
@@ -1179,7 +1179,7 @@ shdr_8:
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
-	dq 0x0000000000000004
+	dq 0x4
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
@@ -1202,7 +1202,7 @@ shdr_9:
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
-	dq 0x0000000000000008
+	dq 0x8
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000010
 
@@ -1225,7 +1225,7 @@ shdr_10:
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
-	dq 0x0000000000000008
+	dq 0x8
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000008
 
@@ -1248,7 +1248,7 @@ shdr_11:
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
-	dq 0x0000000000000001
+	dq 0x1
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 

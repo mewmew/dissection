@@ -213,7 +213,7 @@ STV_DEFAULT equ 0 ; Default visibility.
 
 dynsym_0:
   .name:  ; Symbol name (string tbl index)
-	dd 0x00000000
+	dd dynstr.null
   .info:  ; Symbol type and binding
 	db STB_LOCAL<<4
   .other: ; Symbol visibility
@@ -231,7 +231,7 @@ dynsym_globals:
 
 dynsym_1:
   .name:  ; Symbol name (string tbl index)
-	dd 0x00000010
+	dd dynstr.printf
   .info:  ; Symbol type and binding
 	db STB_GLOBAL<<4 | STT_FUNC
   .other: ; Symbol visibility
@@ -245,7 +245,7 @@ dynsym_1:
 
 dynsym_2:
   .name:  ; Symbol name (string tbl index)
-	dd 0x0000000B
+	dd dynstr.exit
   .info:  ; Symbol type and binding
 	db STB_GLOBAL<<4 | STT_FUNC
   .other: ; Symbol visibility
@@ -261,11 +261,16 @@ dynsymsize equ $ - dynsym
 
 dynstr:
 
-db 0x00
-db "libc.so.6", 0
-db "exit", 0
-db "printf", 0
-db "GLIBC_2.2.5", 0
+  .null equ $ - dynstr
+	db 0
+  .libc equ $ - dynstr
+	db "libc.so.6", 0
+  .exit equ $ - dynstr
+	db "exit", 0
+  .printf equ $ - dynstr
+	db "printf", 0
+  .glibc equ $ - dynstr
+	db "GLIBC_2.2.5", 0
 
 dynstrsize equ $ - dynstr
 

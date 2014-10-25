@@ -79,7 +79,7 @@ PF_R equ 0x4 ; Segment is readable
 MB   equ 0x100000
 BASE equ 4*MB
 
-phdr_0:
+phdr_phdr:
   .type:   ; Segment type
 	dd PT_PHDR
   .flags:  ; Segment flags
@@ -99,7 +99,7 @@ phdr_0:
 
 phentsize equ $ - phdr
 
-phdr_1:
+phdr_interp:
   .type:   ; Segment type
 	dd PT_INTERP
   .flags:  ; Segment flags
@@ -153,7 +153,7 @@ phdr_3:
   .align:  ; Segment alignment
 	dq 2*MB
 
-phdr_4:
+phdr_dynamic:
   .type:   ; Segment type
 	dd PT_DYNAMIC
   .flags:  ; Segment flags

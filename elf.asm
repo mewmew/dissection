@@ -329,7 +329,7 @@ R_386_JMP_SLOT equ 7
 
 rela_plt_0:
   .offset: ; Address
-	dq 0x0000000000600408
+	dq BASE + 2*MB + got_3
   .info:   ; Relocation type and symbol index
 	dq dynsym_printf_idx<<32 | R_386_JMP_SLOT
   .addend: ; Addend
@@ -339,7 +339,7 @@ rela_pltentsize equ $ - rela_plt
 
 rela_plt_1:
   .offset: ; Address
-	dq 0x0000000000600410
+	dq BASE + 2*MB + got_4
   .info:   ; Relocation type and symbol index
 	dq dynsym_exit_idx<<32 | R_386_JMP_SLOT
   .addend: ; Addend
@@ -587,14 +587,22 @@ dynamicsize equ $ - dynamic
 
 got_plt:
 
+got_0:
 	dq BASE + 2*MB + dyn_0.tag
 
 got_pltentsize equ $ - got_plt
 
+got_1:
 	dq 0
+
+got_2:
 	dq 0
+
+got_3:
   .printf:
 	dq BASE + plt_1.resolve
+
+got_4:
   .exit:
 	dq BASE + plt_2.resolve
 

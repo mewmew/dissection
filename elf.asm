@@ -861,7 +861,7 @@ shdr_0:
   .size: ; Section size in bytes
 	dq 0
   .link: ; Link to another section
-	dd 0
+	dd SHN_UNDEF
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
@@ -895,7 +895,7 @@ shdr_1:
 	dq 0
 
 ; .dynsym section
-shdr_2:
+shdr_dynsym:
   .name: ; Section name (string tbl index)
 	dd 0x00000013
   .type: ; Section type
@@ -909,7 +909,7 @@ shdr_2:
   .size: ; Section size in bytes
 	dq dynsymsize
   .link: ; Link to another section
-	dd 0x000000003
+	dd (shdr_dynstr - shdr) / shentsize
   .info: ; Additional section information
 	dd 0x000000001
   .addralign: ; Section alignment
@@ -918,7 +918,7 @@ shdr_2:
 	dq dynsymentsize
 
 ; .dynstr section
-shdr_3:
+shdr_dynstr:
   .name: ; Section name (string tbl index)
 	dd 0x0000001B
   .type: ; Section type
@@ -955,7 +955,7 @@ shdr_4:
   .size: ; Section size in bytes
 	dq 0x0000000000000020
   .link: ; Link to another section
-	dd 0x000000003
+	dd (shdr_dynstr - shdr) / shentsize
   .info: ; Additional section information
 	dd 0x000000001
   .addralign: ; Section alignment
@@ -978,7 +978,7 @@ shdr_5:
   .size: ; Section size in bytes
 	dq 0x0000000000000030
   .link: ; Link to another section
-	dd 0x000000002
+	dd (shdr_dynsym - shdr) / shentsize
   .info: ; Additional section information
 	dd 0x000000006
   .addralign: ; Section alignment
@@ -1070,7 +1070,7 @@ shdr_9:
   .size: ; Section size in bytes
 	dq 0x0000000000000140
   .link: ; Link to another section
-	dd 0x000000003
+	dd (shdr_dynstr - shdr) / shentsize
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment

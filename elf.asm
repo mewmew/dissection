@@ -448,7 +448,7 @@ dyn_3:
   .tag: ; Dynamic entry type
 	dq 0x0000000000000006
   .val: ; Integer or address value
-	dq 0x0000000000400180
+	dq BASE + dynsym_0
 
 dyn_4:
   .tag: ; Dynamic entry type

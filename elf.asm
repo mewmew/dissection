@@ -1,5 +1,7 @@
 [bits 64]
 
+; === [ ELF file header ] ======================================================
+
 ehdr:
 
 something4:
@@ -55,6 +57,10 @@ EM_X86_64 equ 62 ; AMD x86-64 architecture
 	dw shdr_shstrtab_idx
 
 ehsize equ $ - ehdr
+
+; === [/ ELF file header ] =====================================================
+
+; === [ Program headers ] ======================================================
 
 phdr:
 
@@ -167,6 +173,10 @@ phdr_4:
 
 phsize equ $ - phdr
 phnum  equ phsize / phentsize
+
+; === [/ Program headers ] =====================================================
+
+; === [ Sections ] =============================================================
 
 ; --- [ .interp section ] ------------------------------------------------------
 
@@ -489,6 +499,10 @@ shstrtabsize equ $ - shstrtab
 
 ; --- [/ .shstrtab section ] ---------------------------------------------------
 
+; === [/ Sections ] ============================================================
+
+; === [/ Section headers ] =====================================================
+
 shdr:
 
 ; Section types.
@@ -774,3 +788,5 @@ shdr_shstrtab_idx equ (shdr_shstrtab - shdr) / shentsize
 
 shsize equ $ - shdr
 shnum  equ shsize / shentsize
+
+; === [/ Section headers ] =====================================================

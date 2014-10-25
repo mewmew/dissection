@@ -289,48 +289,6 @@ dynstrsize equ $ - dynstr
 
 db 0x00
 
-something6:
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-
-gnu_version_r:
-
-verneed_0:
-  .version: ; Version of structure
-	dw 0x0001
-  .cnt:     ; Number of associated verneed array entries
-	dw 0x0001
-  .file:    ; Offset to the file name string in the section header
-	dd 0x00000001
-  .aux:     ; Offset to a corresponding entry in the vernaux array
-	dd 0x00000010
-  .next:    ; Offset to the next verneed entry
-	dd 0
-
-verneed_1:
-  .version: ; Version of structure
-	dw 0x1A75
-  .cnt:     ; Number of associated verneed array entries
-	dw 0x0969
-  .file:    ; Offset to the file name string in the section header
-	dd 0x00020000
-  .aux:     ; Offset to a corresponding entry in the vernaux array
-	dd 0x00000017
-  .next:    ; Offset to the next verneed entry
-	dd 0
-
-gnu_version_rsize equ $ - gnu_version_r
-
 rela_plt:
 
 ; Relocation types.
@@ -511,54 +469,6 @@ dyn_10:
 
 dyn_11:
   .tag: ; Dynamic entry type
-	dq 0x000000006FFFFFFE
-  .val: ; Integer or address value
-	dq BASE + verneed_0
-
-dyn_12:
-  .tag: ; Dynamic entry type
-	dq 0x000000006FFFFFFF
-  .val: ; Integer or address value
-	dq 0x0000000000000001
-
-dyn_13:
-  .tag: ; Dynamic entry type
-	dq 0x000000006FFFFFF0
-  .val: ; Integer or address value
-	dq BASE + something6
-
-dyn_14:
-  .tag: ; Dynamic entry type
-	dq DT_NULL
-  .val: ; Integer or address value
-	dq 0
-
-dyn_15:
-  .tag: ; Dynamic entry type
-	dq DT_NULL
-  .val: ; Integer or address value
-	dq 0
-
-dyn_16:
-  .tag: ; Dynamic entry type
-	dq DT_NULL
-  .val: ; Integer or address value
-	dq 0
-
-dyn_17:
-  .tag: ; Dynamic entry type
-	dq DT_NULL
-  .val: ; Integer or address value
-	dq 0
-
-dyn_18:
-  .tag: ; Dynamic entry type
-	dq DT_NULL
-  .val: ; Integer or address value
-	dq 0
-
-dyn_19:
-  .tag: ; Dynamic entry type
 	dq DT_NULL
   .val: ; Integer or address value
 	dq 0
@@ -600,8 +510,6 @@ shstrtab:
 	db ".dynsym", 0
   .dynstr:
 	db ".dynstr", 0
-  .gnu_version_r:
-	db ".gnu.version_r", 0
   .rela_plt:
 	db ".rela"
 	.plt:
@@ -620,7 +528,6 @@ shstrtab:
 .interp_idx        equ .interp - shstrtab
 .dynsym_idx        equ .dynsym - shstrtab
 .dynstr_idx        equ .dynstr - shstrtab
-.gnu_version_r_idx equ .gnu_version_r - shstrtab
 .rela_plt_idx      equ .rela_plt - shstrtab
 .plt_idx           equ .plt - shstrtab
 .text_idx          equ .text - shstrtab
@@ -753,31 +660,8 @@ shdr_dynstr_idx equ (shdr_dynstr - shdr) / shentsize
   .entsize: ; Entry size if section holds table
 	dq 0
 
-; .gnu.version_r section
-shdr_4:
-  .name: ; Section name (string tbl index)
-	dd shstrtab.gnu_version_r_idx
-  .type: ; Section type
-	dd 0x6FFFFFFE
-  .flags: ; Section flags
-	dq SHF_ALLOC
-  .addr: ; Section virtual addr at execution
-	dq BASE + gnu_version_r
-  .offset: ; Section file offset
-	dq gnu_version_r
-  .size: ; Section size in bytes
-	dq gnu_version_rsize
-  .link: ; Link to another section
-	dd shdr_dynstr_idx
-  .info: ; Additional section information
-	dd 0x000000001
-  .addralign: ; Section alignment
-	dq 0x8
-  .entsize: ; Entry size if section holds table
-	dq 0
-
 ; .rela.plt section
-shdr_5:
+shdr_4:
   .name: ; Section name (string tbl index)
 	dd shstrtab.rela_plt_idx
   .type: ; Section type
@@ -825,7 +709,7 @@ shdr_plt_idx equ (shdr_plt - shdr) / shentsize
 	dq pltentsize
 
 ; .text section
-shdr_7:
+shdr_6:
   .name: ; Section name (string tbl index)
 	dd shstrtab.text_idx
   .type: ; Section type
@@ -848,7 +732,7 @@ shdr_7:
 	dq 0
 
 ; .rodata section
-shdr_8:
+shdr_7:
   .name: ; Section name (string tbl index)
 	dd shstrtab.rodata_idx
   .type: ; Section type
@@ -871,7 +755,7 @@ shdr_8:
 	dq 0
 
 ; .dynamic section
-shdr_9:
+shdr_8:
   .name: ; Section name (string tbl index)
 	dd shstrtab.dynamic_idx
   .type: ; Section type
@@ -894,7 +778,7 @@ shdr_9:
 	dq dynentsize
 
 ; .got.plt section
-shdr_10:
+shdr_9:
   .name: ; Section name (string tbl index)
 	dd shstrtab.got_plt_idx
   .type: ; Section type

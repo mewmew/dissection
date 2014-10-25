@@ -32,16 +32,22 @@ ehsize equ $ - ehdr
 
 phdr:
 
-PT_LOAD    equ 0x00000001
-PT_DYNAMIC equ 0x00000002
-PT_INTERP  equ 0x00000003
-PT_PHDR    equ 0x00000006
+; Segment types.
+PT_LOAD    equ 0x00000001 ; Loadable program segment
+PT_DYNAMIC equ 0x00000002 ; Dynamic linking information
+PT_INTERP  equ 0x00000003 ; Program interpreter
+PT_PHDR    equ 0x00000006 ; Entry for header table itself
+
+; Segment flags.
+PF_X equ 0x1 ; Segment is executable
+PF_W equ 0x2 ; Segment is writable
+PF_R equ 0x4 ; Segment is readable
 
 phdr_0:
   .type:   ; Segment type
 	dd PT_PHDR
   .flags:  ; Segment flags
-	dd 0x00000005
+	dd PF_R | PF_X
   .offset: ; Segment file offset
 	dq 0x0000000000000040
   .vaddr:  ; Segment virtual address
@@ -61,7 +67,7 @@ phdr_1:
   .type:   ; Segment type
 	dd PT_INTERP
   .flags:  ; Segment flags
-	dd 0x00000004
+	dd PF_R
   .offset: ; Segment file offset
 	dq 0x0000000000000158
   .vaddr:  ; Segment virtual address
@@ -79,7 +85,7 @@ phdr_2:
   .type:   ; Segment type
 	dd PT_LOAD
   .flags:  ; Segment flags
-	dd 0x00000005
+	dd PF_R | PF_X
   .offset: ; Segment file offset
 	dq 0x0000000000000000
   .vaddr:  ; Segment virtual address
@@ -97,7 +103,7 @@ phdr_3:
   .type:   ; Segment type
 	dd PT_LOAD
   .flags:  ; Segment flags
-	dd 0x00000006
+	dd PF_R | PF_W
   .offset: ; Segment file offset
 	dq 0x00000000000002B0
   .vaddr:  ; Segment virtual address
@@ -115,7 +121,7 @@ phdr_4:
   .type:   ; Segment type
 	dd PT_DYNAMIC
   .flags:  ; Segment flags
-	dd 0x00000006
+	dd PF_R | PF_W
   .offset: ; Segment file offset
 	dq 0x00000000000002B0
   .vaddr:  ; Segment virtual address

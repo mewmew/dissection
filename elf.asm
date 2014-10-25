@@ -49,15 +49,15 @@ phdr_0:
   .flags:  ; Segment flags
 	dd PF_R | PF_X
   .offset: ; Segment file offset
-	dq 0x0000000000000040
+	dq phdr
   .vaddr:  ; Segment virtual address
 	dq 0x0000000000400040
   .paddr:  ; Segment physical address
 	dq 0x0000000000400040
   .filesz: ; Segment size in file
-	dq 0x0000000000000118
+	dq phsize
   .memsz:  ; Segment size in memory
-	dq 0x0000000000000118
+	dq phsize
   .align:  ; Segment alignment
 	dq 0x0000000000000008
 
@@ -135,7 +135,8 @@ phdr_4:
   .align:  ; Segment alignment
 	dq 0x0000000000000008
 
-phnum equ ($ - phdr) / phentsize
+phsize equ $ - phdr
+phnum  equ phsize / phentsize
 
 db "/lib/ld64.so.1"
 

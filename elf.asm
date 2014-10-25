@@ -958,14 +958,27 @@ db 0x00
 
 shdr:
 
+; Section types.
+SHT_NULL     equ 0  ; Inactive section
+SHT_PROGBITS equ 1  ; Program specific information
+SHT_STRTAB   equ 3  ; String table
+SHT_RELA     equ 4  ; Relocation entities
+SHT_DYNAMIC  equ 6  ; Dynamic linking information
+SHT_DYNSYM   equ 11 ; Dynamic linking symbols
+
+; Section flags.
+SHF_WRITE     equ 1 ; Contains writeable data
+SHF_ALLOC     equ 2 ; Occupies memory during process execution
+SHF_EXECINSTR equ 4 ; Contains executable machine instructions
+
 ; NULL section
 shdr_0:
   .name: ; Section name (string tbl index)
 	dd 0x00000000
   .type: ; Section type
-	dd 0x00000000
+	dd SHT_NULL
   .flags: ; Section flags
-	dq 0x000000000000000000
+	dq 0
   .addr: ; Section virtual addr at execution
 	dq 0x000000000000000000
   .offset: ; Section file offset
@@ -988,9 +1001,9 @@ shdr_1:
   .name: ; Section name (string tbl index)
 	dd 0x0000000B
   .type: ; Section type
-	dd 0x00000001
+	dd SHT_PROGBITS
   .flags: ; Section flags
-	dq 0x0000000000000002
+	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
 	dq 0x0000000000400158
   .offset: ; Section file offset
@@ -1011,9 +1024,9 @@ shdr_2:
   .name: ; Section name (string tbl index)
 	dd 0x00000013
   .type: ; Section type
-	dd 0x0000000B
+	dd SHT_DYNSYM
   .flags: ; Section flags
-	dq 0x0000000000000002
+	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
 	dq 0x0000000000400180
   .offset: ; Section file offset
@@ -1034,9 +1047,9 @@ shdr_3:
   .name: ; Section name (string tbl index)
 	dd 0x0000001B
   .type: ; Section type
-	dd 0x00000003
+	dd SHT_STRTAB
   .flags: ; Section flags
-	dq 0x0000000000000002
+	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
 	dq 0x00000000004001C8
   .offset: ; Section file offset
@@ -1059,7 +1072,7 @@ shdr_4:
   .type: ; Section type
 	dd 0x6FFFFFFE
   .flags: ; Section flags
-	dq 0x0000000000000002
+	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
 	dq 0x00000000004001F8
   .offset: ; Section file offset
@@ -1080,9 +1093,9 @@ shdr_5:
   .name: ; Section name (string tbl index)
 	dd 0x00000032
   .type: ; Section type
-	dd 0x00000004
+	dd SHT_RELA
   .flags: ; Section flags
-	dq 0x0000000000000002
+	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
 	dq 0x0000000000400218
   .offset: ; Section file offset
@@ -1103,9 +1116,9 @@ shdr_6:
   .name: ; Section name (string tbl index)
 	dd 0x00000037
   .type: ; Section type
-	dd 0x00000001
+	dd SHT_PROGBITS
   .flags: ; Section flags
-	dq 0x0000000000000006
+	dq SHF_ALLOC | SHF_EXECINSTR
   .addr: ; Section virtual addr at execution
 	dq 0x0000000000400250
   .offset: ; Section file offset
@@ -1126,9 +1139,9 @@ shdr_7:
   .name: ; Section name (string tbl index)
 	dd 0x0000003C
   .type: ; Section type
-	dd 0x00000001
+	dd SHT_PROGBITS
   .flags: ; Section flags
-	dq 0x0000000000000006
+	dq SHF_ALLOC | SHF_EXECINSTR
   .addr: ; Section virtual addr at execution
 	dq 0x0000000000400280
   .offset: ; Section file offset
@@ -1149,9 +1162,9 @@ shdr_8:
   .name: ; Section name (string tbl index)
 	dd 0x00000042
   .type: ; Section type
-	dd 0x00000001
+	dd SHT_PROGBITS
   .flags: ; Section flags
-	dq 0x0000000000000002
+	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
 	dq 0x00000000004002A0
   .offset: ; Section file offset
@@ -1172,9 +1185,9 @@ shdr_9:
   .name: ; Section name (string tbl index)
 	dd 0x0000004A
   .type: ; Section type
-	dd 0x00000006
+	dd SHT_DYNAMIC
   .flags: ; Section flags
-	dq 0x0000000000000003
+	dq SHF_WRITE | SHF_ALLOC
   .addr: ; Section virtual addr at execution
 	dq 0x00000000006002B0
   .offset: ; Section file offset
@@ -1195,9 +1208,9 @@ shdr_10:
   .name: ; Section name (string tbl index)
 	dd 0x00000053
   .type: ; Section type
-	dd 0x00000001
+	dd SHT_PROGBITS
   .flags: ; Section flags
-	dq 0x0000000000000003
+	dq SHF_WRITE | SHF_ALLOC
   .addr: ; Section virtual addr at execution
 	dq 0x00000000006003F0
   .offset: ; Section file offset
@@ -1218,9 +1231,9 @@ shdr_11:
   .name: ; Section name (string tbl index)
 	dd 0x00000001
   .type: ; Section type
-	dd 0x00000003
+	dd SHT_STRTAB
   .flags: ; Section flags
-	dq 0x0000000000000000
+	dq 0
   .addr: ; Section virtual addr at execution
 	dq 0x0000000000000000
   .offset: ; Section file offset

@@ -429,11 +429,13 @@ dynamic:
 ; Dynamic tags.
 DT_NULL   equ 0  ; Marks the end of the dynamic array
 DT_NEEDED equ 1  ; String table offset of a required library
+DT_PLTGOT equ 3  ; Address of the PLT and/or GOT
 DT_HASH   equ 4  ; Address of the symbol hash table
 DT_STRTAB equ 5  ; Address of the string table
 DT_SYMTAB equ 6  ; Address of the symbol table
 DT_STRSZ  equ 10 ; Size of the string table
 DT_SYMENT equ 11 ; Symbol table entry size
+DT_DEBUG  equ 21 ; Used for debugging
 
 dyn_0:
   .tag: ; Dynamic entry type
@@ -475,15 +477,15 @@ dyn_5:
 
 dyn_6:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000015
+	dq DT_DEBUG
   .val: ; Integer or address value
-	dq 0x0000000000000000
+	dq 0
 
 dyn_7:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000003
+	dq DT_PLTGOT
   .val: ; Integer or address value
-	dq BASE + 2*MB + got_plt_0
+	dq BASE + 2*MB + got_plt
 
 dyn_8:
   .tag: ; Dynamic entry type

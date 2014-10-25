@@ -316,6 +316,8 @@ db 0x00
 
 gnu_version_rsize equ $ - gnu_version_r
 
+rela_plt:
+
 db 0x08
 db 0x04
 db 0x60
@@ -364,6 +366,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+rela_pltsize equ $ - rela_plt
+
 db 0x00
 db 0x00
 db 0x00
@@ -1003,11 +1008,11 @@ shdr_5:
   .flags: ; Section flags
 	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq 0x0000000000400218
+	dq BASE + rela_plt
   .offset: ; Section file offset
-	dq 0x0000000000000218
+	dq rela_plt
   .size: ; Section size in bytes
-	dq 0x0000000000000030
+	dq rela_pltsize
   .link: ; Link to another section
 	dd (shdr_dynsym - shdr) / shentsize
   .info: ; Additional section information

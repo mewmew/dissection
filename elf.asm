@@ -433,6 +433,7 @@ DT_HASH   equ 4  ; Address of the symbol hash table
 DT_STRTAB equ 5  ; Address of the string table
 DT_SYMTAB equ 6  ; Address of the symbol table
 DT_STRSZ  equ 10 ; Size of the string table
+DT_SYMENT equ 11 ; Symbol table entry size
 
 dyn_0:
   .tag: ; Dynamic entry type
@@ -468,9 +469,9 @@ dyn_4:
 
 dyn_5:
   .tag: ; Dynamic entry type
-	dq 0x000000000000000B
+	dq DT_SYMENT
   .val: ; Integer or address value
-	dq 0x0000000000000018
+	dq dynsymentsize
 
 dyn_6:
   .tag: ; Dynamic entry type

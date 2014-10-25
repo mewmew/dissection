@@ -48,7 +48,7 @@ EM_X86_64 equ 62 ; AMD x86-64 architecture
   .shnum:     ; Section header table entry count
 	dw shnum
   .shstrndx:  ; Section header string table index
-	dw 0x000B
+	dw (shdr_shstrtab - shdr) / shentsize
 
 ehsize equ $ - ehdr
 
@@ -1107,7 +1107,7 @@ shdr_10:
 	dq 0x0000000000000008
 
 ; .shstrtab section
-shdr_11:
+shdr_shstrtab:
   .name: ; Section name (string tbl index)
 	dd 0x00000001
   .type: ; Section type

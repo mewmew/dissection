@@ -490,7 +490,7 @@ dyn_10:
   .tag: ; Dynamic entry type
 	dq 0x0000000000000017
   .val: ; Integer or address value
-	dq 0x0000000000400218
+	dq BASE + rela_plt_0
 
 dyn_11:
   .tag: ; Dynamic entry type

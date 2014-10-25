@@ -971,35 +971,38 @@ SHF_WRITE     equ 1 ; Contains writeable data
 SHF_ALLOC     equ 2 ; Occupies memory during process execution
 SHF_EXECINSTR equ 4 ; Contains executable machine instructions
 
+; Section indicies.
+SHN_UNDEF equ 0 ; Undefined, missing or irrelevant section reference
+
 ; NULL section
 shdr_0:
   .name: ; Section name (string tbl index)
-	dd 0x00000000
+	dd 0
   .type: ; Section type
 	dd SHT_NULL
   .flags: ; Section flags
 	dq 0
   .addr: ; Section virtual addr at execution
-	dq 0x000000000000000000
+	dq 0
   .offset: ; Section file offset
-	dq 0x000000000000000000
+	dq 0
   .size: ; Section size in bytes
-	dq 0x000000000000000000
+	dq 0
   .link: ; Link to another section
-	dd 0x00000000
+	dd 0
   .info: ; Additional section information
-	dd 0x00000000
+	dd 0
   .addralign: ; Section alignment
-	dq 0x000000000000000000
+	dq 0
   .entsize: ; Entry size if section holds table
-	dq 0x000000000000000000
+	dq 0
 
 shentsize equ $ - shdr
 
 ; .interp section
 shdr_1:
   .name: ; Section name (string tbl index)
-	dd 0x0000000B
+	dd 11
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -1007,11 +1010,11 @@ shdr_1:
   .addr: ; Section virtual addr at execution
 	dq 0x0000000000400158
   .offset: ; Section file offset
-	dq 0x0000000000000158
+	dq interp
   .size: ; Section size in bytes
-	dq 0x000000000000000F
+	dq interpsize
   .link: ; Link to another section
-	dd 000000000
+	dd SHN_UNDEF
   .info: ; Additional section information
 	dd 000000000
   .addralign: ; Section alignment
@@ -1057,7 +1060,7 @@ shdr_3:
   .size: ; Section size in bytes
 	dq 0x0000000000000023
   .link: ; Link to another section
-	dd 000000000
+	dd SHN_UNDEF
   .info: ; Additional section information
 	dd 000000000
   .addralign: ; Section alignment
@@ -1126,7 +1129,7 @@ shdr_6:
   .size: ; Section size in bytes
 	dq 0x0000000000000030
   .link: ; Link to another section
-	dd 000000000
+	dd SHN_UNDEF
   .info: ; Additional section information
 	dd 000000000
   .addralign: ; Section alignment
@@ -1149,7 +1152,7 @@ shdr_7:
   .size: ; Section size in bytes
 	dq 0x000000000000001F
   .link: ; Link to another section
-	dd 000000000
+	dd SHN_UNDEF
   .info: ; Additional section information
 	dd 000000000
   .addralign: ; Section alignment
@@ -1172,7 +1175,7 @@ shdr_8:
   .size: ; Section size in bytes
 	dq 0x000000000000000D
   .link: ; Link to another section
-	dd 000000000
+	dd SHN_UNDEF
   .info: ; Additional section information
 	dd 000000000
   .addralign: ; Section alignment
@@ -1218,7 +1221,7 @@ shdr_10:
   .size: ; Section size in bytes
 	dq 0x0000000000000028
   .link: ; Link to another section
-	dd 000000000
+	dd SHN_UNDEF
   .info: ; Additional section information
 	dd 000000000
   .addralign: ; Section alignment
@@ -1241,7 +1244,7 @@ shdr_11:
   .size: ; Section size in bytes
 	dq 0x000000000000005C
   .link: ; Link to another section
-	dd 000000000
+	dd SHN_UNDEF
   .info: ; Additional section information
 	dd 000000000
   .addralign: ; Section alignment

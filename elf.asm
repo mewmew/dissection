@@ -6,7 +6,7 @@ ehdr:
   .machine:   ; Architecture
 	dw 0x003E
   .version:   ; Object file version
-	dd 0x00000001
+	dd 1
   .entry:     ; Entry point virtual address
 	dq 0x0000000000400280
   .phoff:     ; Program header table file offset
@@ -33,10 +33,10 @@ ehsize equ $ - ehdr
 phdr:
 
 ; Segment types.
-PT_LOAD    equ 0x00000001 ; Loadable program segment
-PT_DYNAMIC equ 0x00000002 ; Dynamic linking information
-PT_INTERP  equ 0x00000003 ; Program interpreter
-PT_PHDR    equ 0x00000006 ; Entry for header table itself
+PT_LOAD    equ 1 ; Loadable program segment
+PT_DYNAMIC equ 2 ; Dynamic linking information
+PT_INTERP  equ 3 ; Program interpreter
+PT_PHDR    equ 6 ; Entry for header table itself
 
 ; Segment flags.
 PF_X equ 0x1 ; Segment is executable
@@ -59,7 +59,7 @@ phdr_0:
   .memsz:  ; Segment size in memory
 	dq phsize
   .align:  ; Segment alignment
-	dq 0x0000000000000008
+	dq 0x8
 
 phentsize equ $ - phdr
 
@@ -79,7 +79,7 @@ phdr_1:
   .memsz:  ; Segment size in memory
 	dq interpsize
   .align:  ; Segment alignment
-	dq 0x0000000000000001
+	dq 0x1
 
 phdr_2:
   .type:   ; Segment type
@@ -97,7 +97,7 @@ phdr_2:
   .memsz:  ; Segment size in memory
 	dq 0x00000000000002AD
   .align:  ; Segment alignment
-	dq 0x0000000000200000
+	dq 0x200000 ; 2MB
 
 phdr_3:
   .type:   ; Segment type
@@ -115,7 +115,7 @@ phdr_3:
   .memsz:  ; Segment size in memory
 	dq 0x0000000000000168
   .align:  ; Segment alignment
-	dq 0x0000000000200000
+	dq 0x200000 ; 2MB
 
 phdr_4:
   .type:   ; Segment type
@@ -133,7 +133,7 @@ phdr_4:
   .memsz:  ; Segment size in memory
 	dq 0x0000000000000140
   .align:  ; Segment alignment
-	dq 0x0000000000000008
+	dq 0x8
 
 phsize equ $ - phdr
 phnum  equ phsize / phentsize

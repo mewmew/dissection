@@ -288,6 +288,8 @@ dynstr:
 dynstrsize equ $ - dynstr
 
 db 0x00
+
+something6:
 db 0x00
 db 0x00
 db 0x00
@@ -508,7 +510,7 @@ dyn_13:
   .tag: ; Dynamic entry type
 	dq 0x000000006FFFFFF0
   .val: ; Integer or address value
-	dq 0x00000000004001EC
+	dq BASE + something6
 
 dyn_14:
   .tag: ; Dynamic entry type

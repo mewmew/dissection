@@ -173,32 +173,6 @@ interp:
 
 interpsize equ $ - interp
 
-hash:
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-
 dynsym:
 
 ; Symbol bindings.
@@ -384,7 +358,6 @@ DT_NULL     equ 0  ; Marks the end of the dynamic array
 DT_NEEDED   equ 1  ; String table offset of a required library
 DT_PLTRELSZ equ 2  ; Size of the relocation entities of the PLT
 DT_PLTGOT   equ 3  ; Address of the PLT and/or GOT
-DT_HASH     equ 4  ; Address of the symbol hash table
 DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_STRSZ    equ 10 ; Size of the string table
@@ -399,12 +372,6 @@ dyn_0:
 	dq dynstr.libc_idx
 
 dynentsize equ $ - dynamic
-
-dyn_1:
-  .tag: ; Dynamic entry type
-	dq DT_HASH
-  .val: ; Integer or address value
-	dq BASE + hash
 
 dyn_2:
   .tag: ; Dynamic entry type

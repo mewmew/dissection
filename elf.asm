@@ -1,10 +1,17 @@
 ehdr:
+
+; Object file types.
+ET_EXEC equ 2 ; Executable file
+
+; Architecture.
+EM_X86_64 equ 62 ; AMD x86-64 architecture
+
   .ident:     ; Magic number and other info
 	db 0x7F, "ELF", 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   .type:      ; Object file type
-	dw 0x0002
+	dw ET_EXEC
   .machine:   ; Architecture
-	dw 0x003E
+	dw EM_X86_64
   .version:   ; Object file version
 	dd 1
   .entry:     ; Entry point virtual address
@@ -14,7 +21,7 @@ ehdr:
   .shoff:     ; Section header table file offset
 	dq shdr
   .flags:     ; Processor-specific flags
-	dd 0x00000000
+	dd 0
   .ehsize:    ; ELF header size in bytes
 	dw ehsize
   .phentsize: ; Program header table entry size

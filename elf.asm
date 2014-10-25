@@ -18,7 +18,7 @@ ehdr:
   .ehsize:    ; ELF header size in bytes
 	dw ehsize
   .phentsize: ; Program header table entry size
-	dw 0x0038
+	dw phentsize
   .phnum:     ; Program header table entry count
 	dw 0x0005
   .shentsize: ; Section header table entry size
@@ -49,6 +49,8 @@ phdr_0:
 	dq 0x0000000000000118
   .align:  ; Segment alignment
 	dq 0x0000000000000008
+
+phentsize equ $ - phdr
 
 phdr_1:
   .type:   ; Segment type

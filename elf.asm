@@ -361,7 +361,7 @@ DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
 
-dyn_0:
+dyn_libc:
   .tag: ; Dynamic entry type
 	dq DT_NEEDED
   .val: ; Integer or address value
@@ -369,13 +369,13 @@ dyn_0:
 
 dynentsize equ $ - dynamic
 
-dyn_2:
+dyn_strtab:
   .tag: ; Dynamic entry type
 	dq DT_STRTAB
   .val: ; Integer or address value
 	dq BASE + dynstr
 
-dyn_3:
+dyn_symtab:
   .tag: ; Dynamic entry type
 	dq DT_SYMTAB
   .val: ; Integer or address value
@@ -388,13 +388,13 @@ dyn_pltgot_idx equ (dyn_pltgot - dynamic) / dynentsize
   .val: ; Integer or address value
 	dq BASE + 2*MB + got_plt
 
-dyn_10:
+dyn_jmprel:
   .tag: ; Dynamic entry type
 	dq DT_JMPREL
   .val: ; Integer or address value
 	dq BASE + rela_plt
 
-dyn_11:
+dyn_null:
   .tag: ; Dynamic entry type
 	dq DT_NULL
   .val: ; Integer or address value
@@ -404,8 +404,8 @@ dynamicsize equ $ - dynamic
 
 got_plt:
 
-got_plt_0:
-	dq BASE + 2*MB + dyn_0.tag
+got_plt_libc:
+	dq BASE + 2*MB + dyn_libc.tag
 
 got_pltentsize equ $ - got_plt
 

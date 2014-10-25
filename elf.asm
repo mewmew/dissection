@@ -426,11 +426,15 @@ something:
 
 dynamic:
 
+; Dynamic tags.
+DT_NULL   equ 0 ; Marks the end of the dynamic array
+DT_NEEDED equ 1 ; String table offset of a required library
+
 dyn_0:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000001
+	dq DT_NEEDED
   .val: ; Integer or address value
-	dq 0x0000000000000001
+	dq dynstr.libc_idx
 
 dynentsize equ $ - dynamic
 
@@ -514,37 +518,37 @@ dyn_13:
 
 dyn_14:
   .tag: ; Dynamic entry type
-	dq 0
+	dq DT_NULL
   .val: ; Integer or address value
 	dq 0
 
 dyn_15:
   .tag: ; Dynamic entry type
-	dq 0
+	dq DT_NULL
   .val: ; Integer or address value
 	dq 0
 
 dyn_16:
   .tag: ; Dynamic entry type
-	dq 0
+	dq DT_NULL
   .val: ; Integer or address value
 	dq 0
 
 dyn_17:
   .tag: ; Dynamic entry type
-	dq 0
+	dq DT_NULL
   .val: ; Integer or address value
 	dq 0
 
 dyn_18:
   .tag: ; Dynamic entry type
-	dq 0
+	dq DT_NULL
   .val: ; Integer or address value
 	dq 0
 
 dyn_19:
   .tag: ; Dynamic entry type
-	dq 0
+	dq DT_NULL
   .val: ; Integer or address value
 	dq 0
 

@@ -153,15 +153,15 @@ phdr_4:
   .flags:  ; Segment flags
 	dd PF_R | PF_W
   .offset: ; Segment file offset
-	dq something2
+	dq dynamic
   .vaddr:  ; Segment virtual address
-	dq BASE + 2*MB + something2
+	dq BASE + 2*MB + dynamic
   .paddr:  ; Segment physical address
-	dq BASE + 2*MB + something2
+	dq BASE + 2*MB + dynamic
   .filesz: ; Segment size in file
-	dq something2size
+	dq dynamicsize
   .memsz:  ; Segment size in memory
-	dq something2size
+	dq dynamicsize
   .align:  ; Segment alignment
 	dq 0x8
 
@@ -447,7 +447,9 @@ db 0x00
 db 0x00
 
 something:
-something2:
+
+dynamic:
+
 db 0x01
 db 0x00
 db 0x00
@@ -769,7 +771,7 @@ db 0x00
 db 0x00
 db 0x00
 
-something2size equ $ - something2
+dynamicsize equ $ - dynamic
 
 db 0xB0
 db 0x02
@@ -1084,11 +1086,11 @@ shdr_9:
   .flags: ; Section flags
 	dq SHF_WRITE | SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq 0x00000000006002B0
+	dq BASE + 2*MB + dynamic
   .offset: ; Section file offset
-	dq 0x00000000000002B0
+	dq dynamic
   .size: ; Section size in bytes
-	dq 0x0000000000000140
+	dq dynamicsize
   .link: ; Link to another section
 	dd (shdr_dynstr - shdr) / shentsize
   .info: ; Additional section information

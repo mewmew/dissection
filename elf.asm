@@ -65,6 +65,10 @@ PF_X equ 0x1 ; Segment is executable
 PF_W equ 0x2 ; Segment is writable
 PF_R equ 0x4 ; Segment is readable
 
+; Base address
+MB   equ 0x100000
+BASE equ 4*MB
+
 phdr_0:
   .type:   ; Segment type
 	dd PT_PHDR
@@ -73,9 +77,9 @@ phdr_0:
   .offset: ; Segment file offset
 	dq phdr
   .vaddr:  ; Segment virtual address
-	dq 0x0000000000400040
+	dq BASE + phdr
   .paddr:  ; Segment physical address
-	dq 0x0000000000400040
+	dq BASE + phdr
   .filesz: ; Segment size in file
 	dq phsize
   .memsz:  ; Segment size in memory
@@ -93,9 +97,9 @@ phdr_1:
   .offset: ; Segment file offset
 	dq interp
   .vaddr:  ; Segment virtual address
-	dq 0x0000000000400158
+	dq BASE + interp
   .paddr:  ; Segment physical address
-	dq 0x0000000000400158
+	dq BASE + interp
   .filesz: ; Segment size in file
 	dq interpsize
   .memsz:  ; Segment size in memory
@@ -111,9 +115,9 @@ phdr_2:
   .offset: ; Segment file offset
 	dq 0x0000000000000000
   .vaddr:  ; Segment virtual address
-	dq 0x0000000000400000
+	dq BASE
   .paddr:  ; Segment physical address
-	dq 0x0000000000400000
+	dq BASE
   .filesz: ; Segment size in file
 	dq 0x00000000000002AD
   .memsz:  ; Segment size in memory
@@ -129,9 +133,9 @@ phdr_3:
   .offset: ; Segment file offset
 	dq something
   .vaddr:  ; Segment virtual address
-	dq 0x00000000006002B0
+	dq BASE + 2*MB + something
   .paddr:  ; Segment physical address
-	dq 0x00000000006002B0
+	dq BASE + 2*MB + something
   .filesz: ; Segment size in file
 	dq somethingsize
   .memsz:  ; Segment size in memory
@@ -145,15 +149,15 @@ phdr_4:
   .flags:  ; Segment flags
 	dd PF_R | PF_W
   .offset: ; Segment file offset
-	dq 0x00000000000002B0
+	dq something2
   .vaddr:  ; Segment virtual address
-	dq 0x00000000006002B0
+	dq BASE + 2*MB + something2
   .paddr:  ; Segment physical address
-	dq 0x00000000006002B0
+	dq BASE + 2*MB + something2
   .filesz: ; Segment size in file
-	dq 0x0000000000000140
+	dq something2size
   .memsz:  ; Segment size in memory
-	dq 0x0000000000000140
+	dq something2size
   .align:  ; Segment alignment
 	dq 0x8
 
@@ -496,6 +500,7 @@ db 0x00
 db 0x00
 
 something:
+something2:
 db 0x01
 db 0x00
 db 0x00
@@ -816,6 +821,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+something2size equ $ - something2
+
 db 0xB0 ; °
 db 0x02
 db 0x60 ; `
@@ -1002,7 +1010,7 @@ shentsize equ $ - shdr
 ; .interp section
 shdr_1:
   .name: ; Section name (string tbl index)
-	dd 11
+	dd 0x0000000B
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags

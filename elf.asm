@@ -174,6 +174,8 @@ interp:
 interpsize equ $ - interp
 
 db 0x00
+
+something5:
 db 0x00
 db 0x00
 db 0x00
@@ -213,7 +215,7 @@ STV_DEFAULT equ 0 ; Default visibility.
 
 dynsym_0:
   .name:  ; Symbol name (string tbl index)
-	dd dynstr.null
+	dd dynstr.null_idx
   .info:  ; Symbol type and binding
 	db STB_LOCAL<<4
   .other: ; Symbol visibility
@@ -234,7 +236,7 @@ dynsym_printf:
 dynsym_printf_idx equ (dynsym_printf - dynsym) / dynsymentsize
 
   .name:  ; Symbol name (string tbl index)
-	dd dynstr.printf
+	dd dynstr.printf_idx
   .info:  ; Symbol type and binding
 	db STB_GLOBAL<<4 | STT_FUNC
   .other: ; Symbol visibility
@@ -250,7 +252,7 @@ dynsym_exit:
 dynsym_exit_idx equ (dynsym_exit - dynsym) / dynsymentsize
 
   .name:  ; Symbol name (string tbl index)
-	dd dynstr.exit
+	dd dynstr.exit_idx
   .info:  ; Symbol type and binding
 	db STB_GLOBAL<<4 | STT_FUNC
   .other: ; Symbol visibility
@@ -266,16 +268,22 @@ dynsymsize equ $ - dynsym
 
 dynstr:
 
-  .null equ $ - dynstr
+  .null:
 	db 0
-  .libc equ $ - dynstr
+  .libc:
 	db "libc.so.6", 0
-  .exit equ $ - dynstr
+  .exit:
 	db "exit", 0
-  .printf equ $ - dynstr
+  .printf:
 	db "printf", 0
-  .glibc equ $ - dynstr
+  .glibc:
 	db "GLIBC_2.2.5", 0
+
+.null_idx   equ .null - dynstr
+.libc_idx   equ .libc - dynstr
+.exit_idx   equ .exit - dynstr
+.printf_idx equ .printf - dynstr
+.glibc_idx  equ .glibc - dynstr
 
 dynstrsize equ $ - dynstr
 
@@ -428,13 +436,13 @@ dyn_1:
   .tag: ; Dynamic entry type
 	dq 0x0000000000000004
   .val: ; Integer or address value
-	dq 0x0000000000400168
+	dq BASE + something5
 
 dyn_2:
   .tag: ; Dynamic entry type
 	dq 0x0000000000000005
   .val: ; Integer or address value
-	dq 0x00000000004001C8
+	dq BASE + dynstr.null
 
 dyn_3:
   .tag: ; Dynamic entry type
@@ -565,30 +573,43 @@ somethingsize equ $ - something
 
 shstrtab:
 
-  .null equ $ - shstrtab
+  .null:
 	db 0
-  .shstrtab equ $ - shstrtab
+  .shstrtab:
 	db ".shstrtab", 0
-  .interp equ $ - shstrtab
+  .interp:
 	db ".interp", 0
-  .dynsym equ $ - shstrtab
+  .dynsym:
 	db ".dynsym", 0
-  .dynstr equ $ - shstrtab
+  .dynstr:
 	db ".dynstr", 0
-  .gnu_version_r equ $ - shstrtab
+  .gnu_version_r:
 	db ".gnu.version_r", 0
-  .rela_plt equ $ - shstrtab
+  .rela_plt:
 	db ".rela"
-	.plt equ $ - shstrtab
+	.plt:
 	db ".plt", 0
-  .text equ $ - shstrtab
+  .text:
 	db ".text", 0
-  .rodata equ $ - shstrtab
+  .rodata:
 	db ".rodata", 0
-  .dynamic equ $ - shstrtab
+  .dynamic:
 	db ".dynamic", 0
-  .got_plt equ $ - shstrtab
+  .got_plt:
 	db ".got.plt", 0
+
+.null_idx          equ .null - shstrtab
+.shstrtab_idx      equ .shstrtab - shstrtab
+.interp_idx        equ .interp - shstrtab
+.dynsym_idx        equ .dynsym - shstrtab
+.dynstr_idx        equ .dynstr - shstrtab
+.gnu_version_r_idx equ .gnu_version_r - shstrtab
+.rela_plt_idx      equ .rela_plt - shstrtab
+.plt_idx           equ .plt - shstrtab
+.text_idx          equ .text - shstrtab
+.rodata_idx        equ .rodata - shstrtab
+.dynamic_idx       equ .dynamic - shstrtab
+.got_plt_idx       equ .got_plt - shstrtab
 
 shstrtabsize equ $ - shstrtab
 
@@ -620,7 +641,7 @@ shdr_null:
 shdr_null_idx equ (shdr_null - shdr) / shentsize
 
   .name: ; Section name (string tbl index)
-	dd shstrtab.null
+	dd shstrtab.null_idx
   .type: ; Section type
 	dd SHT_NULL
   .flags: ; Section flags
@@ -645,7 +666,7 @@ shentsize equ $ - shdr
 ; .interp section
 shdr_1:
   .name: ; Section name (string tbl index)
-	dd shstrtab.interp
+	dd shstrtab.interp_idx
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -670,7 +691,7 @@ shdr_dynsym:
 shdr_dynsym_idx equ (shdr_dynsym - shdr) / shentsize
 
   .name: ; Section name (string tbl index)
-	dd shstrtab.dynsym
+	dd shstrtab.dynsym_idx
   .type: ; Section type
 	dd SHT_DYNSYM
   .flags: ; Section flags
@@ -695,7 +716,7 @@ shdr_dynstr:
 shdr_dynstr_idx equ (shdr_dynstr - shdr) / shentsize
 
   .name: ; Section name (string tbl index)
-	dd shstrtab.dynstr
+	dd shstrtab.dynstr_idx
   .type: ; Section type
 	dd SHT_STRTAB
   .flags: ; Section flags
@@ -718,7 +739,7 @@ shdr_dynstr_idx equ (shdr_dynstr - shdr) / shentsize
 ; .gnu.version_r section
 shdr_4:
   .name: ; Section name (string tbl index)
-	dd shstrtab.gnu_version_r
+	dd shstrtab.gnu_version_r_idx
   .type: ; Section type
 	dd 0x6FFFFFFE
   .flags: ; Section flags
@@ -741,7 +762,7 @@ shdr_4:
 ; .rela.plt section
 shdr_5:
   .name: ; Section name (string tbl index)
-	dd shstrtab.rela_plt
+	dd shstrtab.rela_plt_idx
   .type: ; Section type
 	dd SHT_RELA
   .flags: ; Section flags
@@ -766,7 +787,7 @@ shdr_plt:
 shdr_plt_idx equ (shdr_plt - shdr) / shentsize
 
   .name: ; Section name (string tbl index)
-	dd shstrtab.plt
+	dd shstrtab.plt_idx
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -789,7 +810,7 @@ shdr_plt_idx equ (shdr_plt - shdr) / shentsize
 ; .text section
 shdr_7:
   .name: ; Section name (string tbl index)
-	dd shstrtab.text
+	dd shstrtab.text_idx
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -812,7 +833,7 @@ shdr_7:
 ; .rodata section
 shdr_8:
   .name: ; Section name (string tbl index)
-	dd shstrtab.rodata
+	dd shstrtab.rodata_idx
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -835,7 +856,7 @@ shdr_8:
 ; .dynamic section
 shdr_9:
   .name: ; Section name (string tbl index)
-	dd shstrtab.dynamic
+	dd shstrtab.dynamic_idx
   .type: ; Section type
 	dd SHT_DYNAMIC
   .flags: ; Section flags
@@ -858,7 +879,7 @@ shdr_9:
 ; .got.plt section
 shdr_10:
   .name: ; Section name (string tbl index)
-	dd shstrtab.got_plt
+	dd shstrtab.got_plt_idx
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -883,7 +904,7 @@ shdr_shstrtab:
 shdr_shstrtab_idx equ (shdr_shstrtab - shdr) / shentsize
 
   .name: ; Section name (string tbl index)
-	dd shstrtab.shstrtab
+	dd shstrtab.shstrtab_idx
   .type: ; Section type
 	dd SHT_STRTAB
   .flags: ; Section flags

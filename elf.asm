@@ -433,7 +433,12 @@ db 0xE8, 0xD7, 0xFF, 0xFF, 0xFF ; call	_exit
 textsize equ $ - text
 
 db 0x00
+
+rodata:
+
 db "hello world", 10, 0
+
+rodatasize equ $ - rodata
 
 something4size equ $ - something4
 
@@ -1056,11 +1061,11 @@ shdr_8:
   .flags: ; Section flags
 	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq 0x00000000004002A0
+	dq BASE + rodata
   .offset: ; Section file offset
-	dq 0x00000000000002A0
+	dq rodata
   .size: ; Section size in bytes
-	dq 0x000000000000000D
+	dq rodatasize
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information

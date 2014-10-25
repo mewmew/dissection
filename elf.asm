@@ -350,6 +350,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+plt:
+
 db 0xFF
 db 0x35
 db 0xA2
@@ -366,6 +369,9 @@ db 0x0F
 db 0x1F
 db 0x40
 db 0x00
+
+pltentsize equ $ - plt
+
 db 0xFF
 db 0x25
 db 0xA2
@@ -382,6 +388,7 @@ db 0xE0
 db 0xFF
 db 0xFF
 db 0xFF
+
 db 0xFF
 db 0x25
 db 0x9A
@@ -398,6 +405,9 @@ db 0xD0
 db 0xFF
 db 0xFF
 db 0xFF
+
+pltsize equ $ - plt
+
 db 0x48
 db 0xBF
 db 0xA0
@@ -1004,11 +1014,11 @@ shdr_plt:
   .flags: ; Section flags
 	dq SHF_ALLOC | SHF_EXECINSTR
   .addr: ; Section virtual addr at execution
-	dq 0x0000000000400250
+	dq BASE + plt
   .offset: ; Section file offset
-	dq 0x0000000000000250
+	dq plt
   .size: ; Section size in bytes
-	dq 0x0000000000000030
+	dq pltsize
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information
@@ -1016,7 +1026,7 @@ shdr_plt:
   .addralign: ; Section alignment
 	dq 0x10
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000010
+	dq pltentsize
 
 ; .text section
 shdr_7:

@@ -274,14 +274,11 @@ dynstr:
 	db "exit", 0
   .printf:
 	db "printf", 0
-  .glibc:
-	db "GLIBC_2.2.5", 0
 
 .null_idx   equ .null - dynstr
 .libc_idx   equ .libc - dynstr
 .exit_idx   equ .exit - dynstr
 .printf_idx equ .printf - dynstr
-.glibc_idx  equ .glibc - dynstr
 
 dynstrsize equ $ - dynstr
 

@@ -177,6 +177,8 @@ interpsize equ $ - interp
 
 ; === [/ .interp section ] =====================================================
 
+; === [ .dynsym section ] ======================================================
+
 dynsym:
 
 ; Symbol bindings.
@@ -242,6 +244,10 @@ dynsym_exit_idx equ (dynsym_exit - dynsym) / dynsymentsize
 
 dynsymsize equ $ - dynsym
 
+; === [/ .dynsym section ] =====================================================
+
+; === [ .dynstr section ] ======================================================
+
 dynstr:
 
   .null:
@@ -260,7 +266,11 @@ dynstr:
 
 dynstrsize equ $ - dynstr
 
+; === [/ .dynstr section ] =====================================================
+
 db 0x00
+
+; === [ .rela.plt section ] ====================================================
 
 rela_plt:
 
@@ -288,14 +298,7 @@ rela_plt_1:
 
 rela_pltsize equ $ - rela_plt
 
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
+; === [/ .rela.plt section ] ===================================================
 
 plt:
 

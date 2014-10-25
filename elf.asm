@@ -223,6 +223,8 @@ dynsym_0:
 
 dynsymentsize equ $ - dynsym
 
+dynsym_globals:
+
 dynsym_1:
   .name:  ; Symbol name (string tbl index)
 	dd 0x00000010
@@ -928,8 +930,8 @@ shdr_dynsym:
 	dq dynsymsize
   .link: ; Link to another section
 	dd (shdr_dynstr - shdr) / shentsize
-  .info: ; Additional section information
-	dd 0x000000001
+  .info: ; Additional section information; index to the first global symbol.
+	dd (dynsym_globals - dynsym) / dynsymentsize
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table

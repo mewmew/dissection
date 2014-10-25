@@ -278,6 +278,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+gnu_version_r:
+
 db 0x01
 db 0x00
 db 0x01
@@ -310,6 +313,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+gnu_version_rsize equ $ - gnu_version_r
+
 db 0x08
 db 0x04
 db 0x60
@@ -974,11 +980,11 @@ shdr_4:
   .flags: ; Section flags
 	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq 0x00000000004001F8
+	dq BASE + gnu_version_r
   .offset: ; Section file offset
-	dq 0x00000000000001F8
+	dq gnu_version_r
   .size: ; Section size in bytes
-	dq 0x0000000000000020
+	dq gnu_version_rsize
   .link: ; Link to another section
 	dd (shdr_dynstr - shdr) / shentsize
   .info: ; Additional section information

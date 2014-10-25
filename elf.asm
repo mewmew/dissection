@@ -2,6 +2,8 @@ BITS 64
 
 ehdr:
 
+something4:
+
 ; ELF classes.
 ELFCLASS64 equ 2 ; 64-bit object
 
@@ -115,15 +117,15 @@ phdr_2:
   .flags:  ; Segment flags
 	dd PF_R | PF_X
   .offset: ; Segment file offset
-	dq 0x0000000000000000
+	dq something4
   .vaddr:  ; Segment virtual address
 	dq BASE
   .paddr:  ; Segment physical address
 	dq BASE
   .filesz: ; Segment size in file
-	dq 0x00000000000002AD
+	dq something4size
   .memsz:  ; Segment size in memory
-	dq 0x00000000000002AD
+	dq something4size
   .align:  ; Segment alignment
 	dq 2*MB
 
@@ -432,6 +434,9 @@ textsize equ $ - text
 
 db 0x00
 db "hello world", 10, 0
+
+something4size equ $ - something4
+
 db 0x00
 db 0x00
 db 0x00

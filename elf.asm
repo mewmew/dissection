@@ -195,82 +195,51 @@ db 0x00
 db 0x00
 db 0x00
 
-something3:
+dynsym:
 
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x10
-db 0x00
-db 0x00
-db 0x00
-db 0x12
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x0B
-db 0x00
-db 0x00
-db 0x00
-db 0x12
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
-db 0x00
+dynsym_0:
+  .name:  ; Symbol name (string tbl index)
+	dd 0x00000000
+  .info:  ; Symbol type and binding
+	db 0x00
+  .other: ; Symbol visibility
+	db 0x00
+  .shndx: ; Section index
+	dw 0x0000
+  .value: ; Symbol value
+	dq 0x0000000000000000
+  .size:  ; Symbol size
+	dq 0x0000000000000000
 
-something3size equ $ - something3
+dynsym_1:
+  .name:  ; Symbol name (string tbl index)
+	dd 0x00000010
+  .info:  ; Symbol type and binding
+	db 0x12
+  .other: ; Symbol visibility
+	db 0x00
+  .shndx: ; Section index
+	dw 0x0000
+  .value: ; Symbol value
+	dq 0x0000000000000000
+  .size:  ; Symbol size
+	dq 0x0000000000000000
+
+dynsym_2:
+  .name:  ; Symbol name (string tbl index)
+	dd 0x0000000B
+  .info:  ; Symbol type and binding
+	db 0x12
+  .other: ; Symbol visibility
+	db 0x00
+  .shndx: ; Section index
+	dw 0x0000
+  .value: ; Symbol value
+	dq 0x0000000000000000
+  .size:  ; Symbol size
+	dq 0x0000000000000000
+
+dynsymsize equ $ - dynsym
 
 db 0x00
 db "libc.so.6", 0
@@ -922,11 +891,11 @@ shdr_2:
   .flags: ; Section flags
 	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq BASE + something3
+	dq BASE + dynsym
   .offset: ; Section file offset
-	dq something3
+	dq dynsym
   .size: ; Section size in bytes
-	dq something3size
+	dq dynsymsize
   .link: ; Link to another section
 	dd 0x000000003
   .info: ; Additional section information

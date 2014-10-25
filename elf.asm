@@ -20,7 +20,7 @@ ehdr:
   .phentsize: ; Program header table entry size
 	dw phentsize
   .phnum:     ; Program header table entry count
-	dw 0x0005
+	dw phnum
   .shentsize: ; Section header table entry size
 	dw 0x0040
   .shnum:     ; Section header table entry count
@@ -123,6 +123,8 @@ phdr_4:
 	dq 0x0000000000000140
   .align:  ; Segment alignment
 	dq 0x0000000000000008
+
+phnum equ ($ - phdr) / phentsize
 
 db 0x2F ; /
 db 0x6C ; l

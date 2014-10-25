@@ -194,6 +194,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+something3:
+
 db 0x00
 db 0x00
 db 0x00
@@ -266,6 +269,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+something3size equ $ - something3
+
 db 0x00
 db "libc.so.6", 0
 db "exit", 0
@@ -893,7 +899,7 @@ shdr_1:
   .flags: ; Section flags
 	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq 0x0000000000400158
+	dq BASE + interp
   .offset: ; Section file offset
 	dq interp
   .size: ; Section size in bytes
@@ -916,11 +922,11 @@ shdr_2:
   .flags: ; Section flags
 	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq 0x0000000000400180
+	dq BASE + something3
   .offset: ; Section file offset
-	dq 0x0000000000000180
+	dq something3
   .size: ; Section size in bytes
-	dq 0x0000000000000048
+	dq something3size
   .link: ; Link to another section
 	dd 0x000000003
   .info: ; Additional section information

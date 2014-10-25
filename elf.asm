@@ -356,7 +356,6 @@ dynamic:
 ; Dynamic tags.
 DT_NULL     equ 0  ; Marks the end of the dynamic array
 DT_NEEDED   equ 1  ; String table offset of a required library
-DT_PLTRELSZ equ 2  ; Size of the relocation entities of the PLT
 DT_PLTGOT   equ 3  ; Address of the PLT and/or GOT
 DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
@@ -409,12 +408,6 @@ dyn_pltgot_idx equ (dyn_pltgot - dynamic) / dynentsize
 	dq DT_PLTGOT
   .val: ; Integer or address value
 	dq BASE + 2*MB + got_plt
-
-dyn_8:
-  .tag: ; Dynamic entry type
-	dq DT_PLTRELSZ
-  .val: ; Integer or address value
-	dq rela_pltsize
 
 dyn_10:
   .tag: ; Dynamic entry type

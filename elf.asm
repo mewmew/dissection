@@ -456,6 +456,8 @@ dyn_0:
   .val: ; Integer or address value
 	dq 0x0000000000000001
 
+dynentsize equ $ - dynamic
+
 dyn_1:
   .tag: ; Dynamic entry type
 	dq 0x0000000000000004
@@ -897,7 +899,7 @@ shdr_9:
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000010
+	dq dynentsize
 
 ; .got.plt section
 shdr_10:

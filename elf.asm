@@ -574,6 +574,8 @@ dyn_19:
 
 dynamicsize equ $ - dynamic
 
+got_plt:
+
 db 0xB0
 db 0x02
 db 0x60
@@ -614,6 +616,8 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+got_pltsize equ $ - got_plt
 
 somethingsize equ $ - something
 
@@ -910,11 +914,11 @@ shdr_10:
   .flags: ; Section flags
 	dq SHF_WRITE | SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq 0x00000000006003F0
+	dq BASE + 2*MB + got_plt
   .offset: ; Section file offset
-	dq 0x00000000000003F0
+	dq got_plt
   .size: ; Section size in bytes
-	dq 0x0000000000000028
+	dq got_pltsize
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information

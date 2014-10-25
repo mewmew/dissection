@@ -40,7 +40,7 @@ EM_X86_64 equ 62 ; AMD x86-64 architecture
   .phoff:     ; Program header table file offset
 	dq phdr
   .shoff:     ; Section header table file offset
-	dq shdr
+	dq 0
   .flags:     ; Processor-specific flags
 	dd 0
   .ehsize:    ; ELF header size in bytes
@@ -50,11 +50,11 @@ EM_X86_64 equ 62 ; AMD x86-64 architecture
   .phnum:     ; Program header table entry count
 	dw phnum
   .shentsize: ; Section header table entry size
-	dw shentsize
+	dw 0
   .shnum:     ; Section header table entry count
-	dw shnum
+	dw 0
   .shstrndx:  ; Section header string table index
-	dw shdr_shstrtab_idx
+	dw 0
 
 ehsize equ $ - ehdr
 
@@ -209,7 +209,7 @@ dynsym_0:
   .other: ; Symbol visibility
 	db STV_DEFAULT
   .shndx: ; Section index
-	dw shdr_null_idx
+	dw 0
   .value: ; Symbol value
 	dq 0
   .size:  ; Symbol size
@@ -230,7 +230,7 @@ dynsym_printf_idx equ (dynsym_printf - dynsym) / dynsymentsize
   .other: ; Symbol visibility
 	db STV_DEFAULT
   .shndx: ; Section index
-	dw shdr_null_idx
+	dw 0
   .value: ; Symbol value
 	dq 0
   .size:  ; Symbol size
@@ -246,7 +246,7 @@ dynsym_exit_idx equ (dynsym_exit - dynsym) / dynsymentsize
   .other: ; Symbol visibility
 	db STV_DEFAULT
   .shndx: ; Section index
-	dw shdr_null_idx
+	dw 0
   .value: ; Symbol value
 	dq 0
   .size:  ; Symbol size
@@ -500,293 +500,3 @@ shstrtabsize equ $ - shstrtab
 ; --- [/ .shstrtab section ] ---------------------------------------------------
 
 ; === [/ Sections ] ============================================================
-
-; === [ Section headers ] ======================================================
-
-shdr:
-
-; Section types.
-SHT_NULL     equ 0  ; Inactive section
-SHT_PROGBITS equ 1  ; Program specific information
-SHT_STRTAB   equ 3  ; String table
-SHT_RELA     equ 4  ; Relocation entities
-SHT_DYNAMIC  equ 6  ; Dynamic linking information
-SHT_DYNSYM   equ 11 ; Dynamic linking symbols
-
-; Section flags.
-SHF_WRITE     equ 1 ; Contains writeable data
-SHF_ALLOC     equ 2 ; Occupies memory during process execution
-SHF_EXECINSTR equ 4 ; Contains executable machine instructions
-
-; Section indicies.
-SHN_UNDEF equ 0 ; Undefined, missing or irrelevant section reference
-
-; NULL section
-shdr_null:
-shdr_null_idx equ (shdr_null - shdr) / shentsize
-
-  .name: ; Section name (string tbl index)
-	dd shstrtab.null_idx
-  .type: ; Section type
-	dd SHT_NULL
-  .flags: ; Section flags
-	dq 0
-  .addr: ; Section virtual addr at execution
-	dq 0
-  .offset: ; Section file offset
-	dq 0
-  .size: ; Section size in bytes
-	dq 0
-  .link: ; Link to another section
-	dd SHN_UNDEF
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0
-  .entsize: ; Entry size if section holds table
-	dq 0
-
-shentsize equ $ - shdr
-
-; .interp section
-shdr_1:
-  .name: ; Section name (string tbl index)
-	dd shstrtab.interp_idx
-  .type: ; Section type
-	dd SHT_PROGBITS
-  .flags: ; Section flags
-	dq SHF_ALLOC
-  .addr: ; Section virtual addr at execution
-	dq BASE + interp
-  .offset: ; Section file offset
-	dq interp
-  .size: ; Section size in bytes
-	dq interpsize
-  .link: ; Link to another section
-	dd SHN_UNDEF
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0x1
-  .entsize: ; Entry size if section holds table
-	dq 0
-
-; .dynsym section
-shdr_dynsym:
-shdr_dynsym_idx equ (shdr_dynsym - shdr) / shentsize
-
-  .name: ; Section name (string tbl index)
-	dd shstrtab.dynsym_idx
-  .type: ; Section type
-	dd SHT_DYNSYM
-  .flags: ; Section flags
-	dq SHF_ALLOC
-  .addr: ; Section virtual addr at execution
-	dq BASE + dynsym
-  .offset: ; Section file offset
-	dq dynsym
-  .size: ; Section size in bytes
-	dq dynsymsize
-  .link: ; Link to another section
-	dd shdr_dynstr_idx
-  .info: ; Additional section information; table index to the first global symbol
-	dd dynsym_globals_idx
-  .addralign: ; Section alignment
-	dq 0x8
-  .entsize: ; Entry size if section holds table
-	dq dynsymentsize
-
-; .dynstr section
-shdr_dynstr:
-shdr_dynstr_idx equ (shdr_dynstr - shdr) / shentsize
-
-  .name: ; Section name (string tbl index)
-	dd shstrtab.dynstr_idx
-  .type: ; Section type
-	dd SHT_STRTAB
-  .flags: ; Section flags
-	dq SHF_ALLOC
-  .addr: ; Section virtual addr at execution
-	dq BASE + dynstr
-  .offset: ; Section file offset
-	dq dynstr
-  .size: ; Section size in bytes
-	dq dynstrsize
-  .link: ; Link to another section
-	dd SHN_UNDEF
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0x1
-  .entsize: ; Entry size if section holds table
-	dq 0
-
-; .rela.plt section
-shdr_4:
-  .name: ; Section name (string tbl index)
-	dd shstrtab.rela_plt_idx
-  .type: ; Section type
-	dd SHT_RELA
-  .flags: ; Section flags
-	dq SHF_ALLOC
-  .addr: ; Section virtual addr at execution
-	dq BASE + rela_plt
-  .offset: ; Section file offset
-	dq rela_plt
-  .size: ; Section size in bytes
-	dq rela_pltsize
-  .link: ; Link to another section
-	dd shdr_dynsym_idx
-  .info: ; Additional section information; section header index to which the relocations apply
-	dd shdr_plt_idx
-  .addralign: ; Section alignment
-	dq 0x8
-  .entsize: ; Entry size if section holds table
-	dq rela_pltentsize
-
-; .plt section
-shdr_plt:
-shdr_plt_idx equ (shdr_plt - shdr) / shentsize
-
-  .name: ; Section name (string tbl index)
-	dd shstrtab.plt_idx
-  .type: ; Section type
-	dd SHT_PROGBITS
-  .flags: ; Section flags
-	dq SHF_ALLOC | SHF_EXECINSTR
-  .addr: ; Section virtual addr at execution
-	dq BASE + plt
-  .offset: ; Section file offset
-	dq plt
-  .size: ; Section size in bytes
-	dq pltsize
-  .link: ; Link to another section
-	dd SHN_UNDEF
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0x10
-  .entsize: ; Entry size if section holds table
-	dq pltentsize
-
-; .text section
-shdr_6:
-  .name: ; Section name (string tbl index)
-	dd shstrtab.text_idx
-  .type: ; Section type
-	dd SHT_PROGBITS
-  .flags: ; Section flags
-	dq SHF_ALLOC | SHF_EXECINSTR
-  .addr: ; Section virtual addr at execution
-	dq BASE + text
-  .offset: ; Section file offset
-	dq text
-  .size: ; Section size in bytes
-	dq textsize
-  .link: ; Link to another section
-	dd SHN_UNDEF
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0x10
-  .entsize: ; Entry size if section holds table
-	dq 0
-
-; .rodata section
-shdr_7:
-  .name: ; Section name (string tbl index)
-	dd shstrtab.rodata_idx
-  .type: ; Section type
-	dd SHT_PROGBITS
-  .flags: ; Section flags
-	dq SHF_ALLOC
-  .addr: ; Section virtual addr at execution
-	dq BASE + rodata
-  .offset: ; Section file offset
-	dq rodata
-  .size: ; Section size in bytes
-	dq rodatasize
-  .link: ; Link to another section
-	dd SHN_UNDEF
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0x4
-  .entsize: ; Entry size if section holds table
-	dq 0
-
-; .dynamic section
-shdr_8:
-  .name: ; Section name (string tbl index)
-	dd shstrtab.dynamic_idx
-  .type: ; Section type
-	dd SHT_DYNAMIC
-  .flags: ; Section flags
-	dq SHF_WRITE | SHF_ALLOC
-  .addr: ; Section virtual addr at execution
-	dq BASE + 2*MB + dynamic
-  .offset: ; Section file offset
-	dq dynamic
-  .size: ; Section size in bytes
-	dq dynamicsize
-  .link: ; Link to another section
-	dd shdr_dynstr_idx
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0x8
-  .entsize: ; Entry size if section holds table
-	dq dynentsize
-
-; .got.plt section
-shdr_9:
-  .name: ; Section name (string tbl index)
-	dd shstrtab.got_plt_idx
-  .type: ; Section type
-	dd SHT_PROGBITS
-  .flags: ; Section flags
-	dq SHF_WRITE | SHF_ALLOC
-  .addr: ; Section virtual addr at execution
-	dq BASE + 2*MB + got_plt
-  .offset: ; Section file offset
-	dq got_plt
-  .size: ; Section size in bytes
-	dq got_pltsize
-  .link: ; Link to another section
-	dd SHN_UNDEF
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0x8
-  .entsize: ; Entry size if section holds table
-	dq got_pltentsize
-
-; .shstrtab section
-shdr_shstrtab:
-shdr_shstrtab_idx equ (shdr_shstrtab - shdr) / shentsize
-
-  .name: ; Section name (string tbl index)
-	dd shstrtab.shstrtab_idx
-  .type: ; Section type
-	dd SHT_STRTAB
-  .flags: ; Section flags
-	dq 0
-  .addr: ; Section virtual addr at execution
-	dq 0
-  .offset: ; Section file offset
-	dq shstrtab
-  .size: ; Section size in bytes
-	dq shstrtabsize
-  .link: ; Link to another section
-	dd SHN_UNDEF
-  .info: ; Additional section information
-	dd 0
-  .addralign: ; Section alignment
-	dq 0x1
-  .entsize: ; Entry size if section holds table
-	dq 0
-
-shsize equ $ - shdr
-shnum  equ shsize / shentsize
-
-; === [/ Section headers ] =====================================================

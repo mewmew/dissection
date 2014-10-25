@@ -168,10 +168,14 @@ phdr_4:
 phsize equ $ - phdr
 phnum  equ phsize / phentsize
 
+; === [ .interp section ] ======================================================
+
 interp:
 	db "/lib/ld64.so.1", 0
 
 interpsize equ $ - interp
+
+; === [/ .interp section ] =====================================================
 
 dynsym:
 
@@ -425,6 +429,8 @@ got_pltsize equ $ - got_plt
 
 somethingsize equ $ - something
 
+; === [ .shstrtab section ] ====================================================
+
 shstrtab:
 
   .null:
@@ -464,10 +470,7 @@ shstrtab:
 
 shstrtabsize equ $ - shstrtab
 
-db 0x00
-db 0x00
-db 0x00
-db 0x00
+; === [/ .shstrtab section ] ===================================================
 
 shdr:
 

@@ -946,7 +946,7 @@ shdr_dynsym:
 	dq dynsymsize
   .link: ; Link to another section
 	dd (shdr_dynstr - shdr) / shentsize
-  .info: ; Additional section information; index to the first global symbol.
+  .info: ; Additional section information; table index to the first global symbol
 	dd (dynsym_globals - dynsym) / dynsymentsize
   .addralign: ; Section alignment
 	dq 0x8
@@ -1015,15 +1015,15 @@ shdr_5:
 	dq rela_pltsize
   .link: ; Link to another section
 	dd (shdr_dynsym - shdr) / shentsize
-  .info: ; Additional section information
-	dd 0x000000006
+  .info: ; Additional section information; section header index to which the relocations apply
+	dd (shdr_plt - shdr) / shentsize
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000018
 
 ; .plt section
-shdr_6:
+shdr_plt:
   .name: ; Section name (string tbl index)
 	dd shstrtab.plt
   .type: ; Section type

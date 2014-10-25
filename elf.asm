@@ -330,6 +330,8 @@ rela_plt_0:
   .addend: ; Addend
 	dq 0
 
+rela_pltentsize equ $ - rela_plt
+
 rela_plt_1:
   .offset: ; Address
 	dq 0x0000000000600410
@@ -991,7 +993,7 @@ shdr_5:
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000018
+	dq rela_pltentsize
 
 ; .plt section
 shdr_plt:

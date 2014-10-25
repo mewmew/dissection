@@ -1020,7 +1020,7 @@ shdr_1:
   .addralign: ; Section alignment
 	dq 0x1
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000000
+	dq 0
 
 ; .dynsym section
 shdr_2:
@@ -1066,7 +1066,7 @@ shdr_3:
   .addralign: ; Section alignment
 	dq 0x1
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000000
+	dq 0
 
 ; .gnu.version_r section
 shdr_4:
@@ -1089,7 +1089,7 @@ shdr_4:
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000000
+	dq 0
 
 ; .rela.plt section
 shdr_5:
@@ -1158,7 +1158,7 @@ shdr_7:
   .addralign: ; Section alignment
 	dq 0x10
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000000
+	dq 0
 
 ; .rodata section
 shdr_8:
@@ -1181,7 +1181,7 @@ shdr_8:
   .addralign: ; Section alignment
 	dq 0x4
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000000
+	dq 0
 
 ; .dynamic section
 shdr_9:
@@ -1238,7 +1238,7 @@ shdr_11:
   .flags: ; Section flags
 	dq 0
   .addr: ; Section virtual addr at execution
-	dq 0x0000000000000000
+	dq 0
   .offset: ; Section file offset
 	dq 0x0000000000000418
   .size: ; Section size in bytes
@@ -1250,7 +1250,7 @@ shdr_11:
   .addralign: ; Section alignment
 	dq 0x1
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000000
+	dq 0
 
 shsize equ $ - shdr
 shnum  equ shsize / shentsize

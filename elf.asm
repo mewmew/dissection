@@ -32,9 +32,14 @@ ehsize equ $ - ehdr
 
 phdr:
 
+PT_LOAD    equ 0x00000001
+PT_DYNAMIC equ 0x00000002
+PT_INTERP  equ 0x00000003
+PT_PHDR    equ 0x00000006
+
 phdr_0:
   .type:   ; Segment type
-	dd 0x00000006
+	dd PT_PHDR
   .flags:  ; Segment flags
 	dd 0x00000005
   .offset: ; Segment file offset
@@ -54,7 +59,7 @@ phentsize equ $ - phdr
 
 phdr_1:
   .type:   ; Segment type
-	dd 0x00000003
+	dd PT_INTERP
   .flags:  ; Segment flags
 	dd 0x00000004
   .offset: ; Segment file offset
@@ -72,7 +77,7 @@ phdr_1:
 
 phdr_2:
   .type:   ; Segment type
-	dd 0x00000001
+	dd PT_LOAD
   .flags:  ; Segment flags
 	dd 0x00000005
   .offset: ; Segment file offset
@@ -90,7 +95,7 @@ phdr_2:
 
 phdr_3:
   .type:   ; Segment type
-	dd 0x00000001
+	dd PT_LOAD
   .flags:  ; Segment flags
 	dd 0x00000006
   .offset: ; Segment file offset
@@ -108,7 +113,7 @@ phdr_3:
 
 phdr_4:
   .type:   ; Segment type
-	dd 0x00000002
+	dd PT_DYNAMIC
   .flags:  ; Segment flags
 	dd 0x00000006
   .offset: ; Segment file offset
@@ -127,6 +132,7 @@ phdr_4:
 phnum equ ($ - phdr) / phentsize
 
 db "/lib/ld64.so.1"
+
 db 0x00
 db 0x00
 db 0x00

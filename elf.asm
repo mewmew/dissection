@@ -1,37 +1,36 @@
 ehdr:
-  .ident: ; Magic number and other info
+  .ident:     ; Magic number and other info
 	db 0x7F, "ELF", 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-  .type: ; Object file type
+  .type:      ; Object file type
 	dw 0x0002
-  .machine: ; Architecture
+  .machine:   ; Architecture
 	dw 0x003E
-  .version: ; Object file version
+  .version:   ; Object file version
 	dd 0x00000001
-  .entry: ; Entry point virtual address
+  .entry:     ; Entry point virtual address
 	dq 0x0000000000400280
-  .phoff: ; Program header table file offset
+  .phoff:     ; Program header table file offset
 	dq phdr
-  .shoff: ; Section header table file offset
+  .shoff:     ; Section header table file offset
 	dq 0x0000000000000478
-  .flags: ; Processor-specific flags
+  .flags:     ; Processor-specific flags
 	dd 0x00000000
-  .ehsize: ; ELF header size in bytes
+  .ehsize:    ; ELF header size in bytes
 	dw ehsize
   .phentsize: ; Program header table entry size
 	dw 0x0038
-  .phnum: ; Program header table entry count
+  .phnum:     ; Program header table entry count
 	dw 0x0005
   .shentsize: ; Section header table entry size
 	dw 0x0040
-  .shnum: ; Section header table entry count
+  .shnum:     ; Section header table entry count
 	dw 0x000C
-  .shstrndx: ; Section header string table index
+  .shstrndx:  ; Section header string table index
 	dw 0x000B
 
 ehsize equ $ - ehdr
 
 phdr:
-
   .type:   ; Segment type
 	dd 0x00000006
   .flags:  ; Segment flags

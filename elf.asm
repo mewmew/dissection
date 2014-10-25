@@ -255,11 +255,16 @@ dynsym_2:
 
 dynsymsize equ $ - dynsym
 
+dynstr:
+
 db 0x00
 db "libc.so.6", 0
 db "exit", 0
 db "printf", 0
 db "GLIBC_2.2.5", 0
+
+dynstrsize equ $ - dynstr
+
 db 0x00
 db 0x00
 db 0x00
@@ -946,11 +951,11 @@ shdr_dynstr:
   .flags: ; Section flags
 	dq SHF_ALLOC
   .addr: ; Section virtual addr at execution
-	dq 0x00000000004001C8
+	dq BASE + dynstr
   .offset: ; Section file offset
-	dq 0x00000000000001C8
+	dq dynstr
   .size: ; Section size in bytes
-	dq 0x0000000000000023
+	dq dynstrsize
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information

@@ -349,6 +349,8 @@ textsize equ $ - text
 
 ; === [/ .text section ] =======================================================
 
+; === [ .rodata section ] ======================================================
+
 rodata:
 
 hello:
@@ -356,11 +358,9 @@ hello:
 
 rodatasize equ $ - rodata
 
-something4size equ $ - something4
+; === [/ .rodata section ] =====================================================
 
-db 0x00
-db 0x00
-db 0x00
+something4size equ $ - something4
 
 something:
 

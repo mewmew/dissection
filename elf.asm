@@ -359,7 +359,6 @@ DT_NEEDED   equ 1  ; String table offset of a required library
 DT_PLTGOT   equ 3  ; Address of the PLT and/or GOT
 DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
-DT_SYMENT   equ 11 ; Symbol table entry size
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
 
 dyn_0:
@@ -381,12 +380,6 @@ dyn_3:
 	dq DT_SYMTAB
   .val: ; Integer or address value
 	dq BASE + dynsym
-
-dyn_5:
-  .tag: ; Dynamic entry type
-	dq DT_SYMENT
-  .val: ; Integer or address value
-	dq dynsymentsize
 
 dyn_pltgot:
 dyn_pltgot_idx equ (dyn_pltgot - dynamic) / dynentsize

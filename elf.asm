@@ -229,7 +229,7 @@ dynsymentsize equ $ - dynsym
 
 dynsym_globals:
 
-dynsym_1:
+dynsym_printf:
   .name:  ; Symbol name (string tbl index)
 	dd dynstr.printf
   .info:  ; Symbol type and binding
@@ -243,7 +243,7 @@ dynsym_1:
   .size:  ; Symbol size
 	dq 0
 
-dynsym_2:
+dynsym_exit:
   .name:  ; Symbol name (string tbl index)
 	dd dynstr.exit
   .info:  ; Symbol type and binding
@@ -256,6 +256,9 @@ dynsym_2:
 	dq 0
   .size:  ; Symbol size
 	dq 0
+
+dynsym_printf_idx equ (dynsym_printf - dynsym) / dynsymentsize
+dynsym_exit_idx   equ (dynsym_exit - dynsym) / dynsymentsize
 
 dynsymsize equ $ - dynsym
 
@@ -326,7 +329,7 @@ rela_plt_0:
   .offset: ; Address
 	dq 0x0000000000600408
   .info:   ; Relocation type and symbol index
-	dq 0x00000001<<32 | R_386_JMP_SLOT
+	dq dynsym_printf_idx<<32 | R_386_JMP_SLOT
   .addend: ; Addend
 	dq 0
 
@@ -336,7 +339,7 @@ rela_plt_1:
   .offset: ; Address
 	dq 0x0000000000600410
   .info:   ; Relocation type and symbol index
-	dq 0x00000002<<32 | R_386_JMP_SLOT
+	dq dynsym_exit_idx<<32 | R_386_JMP_SLOT
   .addend: ; Addend
 	dq 0
 
@@ -585,7 +588,9 @@ got_plt:
 	dq BASE + 2*MB + dyn_0.tag
 	dq 0
 	dq 0
+  .printf:
 	dq BASE + plt_1.resolve
+  .exit:
 	dq BASE + plt_2.resolve
 
 got_pltsize equ $ - got_plt

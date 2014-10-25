@@ -12,7 +12,7 @@ ehdr:
   .phoff:     ; Program header table file offset
 	dq phdr
   .shoff:     ; Section header table file offset
-	dq 0x0000000000000478
+	dq shdr
   .flags:     ; Processor-specific flags
 	dd 0x00000000
   .ehsize:    ; ELF header size in bytes
@@ -928,6 +928,8 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+shdr:
 db 0x00
 db 0x00
 db 0x00

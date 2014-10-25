@@ -1016,7 +1016,7 @@ shdr_1:
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information
-	dd 000000000
+	dd 0
   .addralign: ; Section alignment
 	dq 0x0000000000000001
   .entsize: ; Entry size if section holds table
@@ -1037,9 +1037,9 @@ shdr_2:
   .size: ; Section size in bytes
 	dq 0x0000000000000048
   .link: ; Link to another section
-	dd 000000003
+	dd 0x000000003
   .info: ; Additional section information
-	dd 000000001
+	dd 0x000000001
   .addralign: ; Section alignment
 	dq 0x0000000000000008
   .entsize: ; Entry size if section holds table
@@ -1062,7 +1062,7 @@ shdr_3:
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information
-	dd 000000000
+	dd 0
   .addralign: ; Section alignment
 	dq 0x0000000000000001
   .entsize: ; Entry size if section holds table
@@ -1083,9 +1083,9 @@ shdr_4:
   .size: ; Section size in bytes
 	dq 0x0000000000000020
   .link: ; Link to another section
-	dd 000000003
+	dd 0x000000003
   .info: ; Additional section information
-	dd 000000001
+	dd 0x000000001
   .addralign: ; Section alignment
 	dq 0x0000000000000008
   .entsize: ; Entry size if section holds table
@@ -1106,9 +1106,9 @@ shdr_5:
   .size: ; Section size in bytes
 	dq 0x0000000000000030
   .link: ; Link to another section
-	dd 000000002
+	dd 0x000000002
   .info: ; Additional section information
-	dd 000000006
+	dd 0x000000006
   .addralign: ; Section alignment
 	dq 0x0000000000000008
   .entsize: ; Entry size if section holds table
@@ -1131,7 +1131,7 @@ shdr_6:
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information
-	dd 000000000
+	dd 0
   .addralign: ; Section alignment
 	dq 0x0000000000000010
   .entsize: ; Entry size if section holds table
@@ -1154,7 +1154,7 @@ shdr_7:
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information
-	dd 000000000
+	dd 0
   .addralign: ; Section alignment
 	dq 0x0000000000000010
   .entsize: ; Entry size if section holds table
@@ -1177,7 +1177,7 @@ shdr_8:
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information
-	dd 000000000
+	dd 0
   .addralign: ; Section alignment
 	dq 0x0000000000000004
   .entsize: ; Entry size if section holds table
@@ -1198,9 +1198,9 @@ shdr_9:
   .size: ; Section size in bytes
 	dq 0x0000000000000140
   .link: ; Link to another section
-	dd 000000003
+	dd 0x000000003
   .info: ; Additional section information
-	dd 000000000
+	dd 0
   .addralign: ; Section alignment
 	dq 0x0000000000000008
   .entsize: ; Entry size if section holds table
@@ -1223,7 +1223,7 @@ shdr_10:
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information
-	dd 000000000
+	dd 0
   .addralign: ; Section alignment
 	dq 0x0000000000000008
   .entsize: ; Entry size if section holds table
@@ -1246,7 +1246,7 @@ shdr_11:
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information
-	dd 000000000
+	dd 0
   .addralign: ; Section alignment
 	dq 0x0000000000000001
   .entsize: ; Entry size if section holds table

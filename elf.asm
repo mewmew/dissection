@@ -418,6 +418,8 @@ pltentsize equ $ - plt
 
 pltsize equ $ - plt
 
+text:
+
 db 0x48
 db 0xBF
 db 0xA0
@@ -449,6 +451,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0xC3
+
+textsize equ $ - text
+
 db 0x00
 db "hello world", 10, 0
 db 0x00
@@ -1047,11 +1052,11 @@ shdr_7:
   .flags: ; Section flags
 	dq SHF_ALLOC | SHF_EXECINSTR
   .addr: ; Section virtual addr at execution
-	dq 0x0000000000400280
+	dq BASE + text
   .offset: ; Section file offset
-	dq 0x0000000000000280
+	dq text
   .size: ; Section size in bytes
-	dq 0x000000000000001F
+	dq textsize
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information

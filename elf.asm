@@ -389,6 +389,7 @@ plt_1:
 	db 0x20
 	db 0x00
 
+.resolve:
 ; push qword 0x0            ; 6800000000
 	db 0x68
 	db 0x00
@@ -412,6 +413,7 @@ plt_2:
 	db 0x20
 	db 0x00
 
+.resolve:
 ; push qword 0x1            ; 6801000000
 	db 0x68
 	db 0x01
@@ -587,8 +589,8 @@ got_plt:
 	dq BASE + 2*MB + dyn_0.tag
 	dq 0
 	dq 0
-	dq 0x0000000000400266
-	dq 0x0000000000400276
+	dq BASE + plt_1.resolve
+	dq BASE + plt_2.resolve
 
 got_pltsize equ $ - got_plt
 

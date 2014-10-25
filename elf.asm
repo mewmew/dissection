@@ -812,6 +812,8 @@ db 0x00
 
 somethingsize equ $ - something
 
+shstrtab:
+
 db 0
 db ".shstrtab", 0
 db ".interp", 0
@@ -823,6 +825,9 @@ db ".text", 0
 db ".rodata", 0
 db ".dynamic", 0
 db ".got.plt", 0
+
+shstrtabsize equ $ - shstrtab
+
 db 0x00
 db 0x00
 db 0x00
@@ -1112,9 +1117,9 @@ shdr_11:
   .addr: ; Section virtual addr at execution
 	dq 0
   .offset: ; Section file offset
-	dq 0x0000000000000418
+	dq shstrtab
   .size: ; Section size in bytes
-	dq 0x000000000000005C
+	dq shstrtabsize
   .link: ; Link to another section
 	dd SHN_UNDEF
   .info: ; Additional section information

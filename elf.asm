@@ -13,15 +13,15 @@ ET_EXEC equ 2 ; Executable file
 EM_X86_64 equ 62 ; AMD x86-64 architecture
 
   .ident:     ; Magic number and other info
-    .ident.magic:
-	db 0x7F, "ELF" ; ELF magic number
-    .ident.class:
+    .ident.magic:   ; ELF magic number
+	db 0x7F, "ELF"
+    .ident.class:   ; File class
 	db ELFCLASS64
-    .ident.data:
+    .ident.data:    ; Data encoding
 	db ELFDATA2LSB
-    .ident.version:
+    .ident.version: ; ELF header version
 	db 1
-    .ident.pad:
+    .ident.pad:     ; Padding
 	db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   .type:      ; Object file type
 	dw ET_EXEC

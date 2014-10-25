@@ -32,7 +32,7 @@ EM_X86_64 equ 62 ; AMD x86-64 architecture
   .version:   ; Object file version
 	dd 1
   .entry:     ; Entry point virtual address
-	dq 0x0000000000400280
+	dq BASE + text.start
   .phoff:     ; Program header table file offset
 	dq phdr
   .shoff:     ; Section header table file offset

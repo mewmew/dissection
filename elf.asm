@@ -434,12 +434,12 @@ pltsize equ $ - plt
 text:
 
   .start:
-db 0x48, 0xBF, 0xA0, 0x02, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00 ; mov	rdi, offset format ; "hello world\n"
+	mov	rdi, BASE + hello
 	call	plt_printf
 	mov	edi, 0
 	call	plt_exit
 	mov	eax, 10
-	retn
+	ret
 
 textsize equ $ - text
 
@@ -447,7 +447,8 @@ db 0x00
 
 rodata:
 
-db "hello world", 10, 0
+hello:
+	db "hello world", 10, 0
 
 rodatasize equ $ - rodata
 

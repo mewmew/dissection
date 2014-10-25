@@ -814,17 +814,30 @@ somethingsize equ $ - something
 
 shstrtab:
 
-db 0
-db ".shstrtab", 0
-db ".interp", 0
-db ".dynsym", 0
-db ".dynstr", 0
-db ".gnu.version_r", 0
-db ".rela.plt", 0
-db ".text", 0
-db ".rodata", 0
-db ".dynamic", 0
-db ".got.plt", 0
+  .null equ $ - shstrtab
+	db 0
+  .shstrtab equ $ - shstrtab
+	db ".shstrtab", 0
+  .interp equ $ - shstrtab
+	db ".interp", 0
+  .dynsym equ $ - shstrtab
+	db ".dynsym", 0
+  .dynstr equ $ - shstrtab
+	db ".dynstr", 0
+  .gnu_version_r equ $ - shstrtab
+	db ".gnu.version_r", 0
+  .rela_plt equ $ - shstrtab
+	db ".rela"
+	.plt equ $ - shstrtab
+	db ".plt", 0
+  .text equ $ - shstrtab
+	db ".text", 0
+  .rodata equ $ - shstrtab
+	db ".rodata", 0
+  .dynamic equ $ - shstrtab
+	db ".dynamic", 0
+  .got_plt equ $ - shstrtab
+	db ".got.plt", 0
 
 shstrtabsize equ $ - shstrtab
 
@@ -854,7 +867,7 @@ SHN_UNDEF equ 0 ; Undefined, missing or irrelevant section reference
 ; NULL section
 shdr_0:
   .name: ; Section name (string tbl index)
-	dd 0
+	dd shstrtab.null
   .type: ; Section type
 	dd SHT_NULL
   .flags: ; Section flags
@@ -879,7 +892,7 @@ shentsize equ $ - shdr
 ; .interp section
 shdr_1:
   .name: ; Section name (string tbl index)
-	dd 0x0000000B
+	dd shstrtab.interp
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -902,7 +915,7 @@ shdr_1:
 ; .dynsym section
 shdr_dynsym:
   .name: ; Section name (string tbl index)
-	dd 0x00000013
+	dd shstrtab.dynsym
   .type: ; Section type
 	dd SHT_DYNSYM
   .flags: ; Section flags
@@ -925,7 +938,7 @@ shdr_dynsym:
 ; .dynstr section
 shdr_dynstr:
   .name: ; Section name (string tbl index)
-	dd 0x0000001B
+	dd shstrtab.dynstr
   .type: ; Section type
 	dd SHT_STRTAB
   .flags: ; Section flags
@@ -948,7 +961,7 @@ shdr_dynstr:
 ; .gnu.version_r section
 shdr_4:
   .name: ; Section name (string tbl index)
-	dd 0x00000023
+	dd shstrtab.gnu_version_r
   .type: ; Section type
 	dd 0x6FFFFFFE
   .flags: ; Section flags
@@ -971,7 +984,7 @@ shdr_4:
 ; .rela.plt section
 shdr_5:
   .name: ; Section name (string tbl index)
-	dd 0x00000032
+	dd shstrtab.rela_plt
   .type: ; Section type
 	dd SHT_RELA
   .flags: ; Section flags
@@ -994,7 +1007,7 @@ shdr_5:
 ; .plt section
 shdr_6:
   .name: ; Section name (string tbl index)
-	dd 0x00000037
+	dd shstrtab.plt
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -1017,7 +1030,7 @@ shdr_6:
 ; .text section
 shdr_7:
   .name: ; Section name (string tbl index)
-	dd 0x0000003C
+	dd shstrtab.text
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -1040,7 +1053,7 @@ shdr_7:
 ; .rodata section
 shdr_8:
   .name: ; Section name (string tbl index)
-	dd 0x00000042
+	dd shstrtab.rodata
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -1063,7 +1076,7 @@ shdr_8:
 ; .dynamic section
 shdr_9:
   .name: ; Section name (string tbl index)
-	dd 0x0000004A
+	dd shstrtab.dynamic
   .type: ; Section type
 	dd SHT_DYNAMIC
   .flags: ; Section flags
@@ -1086,7 +1099,7 @@ shdr_9:
 ; .got.plt section
 shdr_10:
   .name: ; Section name (string tbl index)
-	dd 0x00000053
+	dd shstrtab.got_plt
   .type: ; Section type
 	dd SHT_PROGBITS
   .flags: ; Section flags
@@ -1109,7 +1122,7 @@ shdr_10:
 ; .shstrtab section
 shdr_shstrtab:
   .name: ; Section name (string tbl index)
-	dd 0x00000001
+	dd shstrtab.shstrtab
   .type: ; Section type
 	dd SHT_STRTAB
   .flags: ; Section flags

@@ -173,8 +173,6 @@ interp:
 
 interpsize equ $ - interp
 
-db 0x00
-
 hash:
 db 0x00
 db 0x00

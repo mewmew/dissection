@@ -3,6 +3,7 @@ all: elf hello
 elf:
 	nasm -f bin -o $@ $@.asm
 	chmod +x $@
+	./$@
 
 hello:
 	nasm -f elf64 -o $@.o $@.asm

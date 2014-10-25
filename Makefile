@@ -1,4 +1,10 @@
-all: hello
+all: elf hello
+
+elf:
+	nasm -f bin -o $@ $@.asm
+
+check: elf
+	cmp elf hello
 
 hello:
 	nasm -f elf64 -o $@.o $@.asm

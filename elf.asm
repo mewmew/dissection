@@ -1,5 +1,11 @@
 ehdr:
 
+; ELF classes.
+ELFCLASS64 equ 2 ; 64-bit object
+
+; Data encodings.
+ELFDATA2LSB equ 1 ; 2's complement with little-endian encoding
+
 ; Object file types.
 ET_EXEC equ 2 ; Executable file
 
@@ -7,7 +13,16 @@ ET_EXEC equ 2 ; Executable file
 EM_X86_64 equ 62 ; AMD x86-64 architecture
 
   .ident:     ; Magic number and other info
-	db 0x7F, "ELF", 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    .ident.magic:
+	db 0x7F, "ELF" ; ELF magic number
+    .ident.class:
+	db ELFCLASS64
+    .ident.data:
+	db ELFDATA2LSB
+    .ident.version:
+	db 1
+    .ident.pad:
+	db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   .type:      ; Object file type
 	dw ET_EXEC
   .machine:   ; Architecture
@@ -112,15 +127,15 @@ phdr_3:
   .flags:  ; Segment flags
 	dd PF_R | PF_W
   .offset: ; Segment file offset
-	dq 0x00000000000002B0
+	dq something
   .vaddr:  ; Segment virtual address
 	dq 0x00000000006002B0
   .paddr:  ; Segment physical address
 	dq 0x00000000006002B0
   .filesz: ; Segment size in file
-	dq 0x0000000000000168
+	dq somethingsize
   .memsz:  ; Segment size in memory
-	dq 0x0000000000000168
+	dq somethingsize
   .align:  ; Segment alignment
 	dq 0x200000 ; 2MB
 
@@ -479,6 +494,8 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+something:
 db 0x01
 db 0x00
 db 0x00
@@ -839,6 +856,9 @@ db 0x00
 db 0x00
 db 0x00
 db 0x00
+
+somethingsize equ $ - something
+
 db 0x00
 db 0x2E ; .
 db 0x73 ; s
@@ -938,6 +958,7 @@ db 0x00
 
 shdr:
 
+; NULL section
 shdr_0:
   .name: ; Section name (string tbl index)
 	dd 0x00000000
@@ -962,6 +983,7 @@ shdr_0:
 
 shentsize equ $ - shdr
 
+; .interp section
 shdr_1:
   .name: ; Section name (string tbl index)
 	dd 0x0000000B
@@ -984,6 +1006,7 @@ shdr_1:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
+; .dynsym section
 shdr_2:
   .name: ; Section name (string tbl index)
 	dd 0x00000013
@@ -1006,6 +1029,7 @@ shdr_2:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000018
 
+; .dynstr section
 shdr_3:
   .name: ; Section name (string tbl index)
 	dd 0x0000001B
@@ -1028,6 +1052,7 @@ shdr_3:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
+; .gnu.version_r section
 shdr_4:
   .name: ; Section name (string tbl index)
 	dd 0x00000023
@@ -1050,6 +1075,7 @@ shdr_4:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
+; .rela.plt section
 shdr_5:
   .name: ; Section name (string tbl index)
 	dd 0x00000032
@@ -1072,6 +1098,7 @@ shdr_5:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000018
 
+; .plt section
 shdr_6:
   .name: ; Section name (string tbl index)
 	dd 0x00000037
@@ -1094,6 +1121,7 @@ shdr_6:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000010
 
+; .text section
 shdr_7:
   .name: ; Section name (string tbl index)
 	dd 0x0000003C
@@ -1116,6 +1144,7 @@ shdr_7:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
+; .rodata section
 shdr_8:
   .name: ; Section name (string tbl index)
 	dd 0x00000042
@@ -1138,6 +1167,7 @@ shdr_8:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000000
 
+; .dynamic section
 shdr_9:
   .name: ; Section name (string tbl index)
 	dd 0x0000004A
@@ -1160,6 +1190,7 @@ shdr_9:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000010
 
+; .got.plt section
 shdr_10:
   .name: ; Section name (string tbl index)
 	dd 0x00000053
@@ -1182,6 +1213,7 @@ shdr_10:
   .entsize: ; Entry size if section holds table
 	dq 0x0000000000000008
 
+; .shstrtab section
 shdr_11:
   .name: ; Section name (string tbl index)
 	dd 0x00000001

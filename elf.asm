@@ -389,7 +389,6 @@ DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_STRSZ    equ 10 ; Size of the string table
 DT_SYMENT   equ 11 ; Symbol table entry size
-DT_PLTREL   equ 20 ; Index to the PLTGOT dynamic entity
 DT_DEBUG    equ 21 ; Used for debugging
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
 
@@ -449,12 +448,6 @@ dyn_8:
 	dq DT_PLTRELSZ
   .val: ; Integer or address value
 	dq rela_pltsize
-
-dyn_9:
-  .tag: ; Dynamic entry type
-	dq DT_PLTREL
-  .val: ; Integer or address value
-	dq dyn_pltgot_idx
 
 dyn_10:
   .tag: ; Dynamic entry type

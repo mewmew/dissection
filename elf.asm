@@ -228,8 +228,11 @@ dynsym_0:
 dynsymentsize equ $ - dynsym
 
 dynsym_globals:
+dynsym_globals_idx equ (dynsym_globals - dynsym) / dynsymentsize
 
 dynsym_printf:
+dynsym_printf_idx equ (dynsym_printf - dynsym) / dynsymentsize
+
   .name:  ; Symbol name (string tbl index)
 	dd dynstr.printf
   .info:  ; Symbol type and binding
@@ -244,6 +247,8 @@ dynsym_printf:
 	dq 0
 
 dynsym_exit:
+dynsym_exit_idx equ (dynsym_exit - dynsym) / dynsymentsize
+
   .name:  ; Symbol name (string tbl index)
 	dd dynstr.exit
   .info:  ; Symbol type and binding
@@ -256,9 +261,6 @@ dynsym_exit:
 	dq 0
   .size:  ; Symbol size
 	dq 0
-
-dynsym_printf_idx equ (dynsym_printf - dynsym) / dynsymentsize
-dynsym_exit_idx   equ (dynsym_exit - dynsym) / dynsymentsize
 
 dynsymsize equ $ - dynsym
 
@@ -712,9 +714,9 @@ shdr_dynsym:
   .size: ; Section size in bytes
 	dq dynsymsize
   .link: ; Link to another section
-	dd (shdr_dynstr - shdr) / shentsize
+	dd shdr_dynstr_idx
   .info: ; Additional section information; table index to the first global symbol
-	dd (dynsym_globals - dynsym) / dynsymentsize
+	dd dynsym_globals_idx
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table
@@ -722,6 +724,8 @@ shdr_dynsym:
 
 ; .dynstr section
 shdr_dynstr:
+shdr_dynstr_idx equ (shdr_dynstr - shdr) / shentsize
+
   .name: ; Section name (string tbl index)
 	dd shstrtab.dynstr
   .type: ; Section type

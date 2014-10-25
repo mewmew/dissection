@@ -318,21 +318,25 @@ gnu_version_rsize equ $ - gnu_version_r
 
 rela_plt:
 
+; Relocation types.
+
+R_386_JMP_SLOT equ 7
+
 rela_plt_0:
   .offset: ; Address
 	dq 0x0000000000600408
   .info:   ; Relocation type and symbol index
-	dq 0x0000000100000007
+	dq 0x00000001<<32 | R_386_JMP_SLOT
   .addend: ; Addend
-	dq 0x0000000000000000
+	dq 0
 
 rela_plt_1:
   .offset: ; Address
 	dq 0x0000000000600410
   .info:   ; Relocation type and symbol index
-	dq 0x0000000200000007
+	dq 0x00000002<<32 | R_386_JMP_SLOT
   .addend: ; Addend
-	dq 0x0000000000000000
+	dq 0
 
 rela_pltsize equ $ - rela_plt
 

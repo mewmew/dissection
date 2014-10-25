@@ -52,7 +52,7 @@ EM_X86_64 equ 62 ; AMD x86-64 architecture
   .shnum:     ; Section header table entry count
 	dw shnum
   .shstrndx:  ; Section header string table index
-	dw (shdr_shstrtab - shdr) / shentsize
+	dw shdr_shstrtab_idx
 
 ehsize equ $ - ehdr
 
@@ -701,6 +701,8 @@ shdr_1:
 
 ; .dynsym section
 shdr_dynsym:
+shdr_dynsym_idx equ (shdr_dynsym - shdr) / shentsize
+
   .name: ; Section name (string tbl index)
 	dd shstrtab.dynsym
   .type: ; Section type
@@ -762,7 +764,7 @@ shdr_4:
   .size: ; Section size in bytes
 	dq gnu_version_rsize
   .link: ; Link to another section
-	dd (shdr_dynstr - shdr) / shentsize
+	dd shdr_dynstr_idx
   .info: ; Additional section information
 	dd 0x000000001
   .addralign: ; Section alignment
@@ -785,9 +787,9 @@ shdr_5:
   .size: ; Section size in bytes
 	dq rela_pltsize
   .link: ; Link to another section
-	dd (shdr_dynsym - shdr) / shentsize
+	dd shdr_dynsym_idx
   .info: ; Additional section information; section header index to which the relocations apply
-	dd (shdr_plt - shdr) / shentsize
+	dd shdr_plt_idx
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table
@@ -795,6 +797,8 @@ shdr_5:
 
 ; .plt section
 shdr_plt:
+shdr_plt_idx equ (shdr_plt - shdr) / shentsize
+
   .name: ; Section name (string tbl index)
 	dd shstrtab.plt
   .type: ; Section type
@@ -877,7 +881,7 @@ shdr_9:
   .size: ; Section size in bytes
 	dq dynamicsize
   .link: ; Link to another section
-	dd (shdr_dynstr - shdr) / shentsize
+	dd shdr_dynstr_idx
   .info: ; Additional section information
 	dd 0
   .addralign: ; Section alignment
@@ -910,6 +914,8 @@ shdr_10:
 
 ; .shstrtab section
 shdr_shstrtab:
+shdr_shstrtab_idx equ (shdr_shstrtab - shdr) / shentsize
+
   .name: ; Section name (string tbl index)
 	dd shstrtab.shstrtab
   .type: ; Section type

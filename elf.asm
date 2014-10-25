@@ -588,6 +588,9 @@ dynamicsize equ $ - dynamic
 got_plt:
 
 	dq BASE + 2*MB + dyn_0.tag
+
+got_pltentsize equ $ - got_plt
+
 	dq 0
 	dq 0
   .printf:
@@ -912,7 +915,7 @@ shdr_10:
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000008
+	dq got_pltentsize
 
 ; .shstrtab section
 shdr_shstrtab:

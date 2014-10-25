@@ -1,7 +1,8 @@
-all: elf hello
+all: elf hello check
 
 elf:
 	nasm -f bin -o $@ $@.asm
+	chmod +x $@
 
 check: elf
 	cmp elf hello

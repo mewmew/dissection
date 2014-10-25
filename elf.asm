@@ -381,7 +381,7 @@ plt_0:
 
 pltentsize equ $ - plt
 
-plt_1:
+plt_printf:
 ; jmp qword [rel 0x2001b8]  ; FF25A2012000
 	db 0xFF
 	db 0x25
@@ -405,7 +405,7 @@ plt_1:
 	db 0xFF
 	db 0xFF
 
-plt_2:
+plt_exit:
 ; jmp qword [rel 0x2001c0]  ; FF259A012000
 	db 0xFF
 	db 0x25
@@ -435,9 +435,9 @@ text:
 
   .start:
 db 0x48, 0xBF, 0xA0, 0x02, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00 ; mov	rdi, offset format ; "hello world\n"
-db 0xE8, 0xD1, 0xFF, 0xFF, 0xFF ; call	_printf
+	call	plt_printf
 	mov	edi, 0
-db 0xE8, 0xD7, 0xFF, 0xFF, 0xFF ; call	_exit
+	call	plt_exit
 	mov	eax, 10
 	retn
 
@@ -599,10 +599,10 @@ got_plt_2:
 	dq 0
 
 got_plt_printf:
-	dq BASE + plt_1.resolve
+	dq BASE + plt_printf.resolve
 
 got_plt_exit:
-	dq BASE + plt_2.resolve
+	dq BASE + plt_exit.resolve
 
 got_pltsize equ $ - got_plt
 

@@ -514,39 +514,39 @@ dyn_13:
 
 dyn_14:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000000
+	dq 0
   .val: ; Integer or address value
-	dq 0x0000000000000000
+	dq 0
 
 dyn_15:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000000
+	dq 0
   .val: ; Integer or address value
-	dq 0x0000000000000000
+	dq 0
 
 dyn_16:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000000
+	dq 0
   .val: ; Integer or address value
-	dq 0x0000000000000000
+	dq 0
 
 dyn_17:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000000
+	dq 0
   .val: ; Integer or address value
-	dq 0x0000000000000000
+	dq 0
 
 dyn_18:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000000
+	dq 0
   .val: ; Integer or address value
-	dq 0x0000000000000000
+	dq 0
 
 dyn_19:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000000
+	dq 0
   .val: ; Integer or address value
-	dq 0x0000000000000000
+	dq 0
 
 dynamicsize equ $ - dynamic
 

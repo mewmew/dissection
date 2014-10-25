@@ -219,7 +219,7 @@ dynsym_0:
   .other: ; Symbol visibility
 	db STV_DEFAULT
   .shndx: ; Section index
-	dw 0x0000
+	dw shdr_null_idx
   .value: ; Symbol value
 	dq 0
   .size:  ; Symbol size
@@ -240,7 +240,7 @@ dynsym_printf_idx equ (dynsym_printf - dynsym) / dynsymentsize
   .other: ; Symbol visibility
 	db STV_DEFAULT
   .shndx: ; Section index
-	dw 0x0000
+	dw shdr_null_idx
   .value: ; Symbol value
 	dq 0
   .size:  ; Symbol size
@@ -256,7 +256,7 @@ dynsym_exit_idx equ (dynsym_exit - dynsym) / dynsymentsize
   .other: ; Symbol visibility
 	db STV_DEFAULT
   .shndx: ; Section index
-	dw 0x0000
+	dw shdr_null_idx
   .value: ; Symbol value
 	dq 0
   .size:  ; Symbol size
@@ -652,7 +652,9 @@ SHF_EXECINSTR equ 4 ; Contains executable machine instructions
 SHN_UNDEF equ 0 ; Undefined, missing or irrelevant section reference
 
 ; NULL section
-shdr_0:
+shdr_null:
+shdr_null_idx equ (shdr_null - shdr) / shentsize
+
   .name: ; Section name (string tbl index)
 	dd shstrtab.null
   .type: ; Section type

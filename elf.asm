@@ -197,19 +197,29 @@ db 0x00
 
 dynsym:
 
+; Symbol bindings.
+STB_LOCAL  equ 0 ; Local symbol
+STB_GLOBAL equ 1 ; Global symbol
+
+; Symbol types.
+STT_FUNC equ 2 ; Code object
+
+; Symbol visibility.
+STV_DEFAULT equ 0 ; Default visibility.
+
 dynsym_0:
   .name:  ; Symbol name (string tbl index)
 	dd 0x00000000
   .info:  ; Symbol type and binding
-	db 0x00
+	db STB_LOCAL<<4
   .other: ; Symbol visibility
-	db 0x00
+	db STV_DEFAULT
   .shndx: ; Section index
 	dw 0x0000
   .value: ; Symbol value
-	dq 0x0000000000000000
+	dq 0
   .size:  ; Symbol size
-	dq 0x0000000000000000
+	dq 0
 
 dynsymentsize equ $ - dynsym
 
@@ -217,29 +227,29 @@ dynsym_1:
   .name:  ; Symbol name (string tbl index)
 	dd 0x00000010
   .info:  ; Symbol type and binding
-	db 0x12
+	db STB_GLOBAL<<4 | STT_FUNC
   .other: ; Symbol visibility
-	db 0x00
+	db STV_DEFAULT
   .shndx: ; Section index
 	dw 0x0000
   .value: ; Symbol value
-	dq 0x0000000000000000
+	dq 0
   .size:  ; Symbol size
-	dq 0x0000000000000000
+	dq 0
 
 dynsym_2:
   .name:  ; Symbol name (string tbl index)
 	dd 0x0000000B
   .info:  ; Symbol type and binding
-	db 0x12
+	db STB_GLOBAL<<4 | STT_FUNC
   .other: ; Symbol visibility
-	db 0x00
+	db STV_DEFAULT
   .shndx: ; Section index
 	dw 0x0000
   .value: ; Symbol value
-	dq 0x0000000000000000
+	dq 0
   .size:  ; Symbol size
-	dq 0x0000000000000000
+	dq 0
 
 dynsymsize equ $ - dynsym
 

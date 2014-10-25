@@ -211,6 +211,8 @@ dynsym_0:
   .size:  ; Symbol size
 	dq 0x0000000000000000
 
+dynsymentsize equ $ - dynsym
+
 dynsym_1:
   .name:  ; Symbol name (string tbl index)
 	dd 0x00000010
@@ -903,7 +905,7 @@ shdr_2:
   .addralign: ; Section alignment
 	dq 0x8
   .entsize: ; Entry size if section holds table
-	dq 0x0000000000000018
+	dq dynsymentsize
 
 ; .dynstr section
 shdr_3:

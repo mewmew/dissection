@@ -427,11 +427,12 @@ something:
 dynamic:
 
 ; Dynamic tags.
-DT_NULL   equ 0 ; Marks the end of the dynamic array
-DT_NEEDED equ 1 ; String table offset of a required library
-DT_HASH   equ 4 ; Address of the symbol hash table
-DT_STRTAB equ 5 ; Address of the string table
-DT_SYMTAB equ 6 ; Address of the symbol table
+DT_NULL   equ 0  ; Marks the end of the dynamic array
+DT_NEEDED equ 1  ; String table offset of a required library
+DT_HASH   equ 4  ; Address of the symbol hash table
+DT_STRTAB equ 5  ; Address of the string table
+DT_SYMTAB equ 6  ; Address of the symbol table
+DT_STRSZ  equ 10 ; Size of the string table
 
 dyn_0:
   .tag: ; Dynamic entry type
@@ -461,9 +462,9 @@ dyn_3:
 
 dyn_4:
   .tag: ; Dynamic entry type
-	dq 0x000000000000000A
+	dq DT_STRSZ
   .val: ; Integer or address value
-	dq 0x0000000000000023
+	dq dynstrsize
 
 dyn_5:
   .tag: ; Dynamic entry type

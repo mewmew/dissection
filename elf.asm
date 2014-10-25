@@ -496,7 +496,7 @@ dyn_11:
   .tag: ; Dynamic entry type
 	dq 0x000000006FFFFFFE
   .val: ; Integer or address value
-	dq 0x00000000004001F8
+	dq BASE + verneed_0
 
 dyn_12:
   .tag: ; Dynamic entry type

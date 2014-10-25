@@ -175,7 +175,7 @@ interpsize equ $ - interp
 
 db 0x00
 
-something5:
+hash:
 db 0x00
 db 0x00
 db 0x00
@@ -429,6 +429,9 @@ dynamic:
 ; Dynamic tags.
 DT_NULL   equ 0 ; Marks the end of the dynamic array
 DT_NEEDED equ 1 ; String table offset of a required library
+DT_HASH   equ 4 ; Address of the symbol hash table
+DT_STRTAB equ 5 ; Address of the string table
+DT_SYMTAB equ 6 ; Address of the symbol table
 
 dyn_0:
   .tag: ; Dynamic entry type
@@ -440,21 +443,21 @@ dynentsize equ $ - dynamic
 
 dyn_1:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000004
+	dq DT_HASH
   .val: ; Integer or address value
-	dq BASE + something5
+	dq BASE + hash
 
 dyn_2:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000005
+	dq DT_STRTAB
   .val: ; Integer or address value
-	dq BASE + dynstr.null
+	dq BASE + dynstr
 
 dyn_3:
   .tag: ; Dynamic entry type
-	dq 0x0000000000000006
+	dq DT_SYMTAB
   .val: ; Integer or address value
-	dq BASE + dynsym_0
+	dq BASE + dynsym
 
 dyn_4:
   .tag: ; Dynamic entry type

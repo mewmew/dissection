@@ -192,7 +192,6 @@ interpsize equ $ - interp
 dynsym:
 
 ; Symbol bindings.
-STB_LOCAL  equ 0 ; Local symbol
 STB_GLOBAL equ 1 ; Global symbol
 
 ; Symbol types.
@@ -200,22 +199,6 @@ STT_FUNC equ 2 ; Code object
 
 ; Symbol visibility.
 STV_DEFAULT equ 0 ; Default visibility.
-
-dynsym_0:
-  .name:  ; Symbol name (string tbl index)
-	dd dynstr.null_idx
-  .info:  ; Symbol type and binding
-	db STB_LOCAL<<4
-  .other: ; Symbol visibility
-	db STV_DEFAULT
-  .shndx: ; Section index
-	dw 0
-  .value: ; Symbol value
-	dq 0
-  .size:  ; Symbol size
-	dq 0
-
-dynsymentsize equ $ - dynsym
 
 dynsym_globals:
 dynsym_globals_idx equ (dynsym_globals - dynsym) / dynsymentsize
@@ -235,6 +218,8 @@ dynsym_printf_idx equ (dynsym_printf - dynsym) / dynsymentsize
 	dq 0
   .size:  ; Symbol size
 	dq 0
+
+dynsymentsize equ $ - dynsym
 
 dynsym_exit:
 dynsym_exit_idx equ (dynsym_exit - dynsym) / dynsymentsize

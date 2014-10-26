@@ -264,27 +264,23 @@ R_386_JMP_SLOT equ 7
 
 plt:
 
-plt_0:
+  .resolve:
 	push	QWORD [rel 2*MB + got_plt_1]
 	jmp	[rel 2*MB + got_plt_2]
 
-pltentsize equ $ - plt
-
-plt_printf:
+  .printf:
 	jmp	[rel 2*MB + got_plt_printf]
 
-.resolve:
+  .resolve_printf:
 	push	QWORD 0
-	jmp	NEAR plt_0
+	jmp	NEAR .resolve
 
-plt_exit:
+  .exit:
 	jmp	[rel 2*MB + got_plt_exit]
 
-.resolve:
+  .resolve_exit:
 	push	QWORD 1
-	jmp	NEAR plt_0
-
-pltsize equ $ - plt
+	jmp	NEAR .resolve
 
 ; --- [/ .plt section ] --------------------------------------------------------
 
@@ -294,9 +290,9 @@ text:
 
   .start:
 	mov	rdi, BASE + hello
-	call	plt_printf
+	call	plt.printf
 	mov	edi, 0
-	call	plt_exit
+	call	plt.exit
 
 textsize equ $ - text
 
@@ -388,10 +384,10 @@ got_plt_2:
 	dq 0
 
 got_plt_printf:
-	dq BASE + plt_printf.resolve
+	dq BASE + plt.resolve_printf
 
 got_plt_exit:
-	dq BASE + plt_exit.resolve
+	dq BASE + plt.resolve_exit
 
 got_pltsize equ $ - got_plt
 

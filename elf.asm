@@ -60,6 +60,8 @@ PF_R equ 0x4 ; Segment is readable
 BASE equ 0x400000
 PAGE equ 0x1000
 
+; --- [ Program header program header ] ----------------------------------------
+
 phdr:
 
   .phdr:
@@ -74,6 +76,8 @@ phdr:
 
 .entsize equ $ - phdr
 
+; --- [ Interpreter program header ] -------------------------------------------
+
   .interp:
 	dd PT_INTERP              ; type: Segment type
 	dd PF_R                   ; flags: Segment flags
@@ -83,6 +87,8 @@ phdr:
 	dq interp.size            ; filesz: Segment size in file
 	dq interp.size            ; memsz: Segment size in memory
 	dq 0x1                    ; align: Segment alignment
+
+; --- [ Code segment program header ] ------------------------------------------
 
   .code_seg:
 	dd PT_LOAD                ; type: Segment type
@@ -94,6 +100,8 @@ phdr:
 	dq code_seg.size          ; memsz: Segment size in memory
 	dq PAGE                   ; align: Segment alignment
 
+; --- [ Data segment program header ] ------------------------------------------
+
   .data_seg:
 	dd PT_LOAD                ; type: Segment type
 	dd PF_R | PF_W            ; flags: Segment flags
@@ -103,6 +111,8 @@ phdr:
 	dq data_seg.size          ; filesz: Segment size in file
 	dq data_seg.size          ; memsz: Segment size in memory
 	dq PAGE                   ; align: Segment alignment
+
+; --- [ Dynamic array program header ] -----------------------------------------
 
   .dynamic:
 	dd PT_DYNAMIC             ; type: Segment type

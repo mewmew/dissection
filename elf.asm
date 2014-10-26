@@ -157,25 +157,6 @@ phdr:
 
 ; === [ Sections ] =============================================================
 
-; --- [ .rela.plt section ] ----------------------------------------------------
-
-; Relocation types.
-R_386_JMP_SLOT equ 7
-
-rela_plt:
-
-  .printf:
-	dq BASE_DATA + got_plt.printf             ; offset: Address
-	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT ; info: Relocation type and symbol index
-	dq 0                                      ; addend: Addend
-
-  .exit:
-	dq BASE_DATA + got_plt.exit               ; offset: Address
-	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT   ; info: Relocation type and symbol index
-	dq 0                                      ; addend: Addend
-
-; --- [/ .rela.plt section ] ---------------------------------------------------
-
 ; --- [ .plt section ] ---------------------------------------------------------
 
 plt:
@@ -243,26 +224,26 @@ DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
 dynamic:
 
   .libc:
-	dq DT_NEEDED             ; tag: Dynamic entry type
-	dq dynstr.libc_off       ; val: Integer or address value
+	dq DT_NEEDED              ; tag: Dynamic entry type
+	dq dynstr.libc_off        ; val: Integer or address value
 
 .entsize equ $ - dynamic
 
   .strtab:
-	dq DT_STRTAB             ; tag: Dynamic entry type
-	dq BASE_RODATA + dynstr  ; val: Integer or address value
+	dq DT_STRTAB              ; tag: Dynamic entry type
+	dq BASE_RODATA + dynstr   ; val: Integer or address value
 
   .symtab:
-	dq DT_SYMTAB             ; tag: Dynamic entry type
-	dq BASE_RODATA + dynsym  ; val: Integer or address value
+	dq DT_SYMTAB              ; tag: Dynamic entry type
+	dq BASE_RODATA + dynsym   ; val: Integer or address value
 
   .pltgot:
-	dq DT_PLTGOT             ; tag: Dynamic entry type
-	dq BASE_DATA + got_plt   ; val: Integer or address value
+	dq DT_PLTGOT              ; tag: Dynamic entry type
+	dq BASE_DATA + got_plt    ; val: Integer or address value
 
   .jmprel:
-	dq DT_JMPREL             ; tag: Dynamic entry type
-	dq BASE_CODE + rela_plt  ; val: Integer or address value
+	dq DT_JMPREL              ; tag: Dynamic entry type
+	dq BASE_RODATA + rela_plt ; val: Integer or address value
 
   .null:
 	dq DT_NULL               ; tag: Dynamic entry type
@@ -364,6 +345,25 @@ dynstr:
 .exit_off   equ .exit - dynstr
 
 ; --- [/ .dynstr section ] -----------------------------------------------------
+
+; --- [ .rela.plt section ] ----------------------------------------------------
+
+; Relocation types.
+R_386_JMP_SLOT equ 7
+
+rela_plt:
+
+  .printf:
+	dq BASE_DATA + got_plt.printf             ; offset: Address
+	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT ; info: Relocation type and symbol index
+	dq 0                                      ; addend: Addend
+
+  .exit:
+	dq BASE_DATA + got_plt.exit               ; offset: Address
+	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT   ; info: Relocation type and symbol index
+	dq 0                                      ; addend: Addend
+
+; --- [/ .rela.plt section ] ---------------------------------------------------
 
 rodata_seg.size equ $ - data_seg
 

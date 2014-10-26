@@ -449,47 +449,4 @@ got_pltsize equ $ - got_plt
 
 somethingsize equ $ - something
 
-; --- [ .shstrtab section ] ----------------------------------------------------
-
-shstrtab:
-
-  .null:
-	db 0
-  .shstrtab:
-	db ".shstrtab", 0
-  .interp:
-	db ".interp", 0
-  .dynsym:
-	db ".dynsym", 0
-  .dynstr:
-	db ".dynstr", 0
-  .rela_plt:
-	db ".rela"
-	.plt:
-	db ".plt", 0
-  .text:
-	db ".text", 0
-  .rodata:
-	db ".rodata", 0
-  .dynamic:
-	db ".dynamic", 0
-  .got_plt:
-	db ".got.plt", 0
-
-.null_idx          equ .null - shstrtab
-.shstrtab_idx      equ .shstrtab - shstrtab
-.interp_idx        equ .interp - shstrtab
-.dynsym_idx        equ .dynsym - shstrtab
-.dynstr_idx        equ .dynstr - shstrtab
-.rela_plt_idx      equ .rela_plt - shstrtab
-.plt_idx           equ .plt - shstrtab
-.text_idx          equ .text - shstrtab
-.rodata_idx        equ .rodata - shstrtab
-.dynamic_idx       equ .dynamic - shstrtab
-.got_plt_idx       equ .got_plt - shstrtab
-
-shstrtabsize equ $ - shstrtab
-
-; --- [/ .shstrtab section ] ---------------------------------------------------
-
 ; === [/ Sections ] ============================================================

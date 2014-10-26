@@ -303,8 +303,6 @@ rodata:
 hello:
 	db "hello world", 10, 0
 
-rodatasize equ $ - rodata
-
 ; --- [/ .rodata section ] -----------------------------------------------------
 
 something4size equ $ - something4

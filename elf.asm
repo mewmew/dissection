@@ -57,8 +57,8 @@ PF_W equ 0x2 ; Segment is writable
 PF_R equ 0x4 ; Segment is readable
 
 ; Base address
-BASE equ 4*MB
-MB   equ 0x100000
+BASE equ 0x400000
+PAGE equ 0x1000
 
 phdr:
 
@@ -92,24 +92,24 @@ phdr:
 	dq BASE                   ; paddr: Segment physical address
 	dq code_seg.size          ; filesz: Segment size in file
 	dq code_seg.size          ; memsz: Segment size in memory
-	dq 2*MB                   ; align: Segment alignment
+	dq PAGE                   ; align: Segment alignment
 
   .data_seg:
 	dd PT_LOAD                ; type: Segment type
 	dd PF_R | PF_W            ; flags: Segment flags
 	dq data_seg               ; offset: Segment file offset
-	dq BASE + 2*MB + data_seg ; vaddr: Segment virtual address
-	dq BASE + 2*MB + data_seg ; paddr: Segment physical address
+	dq BASE + PAGE + data_seg ; vaddr: Segment virtual address
+	dq BASE + PAGE + data_seg ; paddr: Segment physical address
 	dq data_seg.size          ; filesz: Segment size in file
 	dq data_seg.size          ; memsz: Segment size in memory
-	dq 2*MB                   ; align: Segment alignment
+	dq PAGE                   ; align: Segment alignment
 
   .dynamic:
 	dd PT_DYNAMIC             ; type: Segment type
-	dd PF_R | PF_W            ; flags: Segment flags
+	dd PF_R                   ; flags: Segment flags
 	dq dynamic                ; offset: Segment file offset
-	dq BASE + 2*MB + dynamic  ; vaddr: Segment virtual address
-	dq BASE + 2*MB + dynamic  ; paddr: Segment physical address
+	dq BASE + PAGE + dynamic  ; vaddr: Segment virtual address
+	dq BASE + PAGE + dynamic  ; paddr: Segment physical address
 	dq dynamic.size           ; filesz: Segment size in file
 	dq dynamic.size           ; memsz: Segment size in memory
 	dq 0x8                    ; align: Segment alignment
@@ -192,12 +192,12 @@ R_386_JMP_SLOT equ 7
 rela_plt:
 
   .printf:
-	dq BASE + 2*MB + got_plt.printf           ; offset: Address
+	dq BASE + PAGE + got_plt.printf           ; offset: Address
 	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT ; info: Relocation type and symbol index
 	dq 0                                      ; addend: Addend
 
   .exit:
-	dq BASE + 2*MB + got_plt.exit             ; offset: Address
+	dq BASE + PAGE + got_plt.exit             ; offset: Address
 	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT   ; info: Relocation type and symbol index
 	dq 0                                      ; addend: Addend
 
@@ -208,18 +208,18 @@ rela_plt:
 plt:
 
   .resolve:
-	push	QWORD [rel 2*MB + got_plt.1]
-	jmp	[rel 2*MB + got_plt.2]
+	push	QWORD [rel PAGE + got_plt.1]
+	jmp	[rel PAGE + got_plt.2]
 
   .printf:
-	jmp	[rel 2*MB + got_plt.printf]
+	jmp	[rel PAGE + got_plt.printf]
 
   .resolve_printf:
 	push	QWORD 0
 	jmp	NEAR .resolve
 
   .exit:
-	jmp	[rel 2*MB + got_plt.exit]
+	jmp	[rel PAGE + got_plt.exit]
 
   .resolve_exit:
 	push	QWORD 1
@@ -284,7 +284,7 @@ dynamic:
 
   .pltgot:
 	dq DT_PLTGOT             ; tag: Dynamic entry type
-	dq BASE + 2*MB + got_plt ; val: Integer or address value
+	dq BASE + PAGE + got_plt ; val: Integer or address value
 
   .jmprel:
 	dq DT_JMPREL             ; tag: Dynamic entry type
@@ -303,7 +303,7 @@ dynamic:
 got_plt:
 
   .libc:
-	dq BASE + 2*MB + dynamic.libc
+	dq BASE + PAGE + dynamic.libc
 
   .1:
 	dq 0

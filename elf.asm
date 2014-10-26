@@ -1,10 +1,12 @@
 [bits 64]
 
+; ___ [ Code segment ] _________________________________________________________
+
+code_seg:
+
 ; === [ ELF file header ] ======================================================
 
 ehdr:
-
-something4:
 
 ; ELF classes.
 ELFCLASS64 equ 2 ; 64-bit object
@@ -46,9 +48,9 @@ EM_X86_64 equ 62 ; AMD x86-64 architecture
   .ehsize:    ; ELF header size in bytes
 	dw ehsize
   .phentsize: ; Program header table entry size
-	dw phentsize
+	dw phdr.entsize
   .phnum:     ; Program header table entry count
-	dw phnum
+	dw phdr.count
   .shentsize: ; Section header table entry size
 	dw 0
   .shnum:     ; Section header table entry count
@@ -76,103 +78,63 @@ PF_W equ 0x2 ; Segment is writable
 PF_R equ 0x4 ; Segment is readable
 
 ; Base address
-MB   equ 0x100000
 BASE equ 4*MB
+MB   equ 0x100000
 
-phdr_phdr:
-  .type:   ; Segment type
-	dd PT_PHDR
-  .flags:  ; Segment flags
-	dd PF_R
-  .offset: ; Segment file offset
-	dq phdr
-  .vaddr:  ; Segment virtual address
-	dq BASE + phdr
-  .paddr:  ; Segment physical address
-	dq BASE + phdr
-  .filesz: ; Segment size in file
-	dq phsize
-  .memsz:  ; Segment size in memory
-	dq phsize
-  .align:  ; Segment alignment
-	dq 0x8
+  .phdr:
+	dd PT_PHDR                ; type: Segment type
+	dd PF_R                   ; flags: Segment flags
+	dq phdr                   ; offset: Segment file offset
+	dq BASE + phdr            ; vaddr: Segment virtual address
+	dq BASE + phdr            ; paddr: Segment physical address
+	dq .size                  ; filesz: Segment size in file
+	dq .size                  ; memsz: Segment size in memory
+	dq 0x8                    ; align: Segment alignment
 
-phentsize equ $ - phdr
+.entsize equ $ - phdr
 
-phdr_interp:
-  .type:   ; Segment type
-	dd PT_INTERP
-  .flags:  ; Segment flags
-	dd PF_R
-  .offset: ; Segment file offset
-	dq interp
-  .vaddr:  ; Segment virtual address
-	dq BASE + interp
-  .paddr:  ; Segment physical address
-	dq BASE + interp
-  .filesz: ; Segment size in file
-	dq interp_size
-  .memsz:  ; Segment size in memory
-	dq interp_size
-  .align:  ; Segment alignment
-	dq 0x1
+  .interp:
+	dd PT_INTERP              ; type: Segment type
+	dd PF_R                   ; flags: Segment flags
+	dq interp                 ; offset: Segment file offset
+	dq BASE + interp          ; vaddr: Segment virtual address
+	dq BASE + interp          ; paddr: Segment physical address
+	dq interp.size            ; filesz: Segment size in file
+	dq interp.size            ; memsz: Segment size in memory
+	dq 0x1                    ; align: Segment alignment
 
-phdr_2:
-  .type:   ; Segment type
-	dd PT_LOAD
-  .flags:  ; Segment flags
-	dd PF_R | PF_X
-  .offset: ; Segment file offset
-	dq something4
-  .vaddr:  ; Segment virtual address
-	dq BASE
-  .paddr:  ; Segment physical address
-	dq BASE
-  .filesz: ; Segment size in file
-	dq something4size
-  .memsz:  ; Segment size in memory
-	dq something4size
-  .align:  ; Segment alignment
-	dq 2*MB
+  .code_seg:
+	dd PT_LOAD                ; type: Segment type
+	dd PF_R | PF_X            ; flags: Segment flags
+	dq code_seg               ; offset: Segment file offset
+	dq BASE                   ; vaddr: Segment virtual address
+	dq BASE                   ; paddr: Segment physical address
+	dq code_seg.size          ; filesz: Segment size in file
+	dq code_seg.size          ; memsz: Segment size in memory
+	dq 2*MB                   ; align: Segment alignment
 
-phdr_3:
-  .type:   ; Segment type
-	dd PT_LOAD
-  .flags:  ; Segment flags
-	dd PF_R | PF_W
-  .offset: ; Segment file offset
-	dq something
-  .vaddr:  ; Segment virtual address
-	dq BASE + 2*MB + something
-  .paddr:  ; Segment physical address
-	dq BASE + 2*MB + something
-  .filesz: ; Segment size in file
-	dq somethingsize
-  .memsz:  ; Segment size in memory
-	dq somethingsize
-  .align:  ; Segment alignment
-	dq 2*MB
+  .data_seg:
+	dd PT_LOAD                ; type: Segment type
+	dd PF_R | PF_W            ; flags: Segment flags
+	dq data_seg               ; offset: Segment file offset
+	dq BASE + 2*MB + data_seg ; vaddr: Segment virtual address
+	dq BASE + 2*MB + data_seg ; paddr: Segment physical address
+	dq data_seg.size          ; filesz: Segment size in file
+	dq data_seg.size          ; memsz: Segment size in memory
+	dq 2*MB                   ; align: Segment alignment
 
-phdr_dynamic:
-  .type:   ; Segment type
-	dd PT_DYNAMIC
-  .flags:  ; Segment flags
-	dd PF_R | PF_W
-  .offset: ; Segment file offset
-	dq dynamic
-  .vaddr:  ; Segment virtual address
-	dq BASE + 2*MB + dynamic
-  .paddr:  ; Segment physical address
-	dq BASE + 2*MB + dynamic
-  .filesz: ; Segment size in file
-	dq dynamic_size
-  .memsz:  ; Segment size in memory
-	dq dynamic_size
-  .align:  ; Segment alignment
-	dq 0x8
+  .dynamic:
+	dd PT_DYNAMIC             ; type: Segment type
+	dd PF_R | PF_W            ; flags: Segment flags
+	dq dynamic                ; offset: Segment file offset
+	dq BASE + 2*MB + dynamic  ; vaddr: Segment virtual address
+	dq BASE + 2*MB + dynamic  ; paddr: Segment physical address
+	dq dynamic.size           ; filesz: Segment size in file
+	dq dynamic.size           ; memsz: Segment size in memory
+	dq 0x8                    ; align: Segment alignment
 
-phsize equ $ - phdr
-phnum  equ phsize / phentsize
+.size  equ $ - phdr
+.count equ .size / .entsize
 
 ; === [/ Program headers ] =====================================================
 
@@ -184,7 +146,7 @@ interp:
 
 	db "/lib/ld64.so.1", 0
 
-interp_size equ $ - interp
+.size equ $ - interp
 
 ; --- [/ .interp section ] -----------------------------------------------------
 
@@ -305,9 +267,13 @@ rodata:
 
 ; --- [/ .rodata section ] -----------------------------------------------------
 
-something4size equ $ - something4
+code_seg.size equ $ - code_seg
 
-something:
+; ___ [/ Code segment ] ________________________________________________________
+
+; ___ [ Data segment ] _________________________________________________________
+
+data_seg:
 
 ; --- [ .dynamic section ] -----------------------------------------------------
 
@@ -322,32 +288,32 @@ DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
 
   .libc:
-	dq DT_NEEDED       ; tag: Dynamic entry type
-	dq dynstr.libc_off ; val: Integer or address value
+	dq DT_NEEDED             ; tag: Dynamic entry type
+	dq dynstr.libc_off       ; val: Integer or address value
 
 .entsize equ $ - dynamic
 
   .strtab:
-	dq DT_STRTAB     ; tag: Dynamic entry type
-	dq BASE + dynstr ; val: Integer or address value
+	dq DT_STRTAB             ; tag: Dynamic entry type
+	dq BASE + dynstr         ; val: Integer or address value
 
   .symtab:
-	dq DT_SYMTAB     ; tag: Dynamic entry type
-	dq BASE + dynsym ; val: Integer or address value
+	dq DT_SYMTAB             ; tag: Dynamic entry type
+	dq BASE + dynsym         ; val: Integer or address value
 
   .pltgot:
 	dq DT_PLTGOT             ; tag: Dynamic entry type
 	dq BASE + 2*MB + got_plt ; val: Integer or address value
 
   .jmprel:
-	dq DT_JMPREL       ; tag: Dynamic entry type
-	dq BASE + rela_plt ; val: Integer or address value
+	dq DT_JMPREL             ; tag: Dynamic entry type
+	dq BASE + rela_plt       ; val: Integer or address value
 
   .null:
-	dq DT_NULL ; tag: Dynamic entry type
-	dq 0       ; val: Integer or address value
+	dq DT_NULL               ; tag: Dynamic entry type
+	dq 0                     ; val: Integer or address value
 
-dynamic_size equ $ - dynamic
+.size equ $ - dynamic
 
 ; --- [/ .dynamic section ] ----------------------------------------------------
 
@@ -372,6 +338,8 @@ got_plt:
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
 
-somethingsize equ $ - something
-
 ; === [/ Sections ] ============================================================
+
+data_seg.size equ $ - data_seg
+
+; ___ [/ Data segment ] ________________________________________________________

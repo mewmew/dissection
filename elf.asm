@@ -6,8 +6,6 @@ code_seg:
 
 ; === [ ELF file header ] ======================================================
 
-ehdr:
-
 ; ELF classes.
 ELFCLASS64 equ 2 ; 64-bit object
 
@@ -20,51 +18,32 @@ ET_EXEC equ 2 ; Executable file
 ; Architecture.
 EM_X86_64 equ 62 ; AMD x86-64 architecture
 
-  .ident:     ; Magic number and other info
-    .ident.magic:   ; ELF magic number
-	db 0x7F, "ELF"
-    .ident.class:   ; File class
-	db ELFCLASS64
-    .ident.data:    ; Data encoding
-	db ELFDATA2LSB
-    .ident.version: ; ELF header version
-	db 1
-    .ident.pad:     ; Padding
-	db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-  .type:      ; Object file type
-	dw ET_EXEC
-  .machine:   ; Architecture
-	dw EM_X86_64
-  .version:   ; Object file version
-	dd 1
-  .entry:     ; Entry point virtual address
-	dq BASE + text.start
-  .phoff:     ; Program header table file offset
-	dq phdr
-  .shoff:     ; Section header table file offset
-	dq 0
-  .flags:     ; Processor-specific flags
-	dd 0
-  .ehsize:    ; ELF header size in bytes
-	dw ehsize
-  .phentsize: ; Program header table entry size
-	dw phdr.entsize
-  .phnum:     ; Program header table entry count
-	dw phdr.count
-  .shentsize: ; Section header table entry size
-	dw 0
-  .shnum:     ; Section header table entry count
-	dw 0
-  .shstrndx:  ; Section header string table index
-	dw 0
+ehdr:
 
-ehsize equ $ - ehdr
+	db 0x7F, "ELF"               ; ident.magic: ELF magic number
+	db ELFCLASS64                ; ident.class: File class
+	db ELFDATA2LSB               ; ident.data: Data encoding
+	db 1                         ; ident.version: ELF header version
+	db 0, 0, 0, 0, 0, 0, 0, 0, 0 ; ident.pad: Padding
+	dw ET_EXEC                   ; type: Object file type
+	dw EM_X86_64                 ; machine: Architecture
+	dd 1                         ; version: Object file version
+	dq BASE + text.start         ; entry: Entry point virtual address
+	dq phdr                      ; phoff: Program header table file offset
+	dq 0                         ; shoff: Section header table file offset
+	dd 0                         ; flags: Processor-specific flags
+	dw .size                     ; ehsize: ELF header size in bytes
+	dw phdr.entsize              ; phentsize: Program header table entry size
+	dw phdr.count                ; phnum: Program header table entry count
+	dw 0                         ; shentsize: Section header table entry size
+	dw 0                         ; shnum: Section header table entry count
+	dw 0                         ; shstrndx: Section header string table index
+
+.size equ $ - ehdr
 
 ; === [/ ELF file header ] =====================================================
 
 ; === [ Program headers ] ======================================================
-
-phdr:
 
 ; Segment types.
 PT_LOAD    equ 1 ; Loadable program segment
@@ -80,6 +59,8 @@ PF_R equ 0x4 ; Segment is readable
 ; Base address
 BASE equ 4*MB
 MB   equ 0x100000
+
+phdr:
 
   .phdr:
 	dd PT_PHDR                ; type: Segment type
@@ -152,8 +133,6 @@ interp:
 
 ; --- [ .dynsym section ] ------------------------------------------------------
 
-dynsym:
-
 ; Symbol bindings.
 STB_GLOBAL equ 1 ; Global symbol
 
@@ -162,6 +141,8 @@ STT_FUNC equ 2 ; Code object
 
 ; Symbol visibility.
 STV_DEFAULT equ 0 ; Default visibility.
+
+dynsym:
 
   .printf:
 	dd dynstr.printf_off        ; name: Symbol name (string table offset)
@@ -205,10 +186,10 @@ dynstr:
 
 ; --- [ .rela.plt section ] ----------------------------------------------------
 
-rela_plt:
-
 ; Relocation types.
 R_386_JMP_SLOT equ 7
+
+rela_plt:
 
   .printf:
 	dq BASE + 2*MB + got_plt.printf           ; offset: Address
@@ -277,8 +258,6 @@ data_seg:
 
 ; --- [ .dynamic section ] -----------------------------------------------------
 
-dynamic:
-
 ; Dynamic tags.
 DT_NULL     equ 0  ; Marks the end of the dynamic array
 DT_NEEDED   equ 1  ; String table offset of a required library
@@ -286,6 +265,8 @@ DT_PLTGOT   equ 3  ; Address of the PLT and/or GOT
 DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
+
+dynamic:
 
   .libc:
 	dq DT_NEEDED             ; tag: Dynamic entry type

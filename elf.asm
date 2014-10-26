@@ -165,9 +165,9 @@ phdr_dynamic:
   .paddr:  ; Segment physical address
 	dq BASE + 2*MB + dynamic
   .filesz: ; Segment size in file
-	dq dynamicsize
+	dq dynamic_size
   .memsz:  ; Segment size in memory
-	dq dynamicsize
+	dq dynamic_size
   .align:  ; Segment alignment
 	dq 0x8
 
@@ -289,7 +289,7 @@ plt:
 text:
 
   .start:
-	mov	rdi, BASE + hello
+	mov	rdi, BASE + rodata.hello
 	call	plt.printf
 	mov	edi, 0
 	call	plt.exit
@@ -300,7 +300,7 @@ text:
 
 rodata:
 
-hello:
+  .hello:
 	db "hello world", 10, 0
 
 ; --- [/ .rodata section ] -----------------------------------------------------
@@ -321,46 +321,33 @@ DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
 
-dyn_libc:
-  .tag: ; Dynamic entry type
-	dq DT_NEEDED
-  .val: ; Integer or address value
-	dq dynstr.libc_off
+  .libc:
+	dq DT_NEEDED       ; tag: Dynamic entry type
+	dq dynstr.libc_off ; val: Integer or address value
 
-dynentsize equ $ - dynamic
+.entsize equ $ - dynamic
 
-dyn_strtab:
-  .tag: ; Dynamic entry type
-	dq DT_STRTAB
-  .val: ; Integer or address value
-	dq BASE + dynstr
+  .strtab:
+	dq DT_STRTAB     ; tag: Dynamic entry type
+	dq BASE + dynstr ; val: Integer or address value
 
-dyn_symtab:
-  .tag: ; Dynamic entry type
-	dq DT_SYMTAB
-  .val: ; Integer or address value
-	dq BASE + dynsym
+  .symtab:
+	dq DT_SYMTAB     ; tag: Dynamic entry type
+	dq BASE + dynsym ; val: Integer or address value
 
-dyn_pltgot:
-dyn_pltgot_idx equ (dyn_pltgot - dynamic) / dynentsize
-  .tag: ; Dynamic entry type
-	dq DT_PLTGOT
-  .val: ; Integer or address value
-	dq BASE + 2*MB + got_plt
+  .pltgot:
+	dq DT_PLTGOT             ; tag: Dynamic entry type
+	dq BASE + 2*MB + got_plt ; val: Integer or address value
 
-dyn_jmprel:
-  .tag: ; Dynamic entry type
-	dq DT_JMPREL
-  .val: ; Integer or address value
-	dq BASE + rela_plt
+  .jmprel:
+	dq DT_JMPREL       ; tag: Dynamic entry type
+	dq BASE + rela_plt ; val: Integer or address value
 
-dyn_null:
-  .tag: ; Dynamic entry type
-	dq DT_NULL
-  .val: ; Integer or address value
-	dq 0
+  .null:
+	dq DT_NULL ; tag: Dynamic entry type
+	dq 0       ; val: Integer or address value
 
-dynamicsize equ $ - dynamic
+dynamic_size equ $ - dynamic
 
 ; --- [/ .dynamic section ] ----------------------------------------------------
 
@@ -369,7 +356,7 @@ dynamicsize equ $ - dynamic
 got_plt:
 
 got_plt_libc:
-	dq BASE + 2*MB + dyn_libc.tag
+	dq BASE + 2*MB + dynamic.libc
 
 got_pltentsize equ $ - got_plt
 

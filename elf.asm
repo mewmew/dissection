@@ -63,6 +63,7 @@ PAGE        equ 0x1000
 BASE_CODE   equ BASE
 BASE_DATA   equ BASE + 1*PAGE
 BASE_RODATA equ BASE + 2*PAGE
+BASE_CODE2  equ BASE + 3*PAGE
 
 ; --- [ Program header program header ] ----------------------------------------
 
@@ -102,6 +103,18 @@ phdr:
 	dq BASE_CODE + code_seg   ; paddr: Segment physical address
 	dq code_seg.size          ; filesz: Segment size in file
 	dq code_seg.size          ; memsz: Segment size in memory
+	dq PAGE                   ; align: Segment alignment
+
+; --- [ Code segment 2 program header ] ----------------------------------------
+
+  .code_seg2:
+	dd PT_LOAD                ; type: Segment type
+	dd PF_R | PF_X            ; flags: Segment flags
+	dq code_seg2              ; offset: Segment file offset
+	dq BASE_CODE2 + code_seg2 ; vaddr: Segment virtual address
+	dq BASE_CODE2 + code_seg2 ; paddr: Segment physical address
+	dq code_seg2.size          ; filesz: Segment size in file
+	dq code_seg2.size          ; memsz: Segment size in memory
 	dq PAGE                   ; align: Segment alignment
 
 ; --- [ Data segment program header ] ------------------------------------------
@@ -224,7 +237,6 @@ got_plt:
 	dq BASE_CODE + plt.resolve_exit
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
-
 
 data_seg.size equ $ - data_seg
 
@@ -370,5 +382,13 @@ dynamic:
 rodata_seg.size equ $ - data_seg
 
 ; ___ [/ Read-only data segment ] ______________________________________________
+
+; ___ [ Code segment ] _________________________________________________________
+
+code_seg2:
+
+code_seg2.size equ $ - code_seg2
+
+; ___ [/ Code segment ] ________________________________________________________
 
 ; === [/ Sections ] ============================================================

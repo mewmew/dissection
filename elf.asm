@@ -83,7 +83,7 @@ phdr_phdr:
   .type:   ; Segment type
 	dd PT_PHDR
   .flags:  ; Segment flags
-	dd PF_R | PF_X
+	dd PF_R
   .offset: ; Segment file offset
 	dq phdr
   .vaddr:  ; Segment virtual address
@@ -277,8 +277,6 @@ dynstr:
 dynstrsize equ $ - dynstr
 
 ; --- [/ .dynstr section ] -----------------------------------------------------
-
-db 0x00
 
 ; --- [ .rela.plt section ] ----------------------------------------------------
 

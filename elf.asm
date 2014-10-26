@@ -157,23 +157,6 @@ phdr:
 
 ; === [ Sections ] =============================================================
 
-; --- [ .dynstr section ] ------------------------------------------------------
-
-dynstr:
-
-  .libc:
-	db "libc.so.6", 0
-  .printf:
-	db "printf", 0
-  .exit:
-	db "exit", 0
-
-.libc_off   equ .libc - dynstr
-.printf_off equ .printf - dynstr
-.exit_off   equ .exit - dynstr
-
-; --- [/ .dynstr section ] -----------------------------------------------------
-
 ; --- [ .rela.plt section ] ----------------------------------------------------
 
 ; Relocation types.
@@ -267,7 +250,7 @@ dynamic:
 
   .strtab:
 	dq DT_STRTAB             ; tag: Dynamic entry type
-	dq BASE_CODE + dynstr    ; val: Integer or address value
+	dq BASE_RODATA + dynstr  ; val: Integer or address value
 
   .symtab:
 	dq DT_SYMTAB             ; tag: Dynamic entry type
@@ -365,6 +348,22 @@ dynsym:
 
 ; --- [/ .dynsym section ] -----------------------------------------------------
 
+; --- [ .dynstr section ] ------------------------------------------------------
+
+dynstr:
+
+  .libc:
+	db "libc.so.6", 0
+  .printf:
+	db "printf", 0
+  .exit:
+	db "exit", 0
+
+.libc_off   equ .libc - dynstr
+.printf_off equ .printf - dynstr
+.exit_off   equ .exit - dynstr
+
+; --- [/ .dynstr section ] -----------------------------------------------------
 
 rodata_seg.size equ $ - data_seg
 

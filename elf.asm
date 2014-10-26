@@ -28,7 +28,7 @@ ehdr:
 	dw ET_EXEC                   ; type: Object file type
 	dw EM_X86_64                 ; machine: Architecture
 	dd 1                         ; version: Object file version
-	dq BASE + text.start         ; entry: Entry point virtual address
+	dq BASE_CODE + text.start    ; entry: Entry point virtual address
 	dq phdr                      ; phoff: Program header table file offset
 	dq 0                         ; shoff: Section header table file offset
 	dd 0                         ; flags: Processor-specific flags
@@ -61,7 +61,7 @@ PF_R equ 0x4 ; Segment is readable
 BASE        equ 0x400000
 PAGE        equ 0x1000
 BASE_CODE   equ BASE
-BASE_DATA   equ BASE + 0*PAGE
+BASE_DATA   equ BASE + 1*PAGE
 BASE_RODATA equ BASE + 2*PAGE
 
 ; --- [ Program header program header ] ----------------------------------------
@@ -72,8 +72,8 @@ phdr:
 	dd PT_PHDR                ; type: Segment type
 	dd PF_R                   ; flags: Segment flags
 	dq phdr                   ; offset: Segment file offset
-	dq BASE + phdr            ; vaddr: Segment virtual address
-	dq BASE + phdr            ; paddr: Segment physical address
+	dq BASE_CODE + phdr       ; vaddr: Segment virtual address
+	dq BASE_CODE + phdr       ; paddr: Segment physical address
 	dq .size                  ; filesz: Segment size in file
 	dq .size                  ; memsz: Segment size in memory
 	dq 0x8                    ; align: Segment alignment
@@ -86,8 +86,8 @@ phdr:
 	dd PT_INTERP              ; type: Segment type
 	dd PF_R                   ; flags: Segment flags
 	dq interp                 ; offset: Segment file offset
-	dq BASE + interp          ; vaddr: Segment virtual address
-	dq BASE + interp          ; paddr: Segment physical address
+	dq BASE_CODE + interp     ; vaddr: Segment virtual address
+	dq BASE_CODE + interp     ; paddr: Segment physical address
 	dq interp.size            ; filesz: Segment size in file
 	dq interp.size            ; memsz: Segment size in memory
 	dq 0x1                    ; align: Segment alignment
@@ -98,8 +98,8 @@ phdr:
 	dd PT_LOAD                ; type: Segment type
 	dd PF_R | PF_X            ; flags: Segment flags
 	dq code_seg               ; offset: Segment file offset
-	dq BASE                   ; vaddr: Segment virtual address
-	dq BASE                   ; paddr: Segment physical address
+	dq BASE_CODE              ; vaddr: Segment virtual address
+	dq BASE_CODE              ; paddr: Segment physical address
 	dq code_seg.size          ; filesz: Segment size in file
 	dq code_seg.size          ; memsz: Segment size in memory
 	dq PAGE                   ; align: Segment alignment
@@ -110,8 +110,8 @@ phdr:
 	dd PT_LOAD                ; type: Segment type
 	dd PF_R | PF_W            ; flags: Segment flags
 	dq data_seg               ; offset: Segment file offset
-	dq BASE + PAGE + data_seg ; vaddr: Segment virtual address
-	dq BASE + PAGE + data_seg ; paddr: Segment physical address
+	dq BASE_DATA + data_seg   ; vaddr: Segment virtual address
+	dq BASE_DATA + data_seg   ; paddr: Segment physical address
 	dq data_seg.size          ; filesz: Segment size in file
 	dq data_seg.size          ; memsz: Segment size in memory
 	dq PAGE                   ; align: Segment alignment
@@ -134,8 +134,8 @@ phdr:
 	dd PT_DYNAMIC             ; type: Segment type
 	dd PF_R                   ; flags: Segment flags
 	dq dynamic                ; offset: Segment file offset
-	dq BASE + PAGE + dynamic  ; vaddr: Segment virtual address
-	dq BASE + PAGE + dynamic  ; paddr: Segment physical address
+	dq BASE_DATA + dynamic     ; vaddr: Segment virtual address
+	dq BASE_DATA + dynamic     ; paddr: Segment physical address
 	dq dynamic.size           ; filesz: Segment size in file
 	dq dynamic.size           ; memsz: Segment size in memory
 	dq 0x8                    ; align: Segment alignment
@@ -228,12 +228,12 @@ R_386_JMP_SLOT equ 7
 rela_plt:
 
   .printf:
-	dq BASE + PAGE + got_plt.printf           ; offset: Address
+	dq BASE_DATA + got_plt.printf             ; offset: Address
 	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT ; info: Relocation type and symbol index
 	dq 0                                      ; addend: Addend
 
   .exit:
-	dq BASE + PAGE + got_plt.exit             ; offset: Address
+	dq BASE_DATA + got_plt.exit               ; offset: Address
 	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT   ; info: Relocation type and symbol index
 	dq 0                                      ; addend: Addend
 
@@ -268,7 +268,7 @@ plt:
 text:
 
   .start:
-	mov	rdi, BASE + rodata.hello
+	mov	rdi, BASE_CODE + rodata.hello
 	call	plt.printf
 	jmp	$
 	mov	edi, 0
@@ -313,19 +313,19 @@ dynamic:
 
   .strtab:
 	dq DT_STRTAB             ; tag: Dynamic entry type
-	dq BASE + dynstr         ; val: Integer or address value
+	dq BASE_CODE + dynstr    ; val: Integer or address value
 
   .symtab:
 	dq DT_SYMTAB             ; tag: Dynamic entry type
-	dq BASE + dynsym         ; val: Integer or address value
+	dq BASE_CODE + dynsym    ; val: Integer or address value
 
   .pltgot:
 	dq DT_PLTGOT             ; tag: Dynamic entry type
-	dq BASE + PAGE + got_plt ; val: Integer or address value
+	dq BASE_DATA + got_plt   ; val: Integer or address value
 
   .jmprel:
 	dq DT_JMPREL             ; tag: Dynamic entry type
-	dq BASE + rela_plt       ; val: Integer or address value
+	dq BASE_CODE + rela_plt  ; val: Integer or address value
 
   .null:
 	dq DT_NULL               ; tag: Dynamic entry type
@@ -340,7 +340,7 @@ dynamic:
 got_plt:
 
   .libc:
-	dq BASE + PAGE + dynamic.libc
+	dq BASE_DATA + dynamic.libc
 
   .1:
 	dq 0
@@ -349,10 +349,10 @@ got_plt:
 	dq 0
 
   .printf:
-	dq BASE + plt.resolve_printf
+	dq BASE_CODE + plt.resolve_printf
 
   .exit:
-	dq BASE + plt.resolve_exit
+	dq BASE_CODE + plt.resolve_exit
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
 

@@ -186,22 +186,13 @@ plt:
 text:
 
   .start:
-	mov	rdi, BASE_CODE + rodata.hello
+	mov	rdi, BASE_RODATA + rodata.hello
 	call	plt.printf
 	jmp	$
 	mov	edi, 0
 	call	plt.exit
 
 ; --- [/ .text section ] -------------------------------------------------------
-
-; --- [ .rodata section ] ------------------------------------------------------
-
-rodata:
-
-  .hello:
-	db "hello world", 10, 0
-
-; --- [/ .rodata section ] -----------------------------------------------------
 
 code_seg.size equ $ - code_seg
 
@@ -364,6 +355,15 @@ rela_plt:
 	dq 0                                      ; addend: Addend
 
 ; --- [/ .rela.plt section ] ---------------------------------------------------
+
+; --- [ .rodata section ] ------------------------------------------------------
+
+rodata:
+
+  .hello:
+	db "hello world", 10, 0
+
+; --- [/ .rodata section ] -----------------------------------------------------
 
 rodata_seg.size equ $ - data_seg
 

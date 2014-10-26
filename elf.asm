@@ -57,9 +57,12 @@ PF_X equ 0x1 ; Segment is executable
 PF_W equ 0x2 ; Segment is writable
 PF_R equ 0x4 ; Segment is readable
 
-; Base address
-BASE equ 0x400000
-PAGE equ 0x1000
+; Base addresses.
+BASE        equ 0x400000
+PAGE        equ 0x1000
+BASE_CODE   equ BASE
+BASE_DATA   equ BASE + 0*PAGE
+BASE_RODATA equ BASE + 2*PAGE
 
 ; --- [ Program header program header ] ----------------------------------------
 
@@ -112,6 +115,18 @@ phdr:
 	dq data_seg.size          ; filesz: Segment size in file
 	dq data_seg.size          ; memsz: Segment size in memory
 	dq PAGE                   ; align: Segment alignment
+
+; --- [ Read-only data segment program header ] --------------------------------
+
+  .rodata_seg:
+	dd PT_LOAD                  ; type: Segment type
+	dd PF_R                     ; flags: Segment flags
+	dq rodata_seg               ; offset: Segment file offset
+	dq BASE_RODATA + rodata_seg ; vaddr: Segment virtual address
+	dq BASE_RODATA + rodata_seg ; paddr: Segment physical address
+	dq rodata_seg.size          ; filesz: Segment size in file
+	dq rodata_seg.size          ; memsz: Segment size in memory
+	dq PAGE                     ; align: Segment alignment
 
 ; --- [ Dynamic array program header ] -----------------------------------------
 
@@ -255,6 +270,7 @@ text:
   .start:
 	mov	rdi, BASE + rodata.hello
 	call	plt.printf
+	jmp	$
 	mov	edi, 0
 	call	plt.exit
 
@@ -345,3 +361,11 @@ got_plt:
 data_seg.size equ $ - data_seg
 
 ; ___ [/ Data segment ] ________________________________________________________
+
+; ___ [ Read-only data segment ] _______________________________________________
+
+rodata_seg:
+
+rodata_seg.size equ $ - data_seg
+
+; ___ [/ Read-only data segment ] ______________________________________________

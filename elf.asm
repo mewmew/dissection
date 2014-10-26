@@ -315,8 +315,6 @@ plt:
 plt_0:
 	push	QWORD [rel 2*MB + got_plt_1]
 	jmp	[rel 2*MB + got_plt_2]
-; nopl	0x0(%rax)
-	db 0x0F, 0x1F, 0x40, 0x00
 
 pltentsize equ $ - plt
 

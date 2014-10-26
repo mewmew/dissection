@@ -111,9 +111,9 @@ phdr_interp:
   .paddr:  ; Segment physical address
 	dq BASE + interp
   .filesz: ; Segment size in file
-	dq interpsize
+	dq interp_size
   .memsz:  ; Segment size in memory
-	dq interpsize
+	dq interp_size
   .align:  ; Segment alignment
 	dq 0x1
 
@@ -181,9 +181,10 @@ phnum  equ phsize / phentsize
 ; --- [ .interp section ] ------------------------------------------------------
 
 interp:
+
 	db "/lib/ld64.so.1", 0
 
-interpsize equ $ - interp
+interp_size equ $ - interp
 
 ; --- [/ .interp section ] -----------------------------------------------------
 
@@ -201,7 +202,7 @@ STT_FUNC equ 2 ; Code object
 STV_DEFAULT equ 0 ; Default visibility.
 
   .printf:
-	dd dynstr.printf_idx        ; name: Symbol name (string tbl index)
+	dd dynstr.printf_off        ; name: Symbol name (string table offset)
 	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
 	db STV_DEFAULT              ; other: Symbol visibility
 	dw 0                        ; shndx: Section index
@@ -211,7 +212,7 @@ STV_DEFAULT equ 0 ; Default visibility.
 .entsize equ $ - dynsym
 
   .exit:
-	dd dynstr.exit_idx          ; name: Symbol name (string tbl index)
+	dd dynstr.exit_off          ; name: Symbol name (string table offset)
 	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
 	db STV_DEFAULT              ; other: Symbol visibility
 	dw 0                        ; shndx: Section index
@@ -227,21 +228,16 @@ STV_DEFAULT equ 0 ; Default visibility.
 
 dynstr:
 
-  .null:
-	db 0
   .libc:
 	db "libc.so.6", 0
-  .exit:
-	db "exit", 0
   .printf:
 	db "printf", 0
+  .exit:
+	db "exit", 0
 
-.null_idx   equ .null - dynstr
-.libc_idx   equ .libc - dynstr
-.exit_idx   equ .exit - dynstr
-.printf_idx equ .printf - dynstr
-
-dynstrsize equ $ - dynstr
+.libc_off   equ .libc - dynstr
+.printf_off equ .printf - dynstr
+.exit_off   equ .exit - dynstr
 
 ; --- [/ .dynstr section ] -----------------------------------------------------
 
@@ -348,7 +344,7 @@ dyn_libc:
   .tag: ; Dynamic entry type
 	dq DT_NEEDED
   .val: ; Integer or address value
-	dq dynstr.libc_idx
+	dq dynstr.libc_off
 
 dynentsize equ $ - dynamic
 

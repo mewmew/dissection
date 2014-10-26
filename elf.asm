@@ -324,17 +324,14 @@ plt_printf:
 	jmp	[rel 2*MB + got_plt_printf]
 
 .resolve:
-; pushq	$0x0
-	db 0x68, 0x00, 0x00, 0x00, 0x00
+	push	QWORD 0
 	jmp	NEAR plt_0
 
 plt_exit:
 	jmp	[rel 2*MB + got_plt_exit]
 
 .resolve:
-; pushq	$0x1
-	db 0x68, 0x01, 0x00, 0x00, 0x00
-
+	push	QWORD 1
 	jmp	NEAR plt_0
 
 pltsize equ $ - plt

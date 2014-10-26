@@ -10,6 +10,7 @@ check: elf
 hello:
 	nasm -f elf64 -o $@.o $@.asm
 	ld -s -o $@ $@.o -lc
+	@rm $@.o
 	strip -R .hash $@
 	strip -R .gnu.version $@
 	strip -R .eh_frame $@

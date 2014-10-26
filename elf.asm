@@ -360,7 +360,6 @@ text:
   .start:
 	mov	rdi, BASE_RODATA + rodata.hello
 	call	plt.printf
-	jmp	$
 	mov	edi, 0
 	call	plt.exit
 

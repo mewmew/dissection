@@ -246,28 +246,17 @@ dynstr:
 rela_plt:
 
 ; Relocation types.
-
 R_386_JMP_SLOT equ 7
 
-rela_plt_printf:
-  .offset: ; Address
-	dq BASE + 2*MB + got_plt_printf
-  .info:   ; Relocation type and symbol index
-	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT
-  .addend: ; Addend
-	dq 0
+  .printf:
+	dq BASE + 2*MB + got_plt_printf           ; offset: Address
+	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT ; info: Relocation type and symbol index
+	dq 0                                      ; addend: Addend
 
-rela_pltentsize equ $ - rela_plt
-
-rela_plt_exit:
-  .offset: ; Address
-	dq BASE + 2*MB + got_plt_exit
-  .info:   ; Relocation type and symbol index
-	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT
-  .addend: ; Addend
-	dq 0
-
-rela_pltsize equ $ - rela_plt
+  .exit:
+	dq BASE + 2*MB + got_plt_exit             ; offset: Address
+	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT   ; info: Relocation type and symbol index
+	dq 0                                      ; addend: Addend
 
 ; --- [/ .rela.plt section ] ---------------------------------------------------
 

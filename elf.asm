@@ -134,11 +134,13 @@ phdr:
 	dd PT_DYNAMIC             ; type: Segment type
 	dd PF_R                   ; flags: Segment flags
 	dq dynamic                ; offset: Segment file offset
-	dq BASE_DATA + dynamic     ; vaddr: Segment virtual address
-	dq BASE_DATA + dynamic     ; paddr: Segment physical address
+	dq BASE_RODATA + dynamic  ; vaddr: Segment virtual address
+	dq BASE_RODATA + dynamic  ; paddr: Segment physical address
 	dq dynamic.size           ; filesz: Segment size in file
 	dq dynamic.size           ; memsz: Segment size in memory
 	dq 0x8                    ; align: Segment alignment
+
+; --- [ GNU stack program header ] ---------------------------------------------
 
   .gnu_stack:
 	dd PT_GNU_STACK           ; type: Segment type
@@ -202,54 +204,12 @@ code_seg.size equ $ - code_seg
 
 data_seg:
 
-; --- [ .dynamic section ] -----------------------------------------------------
-
-; Dynamic tags.
-DT_NULL     equ 0  ; Marks the end of the dynamic array
-DT_NEEDED   equ 1  ; String table offset of a required library
-DT_PLTGOT   equ 3  ; Address of the PLT and/or GOT
-DT_STRTAB   equ 5  ; Address of the string table
-DT_SYMTAB   equ 6  ; Address of the symbol table
-DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
-
-dynamic:
-
-  .libc:
-	dq DT_NEEDED              ; tag: Dynamic entry type
-	dq dynstr.libc_off        ; val: Integer or address value
-
-.entsize equ $ - dynamic
-
-  .strtab:
-	dq DT_STRTAB              ; tag: Dynamic entry type
-	dq BASE_RODATA + dynstr   ; val: Integer or address value
-
-  .symtab:
-	dq DT_SYMTAB              ; tag: Dynamic entry type
-	dq BASE_RODATA + dynsym   ; val: Integer or address value
-
-  .pltgot:
-	dq DT_PLTGOT              ; tag: Dynamic entry type
-	dq BASE_DATA + got_plt    ; val: Integer or address value
-
-  .jmprel:
-	dq DT_JMPREL              ; tag: Dynamic entry type
-	dq BASE_RODATA + rela_plt ; val: Integer or address value
-
-  .null:
-	dq DT_NULL               ; tag: Dynamic entry type
-	dq 0                     ; val: Integer or address value
-
-.size equ $ - dynamic
-
-; --- [/ .dynamic section ] ----------------------------------------------------
-
 ; --- [ .got.plt section ] -----------------------------------------------------
 
 got_plt:
 
   .libc:
-	dq BASE_DATA + dynamic.libc
+	dq BASE_RODATA + dynamic.libc
 
   .1:
 	dq 0
@@ -364,6 +324,48 @@ rodata:
 	db "hello world", 10, 0
 
 ; --- [/ .rodata section ] -----------------------------------------------------
+
+; --- [ .dynamic section ] -----------------------------------------------------
+
+; Dynamic tags.
+DT_NULL     equ 0  ; Marks the end of the dynamic array
+DT_NEEDED   equ 1  ; String table offset of a required library
+DT_PLTGOT   equ 3  ; Address of the PLT and/or GOT
+DT_STRTAB   equ 5  ; Address of the string table
+DT_SYMTAB   equ 6  ; Address of the symbol table
+DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
+
+dynamic:
+
+  .libc:
+	dq DT_NEEDED              ; tag: Dynamic entry type
+	dq dynstr.libc_off        ; val: Integer or address value
+
+.entsize equ $ - dynamic
+
+  .strtab:
+	dq DT_STRTAB              ; tag: Dynamic entry type
+	dq BASE_RODATA + dynstr   ; val: Integer or address value
+
+  .symtab:
+	dq DT_SYMTAB              ; tag: Dynamic entry type
+	dq BASE_RODATA + dynsym   ; val: Integer or address value
+
+  .pltgot:
+	dq DT_PLTGOT              ; tag: Dynamic entry type
+	dq BASE_DATA + got_plt    ; val: Integer or address value
+
+  .jmprel:
+	dq DT_JMPREL              ; tag: Dynamic entry type
+	dq BASE_RODATA + rela_plt ; val: Integer or address value
+
+  .null:
+	dq DT_NULL               ; tag: Dynamic entry type
+	dq 0                     ; val: Integer or address value
+
+.size equ $ - dynamic
+
+; --- [/ .dynamic section ] ----------------------------------------------------
 
 rodata_seg.size equ $ - data_seg
 

@@ -347,8 +347,6 @@ text:
 	call	plt_printf
 	mov	edi, 0
 	call	plt_exit
-	mov	eax, 10
-	ret
 
 textsize equ $ - text
 

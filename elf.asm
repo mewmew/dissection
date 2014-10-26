@@ -86,8 +86,8 @@ phdr:
 	dd PT_INTERP              ; type: Segment type
 	dd PF_R                   ; flags: Segment flags
 	dq interp                 ; offset: Segment file offset
-	dq BASE_CODE + interp     ; vaddr: Segment virtual address
-	dq BASE_CODE + interp     ; paddr: Segment physical address
+	dq BASE_RODATA + interp   ; vaddr: Segment virtual address
+	dq BASE_RODATA + interp   ; paddr: Segment physical address
 	dq interp.size            ; filesz: Segment size in file
 	dq interp.size            ; memsz: Segment size in memory
 	dq 0x1                    ; align: Segment alignment
@@ -156,16 +156,6 @@ phdr:
 ; === [/ Program headers ] =====================================================
 
 ; === [ Sections ] =============================================================
-
-; --- [ .interp section ] ------------------------------------------------------
-
-interp:
-
-	db "/lib/ld64.so.1", 0
-
-.size equ $ - interp
-
-; --- [/ .interp section ] -----------------------------------------------------
 
 ; --- [ .dynsym section ] ------------------------------------------------------
 
@@ -356,7 +346,6 @@ got_plt:
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
 
-; === [/ Sections ] ============================================================
 
 data_seg.size equ $ - data_seg
 
@@ -366,6 +355,18 @@ data_seg.size equ $ - data_seg
 
 rodata_seg:
 
+; --- [ .interp section ] ------------------------------------------------------
+
+interp:
+
+	db "/lib/ld64.so.1", 0
+
+.size equ $ - interp
+
+; --- [/ .interp section ] -----------------------------------------------------
+
 rodata_seg.size equ $ - data_seg
 
 ; ___ [/ Read-only data segment ] ______________________________________________
+
+; === [/ Sections ] ============================================================

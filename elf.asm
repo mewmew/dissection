@@ -286,7 +286,7 @@ rela_plt:
 
 R_386_JMP_SLOT equ 7
 
-rela_plt_0:
+rela_plt_printf:
   .offset: ; Address
 	dq BASE + 2*MB + got_plt_printf
   .info:   ; Relocation type and symbol index
@@ -296,7 +296,7 @@ rela_plt_0:
 
 rela_pltentsize equ $ - rela_plt
 
-rela_plt_1:
+rela_plt_exit:
   .offset: ; Address
 	dq BASE + 2*MB + got_plt_exit
   .info:   ; Relocation type and symbol index

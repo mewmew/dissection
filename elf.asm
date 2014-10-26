@@ -97,7 +97,7 @@ phdr:
 
   .code_seg:
 	dd PT_LOAD                ; type: Segment type
-	dd PF_R | PF_X            ; flags: Segment flags
+	dd PF_R                   ; flags: Segment flags
 	dq code_seg               ; offset: Segment file offset
 	dq BASE_CODE + code_seg   ; vaddr: Segment virtual address
 	dq BASE_CODE + code_seg   ; paddr: Segment physical address

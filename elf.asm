@@ -157,42 +157,6 @@ phdr:
 
 ; === [ Sections ] =============================================================
 
-; --- [ .dynsym section ] ------------------------------------------------------
-
-; Symbol bindings.
-STB_GLOBAL equ 1 ; Global symbol
-
-; Symbol types.
-STT_FUNC equ 2 ; Code object
-
-; Symbol visibility.
-STV_DEFAULT equ 0 ; Default visibility.
-
-dynsym:
-
-  .printf:
-	dd dynstr.printf_off        ; name: Symbol name (string table offset)
-	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
-	db STV_DEFAULT              ; other: Symbol visibility
-	dw 0                        ; shndx: Section index
-	dq 0                        ; value: Symbol value
-	dq 0                        ; size: Symbol size
-
-.entsize equ $ - dynsym
-
-  .exit:
-	dd dynstr.exit_off          ; name: Symbol name (string table offset)
-	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
-	db STV_DEFAULT              ; other: Symbol visibility
-	dw 0                        ; shndx: Section index
-	dq 0                        ; value: Symbol value
-	dq 0                        ; size: Symbol size
-
-.printf_idx equ (.printf - dynsym) / .entsize
-.exit_idx   equ (.exit - dynsym) / .entsize
-
-; --- [/ .dynsym section ] -----------------------------------------------------
-
 ; --- [ .dynstr section ] ------------------------------------------------------
 
 dynstr:
@@ -307,7 +271,7 @@ dynamic:
 
   .symtab:
 	dq DT_SYMTAB             ; tag: Dynamic entry type
-	dq BASE_CODE + dynsym    ; val: Integer or address value
+	dq BASE_RODATA + dynsym  ; val: Integer or address value
 
   .pltgot:
 	dq DT_PLTGOT             ; tag: Dynamic entry type
@@ -364,6 +328,43 @@ interp:
 .size equ $ - interp
 
 ; --- [/ .interp section ] -----------------------------------------------------
+
+; --- [ .dynsym section ] ------------------------------------------------------
+
+; Symbol bindings.
+STB_GLOBAL equ 1 ; Global symbol
+
+; Symbol types.
+STT_FUNC equ 2 ; Code object
+
+; Symbol visibility.
+STV_DEFAULT equ 0 ; Default visibility.
+
+dynsym:
+
+  .printf:
+	dd dynstr.printf_off        ; name: Symbol name (string table offset)
+	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
+	db STV_DEFAULT              ; other: Symbol visibility
+	dw 0                        ; shndx: Section index
+	dq 0                        ; value: Symbol value
+	dq 0                        ; size: Symbol size
+
+.entsize equ $ - dynsym
+
+  .exit:
+	dd dynstr.exit_off          ; name: Symbol name (string table offset)
+	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
+	db STV_DEFAULT              ; other: Symbol visibility
+	dw 0                        ; shndx: Section index
+	dq 0                        ; value: Symbol value
+	dq 0                        ; size: Symbol size
+
+.printf_idx equ (.printf - dynsym) / .entsize
+.exit_idx   equ (.exit - dynsym) / .entsize
+
+; --- [/ .dynsym section ] -----------------------------------------------------
+
 
 rodata_seg.size equ $ - data_seg
 

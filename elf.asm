@@ -1,10 +1,10 @@
 [bits 64]
 
-; ___ [ Code segment ] _________________________________________________________
-
-code_seg:
-
 ; === [ ELF file header ] ======================================================
+
+; ___ [ Read-only data segment ] _______________________________________________
+
+rodata_seg:
 
 ; ELF classes.
 ELFCLASS64 equ 2 ; 64-bit object
@@ -28,7 +28,7 @@ ehdr:
 	dw ET_EXEC                   ; type: Object file type
 	dw EM_X86_64                 ; machine: Architecture
 	dd 1                         ; version: Object file version
-	dq BASE_CODE2 + text.start   ; entry: Entry point virtual address
+	dq BASE_CODE + text.start    ; entry: Entry point virtual address
 	dq phdr                      ; phoff: Program header table file offset
 	dq 0                         ; shoff: Section header table file offset
 	dd 0                         ; flags: Processor-specific flags
@@ -60,74 +60,37 @@ PF_R equ 0x4 ; Segment is readable
 ; Base addresses.
 BASE        equ 0x400000
 PAGE        equ 0x1000
-BASE_CODE   equ BASE
+BASE_RODATA equ BASE
 BASE_DATA   equ BASE + 1*PAGE
-BASE_RODATA equ BASE + 2*PAGE
-BASE_CODE2  equ BASE + 3*PAGE
+BASE_CODE   equ BASE + 2*PAGE
 
 ; --- [ Program header program header ] ----------------------------------------
 
 phdr:
 
   .phdr:
-	dd PT_PHDR                ; type: Segment type
-	dd PF_R                   ; flags: Segment flags
-	dq phdr                   ; offset: Segment file offset
-	dq BASE_CODE + phdr       ; vaddr: Segment virtual address
-	dq BASE_CODE + phdr       ; paddr: Segment physical address
-	dq .size                  ; filesz: Segment size in file
-	dq .size                  ; memsz: Segment size in memory
-	dq 0x8                    ; align: Segment alignment
+	dd PT_PHDR                  ; type: Segment type
+	dd PF_R                     ; flags: Segment flags
+	dq phdr                     ; offset: Segment file offset
+	dq BASE_RODATA + phdr       ; vaddr: Segment virtual address
+	dq BASE_RODATA + phdr       ; paddr: Segment physical address
+	dq .size                    ; filesz: Segment size in file
+	dq .size                    ; memsz: Segment size in memory
+	dq 0x8                      ; align: Segment alignment
 
 .entsize equ $ - phdr
 
 ; --- [ Interpreter program header ] -------------------------------------------
 
   .interp:
-	dd PT_INTERP              ; type: Segment type
-	dd PF_R                   ; flags: Segment flags
-	dq interp                 ; offset: Segment file offset
-	dq BASE_RODATA + interp   ; vaddr: Segment virtual address
-	dq BASE_RODATA + interp   ; paddr: Segment physical address
-	dq interp.size            ; filesz: Segment size in file
-	dq interp.size            ; memsz: Segment size in memory
-	dq 0x1                    ; align: Segment alignment
-
-; --- [ Code segment program header ] ------------------------------------------
-
-  .code_seg:
-	dd PT_LOAD                ; type: Segment type
-	dd PF_R                   ; flags: Segment flags
-	dq code_seg               ; offset: Segment file offset
-	dq BASE_CODE + code_seg   ; vaddr: Segment virtual address
-	dq BASE_CODE + code_seg   ; paddr: Segment physical address
-	dq code_seg.size          ; filesz: Segment size in file
-	dq code_seg.size          ; memsz: Segment size in memory
-	dq PAGE                   ; align: Segment alignment
-
-; --- [ Code segment 2 program header ] ----------------------------------------
-
-  .code_seg2:
-	dd PT_LOAD                ; type: Segment type
-	dd PF_R | PF_X            ; flags: Segment flags
-	dq code_seg2              ; offset: Segment file offset
-	dq BASE_CODE2 + code_seg2 ; vaddr: Segment virtual address
-	dq BASE_CODE2 + code_seg2 ; paddr: Segment physical address
-	dq code_seg2.size          ; filesz: Segment size in file
-	dq code_seg2.size          ; memsz: Segment size in memory
-	dq PAGE                   ; align: Segment alignment
-
-; --- [ Data segment program header ] ------------------------------------------
-
-  .data_seg:
-	dd PT_LOAD                ; type: Segment type
-	dd PF_R | PF_W            ; flags: Segment flags
-	dq data_seg               ; offset: Segment file offset
-	dq BASE_DATA + data_seg   ; vaddr: Segment virtual address
-	dq BASE_DATA + data_seg   ; paddr: Segment physical address
-	dq data_seg.size          ; filesz: Segment size in file
-	dq data_seg.size          ; memsz: Segment size in memory
-	dq PAGE                   ; align: Segment alignment
+	dd PT_INTERP                ; type: Segment type
+	dd PF_R                     ; flags: Segment flags
+	dq interp                   ; offset: Segment file offset
+	dq BASE_RODATA + interp     ; vaddr: Segment virtual address
+	dq BASE_RODATA + interp     ; paddr: Segment physical address
+	dq interp.size              ; filesz: Segment size in file
+	dq interp.size              ; memsz: Segment size in memory
+	dq 0x1                      ; align: Segment alignment
 
 ; --- [ Read-only data segment program header ] --------------------------------
 
@@ -139,6 +102,30 @@ phdr:
 	dq BASE_RODATA + rodata_seg ; paddr: Segment physical address
 	dq rodata_seg.size          ; filesz: Segment size in file
 	dq rodata_seg.size          ; memsz: Segment size in memory
+	dq PAGE                     ; align: Segment alignment
+
+; --- [ Data segment program header ] ------------------------------------------
+
+  .data_seg:
+	dd PT_LOAD                  ; type: Segment type
+	dd PF_R | PF_W              ; flags: Segment flags
+	dq data_seg                 ; offset: Segment file offset
+	dq BASE_DATA + data_seg     ; vaddr: Segment virtual address
+	dq BASE_DATA + data_seg     ; paddr: Segment physical address
+	dq data_seg.size            ; filesz: Segment size in file
+	dq data_seg.size            ; memsz: Segment size in memory
+	dq PAGE                     ; align: Segment alignment
+
+; --- [ Code segment program header ] ------------------------------------------
+
+  .code_seg:
+	dd PT_LOAD                  ; type: Segment type
+	dd PF_R | PF_X              ; flags: Segment flags
+	dq code_seg                 ; offset: Segment file offset
+	dq BASE_CODE + code_seg     ; vaddr: Segment virtual address
+	dq BASE_CODE + code_seg     ; paddr: Segment physical address
+	dq code_seg.size            ; filesz: Segment size in file
+	dq code_seg.size            ; memsz: Segment size in memory
 	dq PAGE                     ; align: Segment alignment
 
 ; --- [ Dynamic array program header ] -----------------------------------------
@@ -171,43 +158,6 @@ phdr:
 ; === [/ Program headers ] =====================================================
 
 ; === [ Sections ] =============================================================
-
-code_seg.size equ $ - code_seg
-
-; ___ [/ Code segment ] ________________________________________________________
-
-; ___ [ Data segment ] _________________________________________________________
-
-data_seg:
-
-; --- [ .got.plt section ] -----------------------------------------------------
-
-got_plt:
-
-  .libc:
-	dq BASE_RODATA + dynamic.libc
-
-  .1:
-	dq 0
-
-  .2:
-	dq 0
-
-  .printf:
-	dq BASE_CODE2 + plt.resolve_printf
-
-  .exit:
-	dq BASE_CODE2 + plt.resolve_exit
-
-; --- [/ .got.plt section ] ----------------------------------------------------
-
-data_seg.size equ $ - data_seg
-
-; ___ [/ Data segment ] ________________________________________________________
-
-; ___ [ Read-only data segment ] _______________________________________________
-
-rodata_seg:
 
 ; --- [ .interp section ] ------------------------------------------------------
 
@@ -342,31 +292,60 @@ dynamic:
 
 ; --- [/ .dynamic section ] ----------------------------------------------------
 
-rodata_seg.size equ $ - data_seg
+rodata_seg.size equ $ - rodata_seg
 
 ; ___ [/ Read-only data segment ] ______________________________________________
 
+; ___ [ Data segment ] _________________________________________________________
+
+data_seg:
+
+; --- [ .got.plt section ] -----------------------------------------------------
+
+got_plt:
+
+  .libc:
+	dq BASE_RODATA + dynamic.libc
+
+  .1:
+	dq 0
+
+  .2:
+	dq 0
+
+  .printf:
+	dq BASE_CODE + plt.resolve_printf
+
+  .exit:
+	dq BASE_CODE + plt.resolve_exit
+
+; --- [/ .got.plt section ] ----------------------------------------------------
+
+data_seg.size equ $ - data_seg
+
+; ___ [/ Data segment ] ________________________________________________________
+
 ; ___ [ Code segment ] _________________________________________________________
 
-code_seg2:
+code_seg:
 
 ; --- [ .plt section ] ---------------------------------------------------------
 
 plt:
 
   .resolve:
-	push	QWORD [rel (BASE_DATA - BASE_CODE2) + got_plt.1]
-	jmp	[rel (BASE_DATA - BASE_CODE2) + got_plt.2]
+	push	QWORD [rel (BASE_DATA - BASE_CODE) + got_plt.1]
+	jmp	[rel (BASE_DATA - BASE_CODE) + got_plt.2]
 
   .printf:
-	jmp	[rel (BASE_DATA - BASE_CODE2) + got_plt.printf]
+	jmp	[rel (BASE_DATA - BASE_CODE) + got_plt.printf]
 
   .resolve_printf:
 	push	QWORD 0
 	jmp	NEAR .resolve
 
   .exit:
-	jmp	[rel (BASE_DATA - BASE_CODE2) + got_plt.exit]
+	jmp	[rel (BASE_DATA - BASE_CODE) + got_plt.exit]
 
   .resolve_exit:
 	push	QWORD 1
@@ -387,7 +366,7 @@ text:
 
 ; --- [/ .text section ] -------------------------------------------------------
 
-code_seg2.size equ $ - code_seg2
+code_seg.size equ $ - code_seg
 
 ; ___ [/ Code segment ] ________________________________________________________
 

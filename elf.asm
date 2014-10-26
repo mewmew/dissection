@@ -98,8 +98,8 @@ phdr:
 	dd PT_LOAD                ; type: Segment type
 	dd PF_R | PF_X            ; flags: Segment flags
 	dq code_seg               ; offset: Segment file offset
-	dq BASE_CODE              ; vaddr: Segment virtual address
-	dq BASE_CODE              ; paddr: Segment physical address
+	dq BASE_CODE + code_seg   ; vaddr: Segment virtual address
+	dq BASE_CODE + code_seg   ; paddr: Segment physical address
 	dq code_seg.size          ; filesz: Segment size in file
 	dq code_seg.size          ; memsz: Segment size in memory
 	dq PAGE                   ; align: Segment alignment

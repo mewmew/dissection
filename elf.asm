@@ -249,12 +249,12 @@ rela_plt:
 R_386_JMP_SLOT equ 7
 
   .printf:
-	dq BASE + 2*MB + got_plt_printf           ; offset: Address
+	dq BASE + 2*MB + got_plt.printf           ; offset: Address
 	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT ; info: Relocation type and symbol index
 	dq 0                                      ; addend: Addend
 
   .exit:
-	dq BASE + 2*MB + got_plt_exit             ; offset: Address
+	dq BASE + 2*MB + got_plt.exit             ; offset: Address
 	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT   ; info: Relocation type and symbol index
 	dq 0                                      ; addend: Addend
 
@@ -265,18 +265,18 @@ R_386_JMP_SLOT equ 7
 plt:
 
   .resolve:
-	push	QWORD [rel 2*MB + got_plt_1]
-	jmp	[rel 2*MB + got_plt_2]
+	push	QWORD [rel 2*MB + got_plt.1]
+	jmp	[rel 2*MB + got_plt.2]
 
   .printf:
-	jmp	[rel 2*MB + got_plt_printf]
+	jmp	[rel 2*MB + got_plt.printf]
 
   .resolve_printf:
 	push	QWORD 0
 	jmp	NEAR .resolve
 
   .exit:
-	jmp	[rel 2*MB + got_plt_exit]
+	jmp	[rel 2*MB + got_plt.exit]
 
   .resolve_exit:
 	push	QWORD 1
@@ -355,24 +355,20 @@ dynamic_size equ $ - dynamic
 
 got_plt:
 
-got_plt_libc:
+  .libc:
 	dq BASE + 2*MB + dynamic.libc
 
-got_pltentsize equ $ - got_plt
-
-got_plt_1:
+  .1:
 	dq 0
 
-got_plt_2:
+  .2:
 	dq 0
 
-got_plt_printf:
+  .printf:
 	dq BASE + plt.resolve_printf
 
-got_plt_exit:
+  .exit:
 	dq BASE + plt.resolve_exit
-
-got_pltsize equ $ - got_plt
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
 

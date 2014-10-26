@@ -200,44 +200,26 @@ STT_FUNC equ 2 ; Code object
 ; Symbol visibility.
 STV_DEFAULT equ 0 ; Default visibility.
 
-dynsym_globals:
-dynsym_globals_idx equ (dynsym_globals - dynsym) / dynsymentsize
+  .printf:
+	dd dynstr.printf_idx        ; name: Symbol name (string tbl index)
+	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
+	db STV_DEFAULT              ; other: Symbol visibility
+	dw 0                        ; shndx: Section index
+	dq 0                        ; value: Symbol value
+	dq 0                        ; size: Symbol size
 
-dynsym_printf:
-dynsym_printf_idx equ (dynsym_printf - dynsym) / dynsymentsize
+.entsize equ $ - dynsym
 
-  .name:  ; Symbol name (string tbl index)
-	dd dynstr.printf_idx
-  .info:  ; Symbol type and binding
-	db STB_GLOBAL<<4 | STT_FUNC
-  .other: ; Symbol visibility
-	db STV_DEFAULT
-  .shndx: ; Section index
-	dw 0
-  .value: ; Symbol value
-	dq 0
-  .size:  ; Symbol size
-	dq 0
+  .exit:
+	dd dynstr.exit_idx          ; name: Symbol name (string tbl index)
+	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
+	db STV_DEFAULT              ; other: Symbol visibility
+	dw 0                        ; shndx: Section index
+	dq 0                        ; value: Symbol value
+	dq 0                        ; size: Symbol size
 
-dynsymentsize equ $ - dynsym
-
-dynsym_exit:
-dynsym_exit_idx equ (dynsym_exit - dynsym) / dynsymentsize
-
-  .name:  ; Symbol name (string tbl index)
-	dd dynstr.exit_idx
-  .info:  ; Symbol type and binding
-	db STB_GLOBAL<<4 | STT_FUNC
-  .other: ; Symbol visibility
-	db STV_DEFAULT
-  .shndx: ; Section index
-	dw 0
-  .value: ; Symbol value
-	dq 0
-  .size:  ; Symbol size
-	dq 0
-
-dynsymsize equ $ - dynsym
+.printf_idx equ (.printf - dynsym) / .entsize
+.exit_idx   equ (.exit - dynsym) / .entsize
 
 ; --- [/ .dynsym section ] -----------------------------------------------------
 
@@ -275,7 +257,7 @@ rela_plt_printf:
   .offset: ; Address
 	dq BASE + 2*MB + got_plt_printf
   .info:   ; Relocation type and symbol index
-	dq dynsym_printf_idx<<32 | R_386_JMP_SLOT
+	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT
   .addend: ; Addend
 	dq 0
 
@@ -285,7 +267,7 @@ rela_plt_exit:
   .offset: ; Address
 	dq BASE + 2*MB + got_plt_exit
   .info:   ; Relocation type and symbol index
-	dq dynsym_exit_idx<<32 | R_386_JMP_SLOT
+	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT
   .addend: ; Addend
 	dq 0
 

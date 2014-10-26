@@ -28,7 +28,7 @@ ehdr:
 	dw ET_EXEC                   ; type: Object file type
 	dw EM_X86_64                 ; machine: Architecture
 	dd 1                         ; version: Object file version
-	dq BASE_CODE + text.start    ; entry: Entry point virtual address
+	dq BASE_CODE2 + text.start   ; entry: Entry point virtual address
 	dq phdr                      ; phoff: Program header table file offset
 	dq 0                         ; shoff: Section header table file offset
 	dd 0                         ; flags: Processor-specific flags
@@ -172,43 +172,6 @@ phdr:
 
 ; === [ Sections ] =============================================================
 
-; --- [ .plt section ] ---------------------------------------------------------
-
-plt:
-
-  .resolve:
-	push	QWORD [rel PAGE + got_plt.1]
-	jmp	[rel PAGE + got_plt.2]
-
-  .printf:
-	jmp	[rel PAGE + got_plt.printf]
-
-  .resolve_printf:
-	push	QWORD 0
-	jmp	NEAR .resolve
-
-  .exit:
-	jmp	[rel PAGE + got_plt.exit]
-
-  .resolve_exit:
-	push	QWORD 1
-	jmp	NEAR .resolve
-
-; --- [/ .plt section ] --------------------------------------------------------
-
-; --- [ .text section ] --------------------------------------------------------
-
-text:
-
-  .start:
-	mov	rdi, BASE_RODATA + rodata.hello
-	call	plt.printf
-	jmp	$
-	mov	edi, 0
-	call	plt.exit
-
-; --- [/ .text section ] -------------------------------------------------------
-
 code_seg.size equ $ - code_seg
 
 ; ___ [/ Code segment ] ________________________________________________________
@@ -231,10 +194,10 @@ got_plt:
 	dq 0
 
   .printf:
-	dq BASE_CODE + plt.resolve_printf
+	dq BASE_CODE2 + plt.resolve_printf
 
   .exit:
-	dq BASE_CODE + plt.resolve_exit
+	dq BASE_CODE2 + plt.resolve_exit
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
 
@@ -386,6 +349,43 @@ rodata_seg.size equ $ - data_seg
 ; ___ [ Code segment ] _________________________________________________________
 
 code_seg2:
+
+; --- [ .plt section ] ---------------------------------------------------------
+
+plt:
+
+  .resolve:
+	push	QWORD [rel (BASE_DATA - BASE_CODE2) + got_plt.1]
+	jmp	[rel (BASE_DATA - BASE_CODE2) + got_plt.2]
+
+  .printf:
+	jmp	[rel (BASE_DATA - BASE_CODE2) + got_plt.printf]
+
+  .resolve_printf:
+	push	QWORD 0
+	jmp	NEAR .resolve
+
+  .exit:
+	jmp	[rel (BASE_DATA - BASE_CODE2) + got_plt.exit]
+
+  .resolve_exit:
+	push	QWORD 1
+	jmp	NEAR .resolve
+
+; --- [/ .plt section ] --------------------------------------------------------
+
+; --- [ .text section ] --------------------------------------------------------
+
+text:
+
+  .start:
+	mov	rdi, BASE_RODATA + rodata.hello
+	call	plt.printf
+	jmp	$
+	mov	edi, 0
+	call	plt.exit
+
+; --- [/ .text section ] -------------------------------------------------------
 
 code_seg2.size equ $ - code_seg2
 

@@ -49,7 +49,6 @@ ehdr:
 PT_LOAD      equ 1          ; Loadable program segment
 PT_DYNAMIC   equ 2          ; Dynamic linking information
 PT_INTERP    equ 3          ; Program interpreter
-PT_GNU_STACK equ 0x6474E551 ; Indicates stack executability
 
 ; Segment flags.
 PF_X equ 0x1 ; Segment is executable
@@ -125,18 +124,6 @@ phdr:
 	dq BASE_RODATA + dynamic  ; paddr: Segment physical address
 	dq dynamic.size           ; filesz: Segment size in file
 	dq dynamic.size           ; memsz: Segment size in memory
-	dq 0x8                    ; align: Segment alignment
-
-; --- [ GNU stack program header ] ---------------------------------------------
-
-  .gnu_stack:
-	dd PT_GNU_STACK           ; type: Segment type
-	dd PF_R | PF_W            ; flags: Segment flags
-	dq 0                      ; offset: Segment file offset
-	dq 0                      ; vaddr: Segment virtual address
-	dq 0                      ; paddr: Segment physical address
-	dq 0                      ; filesz: Segment size in file
-	dq 0                      ; memsz: Segment size in memory
 	dq 0x8                    ; align: Segment alignment
 
 .size  equ $ - phdr

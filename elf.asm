@@ -49,7 +49,6 @@ ehdr:
 PT_LOAD      equ 1          ; Loadable program segment
 PT_DYNAMIC   equ 2          ; Dynamic linking information
 PT_INTERP    equ 3          ; Program interpreter
-PT_PHDR      equ 6          ; Entry for header table itself
 PT_GNU_STACK equ 0x6474E551 ; Indicates stack executability
 
 ; Segment flags.
@@ -64,21 +63,7 @@ BASE_RODATA equ BASE
 BASE_DATA   equ BASE + 1*PAGE
 BASE_CODE   equ BASE + 2*PAGE
 
-; --- [ Program header program header ] ----------------------------------------
-
 phdr:
-
-  .phdr:
-	dd PT_PHDR                  ; type: Segment type
-	dd PF_R                     ; flags: Segment flags
-	dq phdr                     ; offset: Segment file offset
-	dq BASE_RODATA + phdr       ; vaddr: Segment virtual address
-	dq BASE_RODATA + phdr       ; paddr: Segment physical address
-	dq .size                    ; filesz: Segment size in file
-	dq .size                    ; memsz: Segment size in memory
-	dq 0x8                      ; align: Segment alignment
-
-.entsize equ $ - phdr
 
 ; --- [ Interpreter program header ] -------------------------------------------
 
@@ -91,6 +76,8 @@ phdr:
 	dq interp.size              ; filesz: Segment size in file
 	dq interp.size              ; memsz: Segment size in memory
 	dq 0x1                      ; align: Segment alignment
+
+.entsize equ $ - phdr
 
 ; --- [ Read-only data segment program header ] --------------------------------
 

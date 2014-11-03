@@ -78,6 +78,18 @@ phdr:
 
 .entsize equ $ - phdr
 
+; --- [ Dynamic array program header ] -----------------------------------------
+
+  .dynamic:
+	dd PT_DYNAMIC             ; type: Segment type
+	dd PF_R                   ; flags: Segment flags
+	dq dynamic                ; offset: Segment file offset
+	dq BASE_RODATA + dynamic  ; vaddr: Segment virtual address
+	dq BASE_RODATA + dynamic  ; paddr: Segment physical address
+	dq dynamic.size           ; filesz: Segment size in file
+	dq dynamic.size           ; memsz: Segment size in memory
+	dq 0x8                    ; align: Segment alignment
+
 ; --- [ Read-only data segment program header ] --------------------------------
 
   .rodata_seg:
@@ -114,18 +126,6 @@ phdr:
 	dq code_seg.size            ; memsz: Segment size in memory
 	dq PAGE                     ; align: Segment alignment
 
-; --- [ Dynamic array program header ] -----------------------------------------
-
-  .dynamic:
-	dd PT_DYNAMIC             ; type: Segment type
-	dd PF_R                   ; flags: Segment flags
-	dq dynamic                ; offset: Segment file offset
-	dq BASE_RODATA + dynamic  ; vaddr: Segment virtual address
-	dq BASE_RODATA + dynamic  ; paddr: Segment physical address
-	dq dynamic.size           ; filesz: Segment size in file
-	dq dynamic.size           ; memsz: Segment size in memory
-	dq 0x8                    ; align: Segment alignment
-
 .size  equ $ - phdr
 .count equ .size / .entsize
 
@@ -142,87 +142,6 @@ interp:
 .size equ $ - interp
 
 ; --- [/ .interp section ] -----------------------------------------------------
-
-; --- [ .dynsym section ] ------------------------------------------------------
-
-; Symbol bindings.
-STB_GLOBAL equ 1 ; Global symbol
-
-; Symbol types.
-STT_FUNC equ 2 ; Code object
-
-; Symbol visibility.
-STV_DEFAULT equ 0 ; Default visibility.
-
-dynsym:
-
-  .printf:
-	dd dynstr.printf_off        ; name: Symbol name (string table offset)
-	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
-	db STV_DEFAULT              ; other: Symbol visibility
-	dw 0                        ; shndx: Section index
-	dq 0                        ; value: Symbol value
-	dq 0                        ; size: Symbol size
-
-.entsize equ $ - dynsym
-
-  .exit:
-	dd dynstr.exit_off          ; name: Symbol name (string table offset)
-	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
-	db STV_DEFAULT              ; other: Symbol visibility
-	dw 0                        ; shndx: Section index
-	dq 0                        ; value: Symbol value
-	dq 0                        ; size: Symbol size
-
-.printf_idx equ (.printf - dynsym) / .entsize
-.exit_idx   equ (.exit - dynsym) / .entsize
-
-; --- [/ .dynsym section ] -----------------------------------------------------
-
-; --- [ .dynstr section ] ------------------------------------------------------
-
-dynstr:
-
-  .libc:
-	db "libc.so.6", 0
-  .printf:
-	db "printf", 0
-  .exit:
-	db "exit", 0
-
-.libc_off   equ .libc - dynstr
-.printf_off equ .printf - dynstr
-.exit_off   equ .exit - dynstr
-
-; --- [/ .dynstr section ] -----------------------------------------------------
-
-; --- [ .rela.plt section ] ----------------------------------------------------
-
-; Relocation types.
-R_386_JMP_SLOT equ 7
-
-rela_plt:
-
-  .printf:
-	dq BASE_DATA + got_plt.printf             ; offset: Address
-	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT ; info: Relocation type and symbol index
-	dq 0                                      ; addend: Addend
-
-  .exit:
-	dq BASE_DATA + got_plt.exit               ; offset: Address
-	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT   ; info: Relocation type and symbol index
-	dq 0                                      ; addend: Addend
-
-; --- [/ .rela.plt section ] ---------------------------------------------------
-
-; --- [ .rodata section ] ------------------------------------------------------
-
-rodata:
-
-  .hello:
-	db "hello world", 10, 0
-
-; --- [/ .rodata section ] -----------------------------------------------------
 
 ; --- [ .dynamic section ] -----------------------------------------------------
 
@@ -265,6 +184,87 @@ dynamic:
 .size equ $ - dynamic
 
 ; --- [/ .dynamic section ] ----------------------------------------------------
+
+; --- [ .dynstr section ] ------------------------------------------------------
+
+dynstr:
+
+  .libc:
+	db "libc.so.6", 0
+  .printf:
+	db "printf", 0
+  .exit:
+	db "exit", 0
+
+.libc_off   equ .libc - dynstr
+.printf_off equ .printf - dynstr
+.exit_off   equ .exit - dynstr
+
+; --- [/ .dynstr section ] -----------------------------------------------------
+
+; --- [ .dynsym section ] ------------------------------------------------------
+
+; Symbol bindings.
+STB_GLOBAL equ 1 ; Global symbol
+
+; Symbol types.
+STT_FUNC equ 2 ; Code object
+
+; Symbol visibility.
+STV_DEFAULT equ 0 ; Default visibility.
+
+dynsym:
+
+  .printf:
+	dd dynstr.printf_off        ; name: Symbol name (string table offset)
+	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
+	db STV_DEFAULT              ; other: Symbol visibility
+	dw 0                        ; shndx: Section index
+	dq 0                        ; value: Symbol value
+	dq 0                        ; size: Symbol size
+
+.entsize equ $ - dynsym
+
+  .exit:
+	dd dynstr.exit_off          ; name: Symbol name (string table offset)
+	db STB_GLOBAL<<4 | STT_FUNC ; info: Symbol type and binding
+	db STV_DEFAULT              ; other: Symbol visibility
+	dw 0                        ; shndx: Section index
+	dq 0                        ; value: Symbol value
+	dq 0                        ; size: Symbol size
+
+.printf_idx equ (.printf - dynsym) / .entsize
+.exit_idx   equ (.exit - dynsym) / .entsize
+
+; --- [/ .dynsym section ] -----------------------------------------------------
+
+; --- [ .rela.plt section ] ----------------------------------------------------
+
+; Relocation types.
+R_386_JMP_SLOT equ 7
+
+rela_plt:
+
+  .printf:
+	dq BASE_DATA + got_plt.printf             ; offset: Address
+	dq dynsym.printf_idx<<32 | R_386_JMP_SLOT ; info: Relocation type and symbol index
+	dq 0                                      ; addend: Addend
+
+  .exit:
+	dq BASE_DATA + got_plt.exit               ; offset: Address
+	dq dynsym.exit_idx<<32 | R_386_JMP_SLOT   ; info: Relocation type and symbol index
+	dq 0                                      ; addend: Addend
+
+; --- [/ .rela.plt section ] ---------------------------------------------------
+
+; --- [ .rodata section ] ------------------------------------------------------
+
+rodata:
+
+  .hello:
+	db "hello world", 10, 0
+
+; --- [/ .rodata section ] -----------------------------------------------------
 
 rodata_seg.size equ $ - rodata_seg
 

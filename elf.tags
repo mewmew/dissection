@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wxHexEditor_XML_TAG>
+  <filename path="elf">
+    <TAG id="11">
+      <start_offset>626</start_offset>
+      <end_offset>688</end_offset>
+      <tag_text>Code segment</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#FFE599</note_colour>
+    </TAG>
+    <TAG id="10">
+      <start_offset>586</start_offset>
+      <end_offset>625</end_offset>
+      <tag_text>Data segment</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#B6D7A8</note_colour>
+    </TAG>
+    <TAG id="9">
+      <start_offset>359</start_offset>
+      <end_offset>454</end_offset>
+      <tag_text>.dynamic section</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#B4A7D6</note_colour>
+    </TAG>
+    <TAG id="8">
+      <start_offset>344</start_offset>
+      <end_offset>358</end_offset>
+      <tag_text>.interp section</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#B7B7B7</note_colour>
+    </TAG>
+    <TAG id="7">
+      <start_offset>296</start_offset>
+      <end_offset>303</end_offset>
+      <tag_text>Offset to code segment</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#F1C232</note_colour>
+    </TAG>
+    <TAG id="6">
+      <start_offset>240</start_offset>
+      <end_offset>247</end_offset>
+      <tag_text>Offset to data segment</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#93C47D</note_colour>
+    </TAG>
+    <TAG id="5">
+      <start_offset>184</start_offset>
+      <end_offset>191</end_offset>
+      <tag_text>Offset to read-only segment</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#3D85C6</note_colour>
+    </TAG>
+    <TAG id="4">
+      <start_offset>128</start_offset>
+      <end_offset>135</end_offset>
+      <tag_text>Offset to .dynamic section</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#674EA7</note_colour>
+    </TAG>
+    <TAG id="3">
+      <start_offset>72</start_offset>
+      <end_offset>79</end_offset>
+      <tag_text>Offset to .interp section</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#666666</note_colour>
+    </TAG>
+    <TAG id="2">
+      <start_offset>64</start_offset>
+      <end_offset>343</end_offset>
+      <tag_text>Program header table</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#EA9999</note_colour>
+    </TAG>
+    <TAG id="1">
+      <start_offset>32</start_offset>
+      <end_offset>39</end_offset>
+      <tag_text>Offset to program header table</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#CC0000</note_colour>
+    </TAG>
+    <TAG id="0">
+      <start_offset>0</start_offset>
+      <end_offset>585</end_offset>
+      <tag_text>Read-only segment</tag_text>
+      <font_colour>#505050</font_colour>
+      <note_colour>#9FC5E8</note_colour>
+    </TAG>
+  </filename>
+</wxHexEditor_XML_TAG>

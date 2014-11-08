@@ -169,13 +169,13 @@ dynamic:
 	dq DT_SYMTAB              ; tag: Dynamic entry type
 	dq BASE_RODATA + dynsym   ; val: Integer or address value
 
-  .pltgot:
-	dq DT_PLTGOT              ; tag: Dynamic entry type
-	dq BASE_DATA + got_plt    ; val: Integer or address value
-
   .jmprel:
 	dq DT_JMPREL              ; tag: Dynamic entry type
 	dq BASE_RODATA + rela_plt ; val: Integer or address value
+
+  .pltgot:
+	dq DT_PLTGOT              ; tag: Dynamic entry type
+	dq BASE_DATA + got_plt    ; val: Integer or address value
 
   .null:
 	dq DT_NULL               ; tag: Dynamic entry type
@@ -281,10 +281,10 @@ got_plt:
   .libc:
 	dq BASE_RODATA + dynamic.libc
 
-  .1:
+  .1: ; shared object struct ptr (ref: binutils-2.24/bfd/elf64-s390.c:3709)
 	dq 0
 
-  .2:
+  .dl_runtime_resolve:
 	dq 0
 
   .printf:
@@ -309,20 +309,20 @@ plt:
 
   .resolve:
 	push	QWORD [rel (BASE_DATA - BASE_CODE) + got_plt.1]
-	jmp	[rel (BASE_DATA - BASE_CODE) + got_plt.2]
+	jmp	[rel (BASE_DATA - BASE_CODE) + got_plt.dl_runtime_resolve]
 
   .printf:
 	jmp	[rel (BASE_DATA - BASE_CODE) + got_plt.printf]
 
   .resolve_printf:
-	push	QWORD 0
+	push	QWORD dynsym.printf_idx
 	jmp	NEAR .resolve
 
   .exit:
 	jmp	[rel (BASE_DATA - BASE_CODE) + got_plt.exit]
 
   .resolve_exit:
-	push	QWORD 1
+	push	QWORD dynsym.exit_idx
 	jmp	NEAR .resolve
 
 ; --- [/ .plt section ] --------------------------------------------------------

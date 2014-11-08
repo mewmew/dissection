@@ -281,7 +281,7 @@ got_plt:
   .dynamic:
 	dq BASE_RODATA + dynamic
 
-  .1: ; shared object struct ptr (ref: binutils-2.24/bfd/elf64-s390.c:3709)
+  .link_map:
 	dq 0
 
   .dl_runtime_resolve:
@@ -308,7 +308,7 @@ code_seg:
 plt:
 
   .resolve:
-	push	QWORD [rel (BASE_DATA - BASE_CODE) + got_plt.1]
+	push	QWORD [rel (BASE_DATA - BASE_CODE) + got_plt.link_map]
 	jmp	[rel (BASE_DATA - BASE_CODE) + got_plt.dl_runtime_resolve]
 
   .printf:

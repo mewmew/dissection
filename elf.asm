@@ -278,8 +278,8 @@ data_seg:
 
 got_plt:
 
-  .libc:
-	dq BASE_RODATA + dynamic.libc
+  .dynamic:
+	dq BASE_RODATA + dynamic
 
   .1: ; shared object struct ptr (ref: binutils-2.24/bfd/elf64-s390.c:3709)
 	dq 0

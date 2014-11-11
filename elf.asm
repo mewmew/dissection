@@ -334,7 +334,7 @@ text:
   .start:
 	mov	rdi, BASE_RODATA + rodata.hello
 	call	plt.printf
-	mov	edi, 0
+	mov	rdi, 0
 	call	plt.exit
 
 ; --- [/ .text section ] -------------------------------------------------------

@@ -12,7 +12,7 @@ The representation of executables, shared libraries and relocatable object code 
 
 Table 1: A summary of the most commonly used sections in ELF files. The `.text` section contains executable code while the `.rodata`, `.data` and `.bss` sections contains data in various forms.
 
-To gain a better understanding of the anatomy of executables the remainder of this section describes the structure of ELF files and presents the dissection of a simple _"hello world"_ ELF executable, largely inspired by Eric Youngdale's article on _["The ELF Object File Format by Dissection"](http://www.linuxjournal.com/article/1060)_. Although the ELF and PE file formats differs with regards to specific details, the general principles are applicable to both formats.
+To gain a better understanding of the anatomy of executables the remainder of this section describes the structure of ELF files and presents the dissection of a simple _"hello world"_ ELF executable, largely inspired by Eric Youngdale's article on _[The ELF Object File Format by Dissection](http://www.linuxjournal.com/article/1060)_. Although the ELF and PE file formats differs with regards to specific details, the general principles are applicable to both formats.
 
 In general ELF files consists of a file header, zero or more program headers, zero or more section headers and data referred to by the program or section headers, as depicted in figure 1.
 
@@ -57,10 +57,10 @@ Lets take a step back for a moment and reflect on how dynamic linking is accompl
 ```asm
 text:
   .start:
-	mov	rdi, rodata.hello
-	call	plt.printf
-	mov	rdi, 0
-	call	plt.exit
+        mov     rdi, rodata.hello
+        call    plt.printf
+        mov     rdi, 0
+        call    plt.exit
 ```
 
 Figure 3: The assembly instructions of the `.text` section.
@@ -68,18 +68,18 @@ Figure 3: The assembly instructions of the `.text` section.
 ```asm
 plt:
   .resolve:
-	push	[got_plt.link_map]
-	jmp	[got_plt.dl_runtime_resolve]
+        push        [got_plt.link_map]
+        jmp         [got_plt.dl_runtime_resolve]
   .printf:
-	jmp	[got_plt.printf]
+        jmp         [got_plt.printf]
   .resolve_printf:
-	push	dynsym.printf_idx
-	jmp	.resolve
+        push        dynsym.printf_idx
+        jmp         .resolve
   .exit:
-	jmp	[got_plt.exit]
+        jmp         [got_plt.exit]
   .resolve_exit:
-	push	dynsym.exit_idx
-	jmp	.resolve
+        push        dynsym.exit_idx
+        jmp         .resolve
 ```
 
 Figure 4: The assembly instructions of the `.plt` section.
@@ -95,6 +95,9 @@ To summarize, the execution of a dynamically linked executable can roughly be de
 public domain
 -------------
 
-The source code and contents of this repository is hereby released into the *[public domain]*.
+The source code and any original content of this repository is hereby released into the *[public domain]*.
+
+The [original version](https://en.wikipedia.org/wiki/File:Elf-layout--en.svg) of `elf_structure.png` is licensed [CC-BY].
 
 [public domain]: https://creativecommons.org/publicdomain/zero/1.0/
+[CC-BY]: https://creativecommons.org/licenses/by/4.0/

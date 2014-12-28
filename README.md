@@ -92,10 +92,10 @@ A closer look at the instructions denoted by the `.resolve_printf` label in figu
 
 To summarize, the execution of a dynamically linked executable can roughly be described as follows. Upon execution the kernel parses the program headers of the ELF file, maps each segment to one or more pages in memory with appropriate access permissions, and transfers the control of execution to the linker (_"/lib/ld64.so.1"_) which was loaded in a similar fashion. The linker is responsible for initiating the addresses of the _dl_runtime_resolve_ function and the aforementioned linked list, both of which are stored in the GOT of the executable. After this setup is complete the linker transfers control to the entry point of the executable, as specified by the ELF file header (in this case the `.start` label of the `.text` section). At this point the assembly instructions of the application are executed until termination and external functions are lazily resolved at runtime by the linker through invokations to the _dl_runtime_resolve_ function.
 
-public domain
+Public domain
 -------------
 
-The source code and any original content of this repository is hereby released into the *[public domain]*.
+The source code and any original content of this repository is hereby released into the [public domain].
 
 The [original version](https://en.wikipedia.org/wiki/File:Elf-layout--en.svg) of `elf_structure.png` is licensed [CC-BY].
 

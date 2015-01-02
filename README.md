@@ -1,5 +1,4 @@
-The Anatomy of an Executable
-============================
+# The Anatomy of an Executable
 
 The representation of executables, shared libraries and relocatable object code is standardized by a variety of file formats which provides encapsulation of assembly instructions and data. Two such formats are the Portable Executable (PE) file format and the Executable and Linkable Format (ELF), which are used by Windows and Linux respectively. Both of these formats partition executable code and data into sections and assign appropriate access permissions to each section, as summarized by table 1. In general no single section has both write and execute permissions as this could compromise the security of the system.
 
@@ -92,8 +91,7 @@ A closer look at the instructions denoted by the `.resolve_printf` label in figu
 
 To summarize, the execution of a dynamically linked executable can roughly be described as follows. Upon execution the kernel parses the program headers of the ELF file, maps each segment to one or more pages in memory with appropriate access permissions, and transfers the control of execution to the linker (_"/lib/ld64.so.1"_) which was loaded in a similar fashion. The linker is responsible for initiating the addresses of the _dl_runtime_resolve_ function and the aforementioned linked list, both of which are stored in the GOT of the executable. After this setup is complete the linker transfers control to the entry point of the executable, as specified by the ELF file header (in this case the `.start` label of the `.text` section). At this point the assembly instructions of the application are executed until termination and external functions are lazily resolved at runtime by the linker through invokations to the _dl_runtime_resolve_ function.
 
-Public domain
--------------
+## Public domain
 
 The source code and any original content of this repository is hereby released into the [public domain].
 

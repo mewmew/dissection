@@ -137,7 +137,7 @@ phdr:
 
 interp:
 
-	db "/lib/ld64.so.1", 0
+	db "/lib64/ld-linux-x86-64.so.2", 0
 
 .size equ $ - interp
 

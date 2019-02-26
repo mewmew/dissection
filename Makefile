@@ -9,7 +9,7 @@ check: elf
 
 hello:
 	nasm -f elf64 -o $@.o $@.asm
-	ld -s -o $@ $@.o -lc
+	ld -I /lib64/ld-linux-x86-64.so.2 -s -o $@ $@.o -lc
 	@rm $@.o
 	strip -R .hash $@
 	strip -R .gnu.version $@

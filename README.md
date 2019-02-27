@@ -15,7 +15,7 @@ To gain a better understanding of the anatomy of executables the remainder of th
 
 In general, ELF files consist of a file header, zero or more program headers, zero or more section headers and data referred to by the program or section headers, as depicted in figure 1.
 
-![ELF file structure](elf_structure.png)
+![ELF file structure](img/elf_structure.png)
 
 Figure 1: The basic structure of an ELF file.
 
@@ -23,7 +23,7 @@ All ELF files starts with the four byte identifier `0x7F`, `'E'`, `'L'`, `'F'` w
 
 Each program and section header describes a continuous segment or section of memory respectively. In general, segments are used by the linker to load executables into memory with correct access permissions, while sections are used by the compiler to categorize data and instructions. Therefore, the program headers are optional for relocatable and shared objects, while the section headers are optional for executables.
 
-![Colour-coded file contents](elf_dissection.png)
+![Colour-coded file contents](img/elf_dissection.png)
 
 Figure 2: The entire contents of a simple _"hello world"_ ELF executable with colour-coded file offsets, sections, segments and program headers. Each file offset is 8 bytes in width and coloured using a darker shade of its corresponding segment, section or program header.
 

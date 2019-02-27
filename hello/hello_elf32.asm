@@ -8,7 +8,7 @@ _start:
 	push    hello    ; arg1, "hello world\n"
 	call    printf   ; printf
 	add     esp, 4
-	push    42       ; arg1, 42
+	push    0        ; arg1, 0
 	call    exit     ; exit
 	add     esp, 4
 	ret

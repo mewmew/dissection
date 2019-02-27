@@ -1,2 +1,4 @@
+elf32/elf32
 elf64/elf64
+hello/hello_elf32
 hello/hello_elf64

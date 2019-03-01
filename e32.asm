@@ -115,7 +115,7 @@ phdr.entsize equ $ - phdr
 
   .interp:
 	dd      PT_INTERP                ; type:   Entry type.
-	dd      interp - BASE_RODATA     ; off:    File offset of contents.
+	dd      interp_off               ; off:    File offset of contents.
 	dd      interp                   ; vaddr:  Virtual address in memory image.
 	dd      interp                   ; paddr:  Physical address (not used).
 	dd      interp.size              ; filesz: Size of contents in file.
@@ -243,7 +243,8 @@ phdr.count equ phdr.size / phdr.entsize
 
 ; --- [ .interp section ] ------------------------------------------------------
 
-; 00000134
+interp_off equ $ - BASE
+
 interp:
 
 	db      "/lib/ld-linux.so.2", 0
@@ -2540,19 +2541,87 @@ db 0x74, 0x65, 0x78, 0x74, 0x00, 0x2e, 0x72, 0x6f, 0x64, 0x61, 0x74, 0x61, 0x00,
 db 0x6e, 0x61, 0x6d, 0x69, 0x63, 0x00, 0x2e, 0x67, 0x6f, 0x74, 0x2e, 0x70, 0x6c, 0x74, 0x00, 0x00 ; |namic..got.plt..|
 
 ; 00003070
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
-; 00003080
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+; === [ Section headers ] ======================================================
 
-; 00003090
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 ; |................|
+; Section header types.
+SHT_NULL        equ 0          ; inactive
+SHT_PROGBITS    equ 1          ; program defined information
+SHT_STRTAB      equ 3          ; string table section
+SHT_DYNAMIC     equ 6          ; dynamic section
+SHT_REL         equ 9          ; relocation section - no addends
+SHT_DYNSYM      equ 11         ; dynamic symbol table section
+SHT_GNU_VERNEED equ 0x6FFFFFFE ; GNU version needs section
 
-; 000030a0
-db 0x02, 0x00, 0x00, 0x00, 0x34, 0x81, 0x04, 0x08, 0x34, 0x01, 0x00, 0x00, 0x13, 0x00, 0x00, 0x00 ; |....4...4.......|
+; Section header flags.
+SHF_WRITE     equ 0x01 ; Section contains writable data.
+SHF_ALLOC     equ 0x02 ; Section occupies memory.
+SHF_EXECINSTR equ 0x04 ; Section contains instructions.
+SHF_INFO_LINK equ 0x40 ; sh_info holds section index.
 
-; 000030b0
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+shdr:
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+
+  .null:
+	dd      0                           ; name:      Section name (index into the section header string table).
+	dd      SHT_NULL                    ; type:      Section type.
+	dd      0                           ; flags:     Section flags.
+	dd      0                           ; addr:      Address in memory image.
+	dd      0                           ; off:       Offset in file.
+	dd      0                           ; size:      Size in bytes.
+	dd      0                           ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0                           ; addralign: Alignment in bytes.
+	dd      0                           ; entsize:   Size of each entry in section.
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 1] .interp           PROGBITS        08048134 000134 000013 00   A  0   0  1
+
+interp_idx  equ 0x0000000b ; .interp string index
+
+  .interp:
+	dd      interp_idx                  ; name:      Section name (index into the section header string table).
+	dd      SHT_PROGBITS                ; type:      Section type.
+	dd      SHF_ALLOC                   ; flags:     Section flags.
+	dd      interp                      ; addr:      Address in memory image.
+	dd      interp_off                  ; off:       Offset in file.
+	dd      interp.size                 ; size:      Size in bytes.
+	dd      0                           ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0x1                         ; addralign: Alignment in bytes.
+	dd      0                           ; entsize:   Size of each entry in section.
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 2] .dynsym           DYNSYM          08048178 000178 000030 10   A  3   1  4
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 3] .dynstr           STRTAB          080481a8 0001a8 000021 00   A  0   0  1
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 4] .gnu.version_r    VERNEED         080481d0 0001d0 000020 00   A  3   1  4
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 5] .rel.plt          REL             080481f0 0001f0 000010 08  AI  2  10  4
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 6] .plt              PROGBITS        08049000 001000 000030 04  AX  0   0 16
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 7] .text             PROGBITS        08049030 001030 000018 00  AX  0   0 16
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 8] .rodata           PROGBITS        0804a000 002000 00000d 00   A  0   0  4
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [ 9] .dynamic          DYNAMIC         0804bf58 002f58 0000a8 08  WA  3   0  4
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [10] .got.plt          PROGBITS        0804c000 003000 000014 04  WA  0   0  4
+
+;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+;  [11] .shstrtab         STRTAB          00000000 003014 00005b 00      0   0  1
 
 ; 000030c0
 db 0x13, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x78, 0x81, 0x04, 0x08 ; |............x...|

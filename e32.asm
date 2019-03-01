@@ -1,15 +1,84 @@
+BITS 32
 
-; 00000000
-db 0x7f, 0x45, 0x4c, 0x46, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.ELF............|
+; Base addresses.
+BASE        equ 0x08048000
+;PAGE        equ 0x1000
+BASE_RODATA equ BASE
+;BASE_DATA   equ BASE + 1*PAGE + rodata_seg.size
+;BASE_CODE   equ BASE + 2*PAGE + rodata_seg.size + data_seg.size
 
-; 00000010
-db 0x02, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x30, 0x90, 0x04, 0x08, 0x34, 0x00, 0x00, 0x00 ; |........0...4...|
+; ___ [ Read-only data segment ] _______________________________________________
 
-; 00000020
-db 0x70, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34, 0x00, 0x20, 0x00, 0x07, 0x00, 0x28, 0x00 ; |p0......4. ...(.|
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  LOAD           0x000000 0x08048000 0x08048000 0x00200 0x00200 R   0x1000
+
+SECTION .rdata vstart=BASE_RODATA align=1
+
+rodata_seg:
+
+; === [ ELF file header ] ======================================================
+
+; ELF classes.
+ELFCLASS32 equ 1 ; 32-bit object
+
+; Data encodings.
+ELFDATA2LSB equ 1 ; 2's complement with little-endian encoding
+
+; Object file types.
+ET_EXEC equ 2 ; Executable file
+
+; Architecture.
+EM_386 equ 3 ; Intel i386
+
+ehdr:
+
+text_start   equ 0x08049030 ; TODO: remove
+shoff        equ 0x00003070 ; TODO: remove
+ehdr_size    equ 0x0034     ; TODO: remove
+phdr_entsize equ 0x0020     ; TODO: remove
+phdr_count   equ 0x0007     ; TODO: remove
+shentsize    equ 0x0028     ; TODO: remove
+shnum        equ 0x000c     ; TODO: remove
+shstrndx     equ 0x000b     ; TODO: remove
+
+	db      0x7F, "ELF"               ; ident.magic: ELF magic number
+	db      ELFCLASS32                ; ident.class: File class
+	db      ELFDATA2LSB               ; ident.data: Data encoding
+	db      1                         ; ident.version: ELF header version
+	db      0, 0, 0, 0, 0, 0, 0, 0, 0 ; ident.pad: Padding
+	dw      ET_EXEC                   ; type: Object file type
+	dw      EM_386                    ; machine: Architecture
+	dd      1                         ; version: Object file version
+	;dd      text.start                ; entry: Entry point virtual address
+	dd      text_start                ; entry: Entry point virtual address
+	dd      phdr - BASE_RODATA        ; phoff: Program header table file offset
+	;dd      0                         ; shoff: Section header table file offset
+	dd      shoff                     ; shoff: Section header table file offset
+	dd      0                         ; flags: Processor-specific flags
+	;dw      ehdr.size                 ; ehsize: ELF header size in bytes
+	dw      ehdr_size                 ; ehsize: ELF header size in bytes
+	;dw      phdr.entsize              ; phentsize: Program header table entry size
+	dw      phdr_entsize              ; phentsize: Program header table entry size
+	;dw      phdr.count                ; phnum: Program header table entry count
+	dw      phdr_count                ; phnum: Program header table entry count
+	;dw      0                         ; shentsize: Section header table entry size
+	dw      shentsize                 ; shentsize: Section header table entry size
+	;dw      0                         ; shnum: Section header table entry count
+	dw      shnum                     ; shnum: Section header table entry count
+	;dw      0                         ; shstrndx: Section header string table index
+	;dw      0                         ; shstrndx: Section header string table index
+	dw      shstrndx                  ; shstrndx: Section header string table index
+
+.size equ $ - ehdr
+
+; === [/ ELF file header ] =====================================================
+
+; === [ Program headers ] ======================================================
+
+phdr:
 
 ; 00000030
-db 0x0c, 0x00, 0x0b, 0x00, 0x06, 0x00, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00, 0x34, 0x80, 0x04, 0x08 ; |........4...4...|
+db 0x06, 0x00, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00, 0x34, 0x80, 0x04, 0x08 ; |........4...4...|
 
 ; 00000040
 db 0x34, 0x80, 0x04, 0x08, 0xe0, 0x00, 0x00, 0x00, 0xe0, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 ; |4...............|

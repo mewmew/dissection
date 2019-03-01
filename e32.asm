@@ -168,20 +168,32 @@ code_seg_size equ 0x00000048 ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x002000 0x0804a000 0x0804a000 0x0000d 0x0000d R   0x1000
 
+hello_off      equ 0x00002000    ; TODO: remove
+BASE_HELLO     equ BASE + 2*PAGE ; TODO: remove
+hello_seg      equ BASE_HELLO    ; TODO: remove
+hello_seg_size equ 0x0000000d    ; TODO: remove
+
+  .hello_seg:
+	dd      PT_LOAD                  ; type:   Entry type.
+	;dd      hello_seg - BASE_hello     ; off:    File offset of contents.
+	dd      hello_off                 ; off:    File offset of contents.
+	dd      hello_seg                 ; vaddr:  Virtual address in memory image.
+	dd      hello_seg                 ; paddr:  Physical address (not used).
+	;dd      hello_seg.size            ; filesz: Size of contents in file.
+	dd      hello_seg_size            ; filesz: Size of contents in file.
+	;dd      hello_seg.size            ; memsz:  Size of contents in memory.
+	dd      hello_seg_size            ; memsz:  Size of contents in memory.
+	dd      PF_R                     ; flags:  Access permission flags.
+	dd      0x1000                   ; align:  Alignment in memory and file.
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x002f58 0x0804bf58 0x0804bf58 0x000bc 0x000bc RW  0x1000
 
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  DYNAMIC        0x002f58 0x0804bf58 0x0804bf58 0x000a8 0x000a8 RW  0x4
 
-; 000000b0
-db 0x01, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0xa0, 0x04, 0x08 ; |......... ......|
-
-; 000000c0
-db 0x00, 0xa0, 0x04, 0x08, 0x0d, 0x00, 0x00, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 ; |................|
-
 ; 000000d0
-db 0x00, 0x10, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x58, 0x2f, 0x00, 0x00, 0x58, 0xbf, 0x04, 0x08 ; |........X/..X...|
+db 0x01, 0x00, 0x00, 0x00, 0x58, 0x2f, 0x00, 0x00, 0x58, 0xbf, 0x04, 0x08 ; |........X/..X...|
 
 ; 000000e0
 db 0x58, 0xbf, 0x04, 0x08, 0xbc, 0x00, 0x00, 0x00, 0xbc, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00 ; |X...............|

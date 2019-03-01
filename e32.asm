@@ -15,6 +15,8 @@ BASE_CODE   equ BASE + 1*PAGE
 
 SECTION .rdata vstart=BASE_RODATA align=1
 
+rodata_seg_off equ $ - BASE
+
 rodata_seg:
 
 ; === [ ELF file header ] ======================================================
@@ -112,50 +114,39 @@ phdr_size equ phdr_count*phdr_entsize ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  INTERP         0x000134 0x08048134 0x08048134 0x00013 0x00013 R   0x1
 
-interp_off  equ 0x134             ; TODO: remove
-interp      equ BASE + interp_off ; TODO: remove
-interp_size equ 0x00000013        ; TODO: remove
-
   .interp:
 	dd      PT_INTERP                ; type:   Entry type.
 	dd      interp - BASE_RODATA     ; off:    File offset of contents.
 	dd      interp                   ; vaddr:  Virtual address in memory image.
 	dd      interp                   ; paddr:  Physical address (not used).
-	;dd      interp.size              ; filesz: Size of contents in file.
-	dd      interp_size              ; filesz: Size of contents in file.
-	;dd      interp.size              ; memsz:  Size of contents in memory.
-	dd      interp_size              ; memsz:  Size of contents in memory.
+	dd      interp.size              ; filesz: Size of contents in file.
+	dd      interp.size              ; memsz:  Size of contents in memory.
 	dd      PF_R                     ; flags:  Access permission flags.
 	dd      0x1                      ; align:  Alignment in memory and file.
 
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x000000 0x08048000 0x08048000 0x00200 0x00200 R   0x1000
 
-rodata_seg_size equ 0x00000200 ; TODO: remove
-
   .rodata_seg:
 	dd      PT_LOAD                  ; type:   Entry type.
-	dd      rodata_seg - BASE_RODATA ; off:    File offset of contents.
+	dd      rodata_seg_off           ; off:    File offset of contents.
 	dd      rodata_seg               ; vaddr:  Virtual address in memory image.
 	dd      rodata_seg               ; paddr:  Physical address (not used).
-	;dd      rodata_seg.size          ; filesz: Size of contents in file.
-	dd      rodata_seg_size          ; filesz: Size of contents in file.
-	;dd      rodata_seg.size          ; memsz:  Size of contents in memory.
-	dd      rodata_seg_size          ; memsz:  Size of contents in memory.
+	dd      rodata_seg.size          ; filesz: Size of contents in file.
+	dd      rodata_seg.size          ; memsz:  Size of contents in memory.
 	dd      PF_R                     ; flags:  Access permission flags.
 	dd      0x1000                   ; align:  Alignment in memory and file.
 
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x001000 0x08049000 0x08049000 0x00048 0x00048 R E 0x1000
 
-code_off      equ 0x00001000 ; TODO: remove
 code_seg      equ BASE_CODE  ; TODO: remove
 code_seg_size equ 0x00000048 ; TODO: remove
 
   .code_seg:
 	dd      PT_LOAD                  ; type:   Entry type.
 	;dd      code_seg - BASE_CODE     ; off:    File offset of contents.
-	dd      code_off                 ; off:    File offset of contents.
+	dd      code_seg_off             ; off:    File offset of contents.
 	dd      code_seg                 ; vaddr:  Virtual address in memory image.
 	dd      code_seg                 ; paddr:  Physical address (not used).
 	;dd      code_seg.size            ; filesz: Size of contents in file.
@@ -168,7 +159,7 @@ code_seg_size equ 0x00000048 ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x002000 0x0804a000 0x0804a000 0x0000d 0x0000d R   0x1000
 
-hello_off      equ 0x00002000    ; TODO: remove
+hello_seg_off  equ 0x00002000    ; TODO: remove
 BASE_HELLO     equ BASE + 2*PAGE ; TODO: remove
 hello_seg      equ BASE_HELLO    ; TODO: remove
 hello_seg_size equ 0x0000000d    ; TODO: remove
@@ -176,7 +167,7 @@ hello_seg_size equ 0x0000000d    ; TODO: remove
   .hello_seg:
 	dd      PT_LOAD                  ; type:   Entry type.
 	;dd      hello_seg - BASE_hello     ; off:    File offset of contents.
-	dd      hello_off                 ; off:    File offset of contents.
+	dd      hello_seg_off             ; off:    File offset of contents.
 	dd      hello_seg                 ; vaddr:  Virtual address in memory image.
 	dd      hello_seg                 ; paddr:  Physical address (not used).
 	;dd      hello_seg.size            ; filesz: Size of contents in file.
@@ -211,10 +202,19 @@ db 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
 ; 00000130
-db 0x00, 0x00, 0x00, 0x00, 0x2f, 0x6c, 0x69, 0x62, 0x2f, 0x6c, 0x64, 0x2d, 0x6c, 0x69, 0x6e, 0x75 ; |..../lib/ld-linu|
+db 0x00, 0x00, 0x00, 0x00
 
-; 00000140
-db 0x78, 0x2e, 0x73, 0x6f, 0x2e, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |x.so.2..........|
+; --- [ .interp section ] ------------------------------------------------------
+
+; 00000134
+interp:
+
+	db      "/lib/ld-linux.so.2", 0
+
+interp.size equ $ - interp
+
+; 00000147
+db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.........|
 
 ; 00000150
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
@@ -248,6 +248,8 @@ db 0x10, 0x69, 0x69, 0x0d, 0x00, 0x00, 0x02, 0x00, 0x17, 0x00, 0x00, 0x00, 0x00,
 
 ; 000001f0
 db 0x0c, 0xc0, 0x04, 0x08, 0x07, 0x01, 0x00, 0x00, 0x10, 0xc0, 0x04, 0x08, 0x07, 0x02, 0x00, 0x00 ; |................|
+
+rodata_seg.size equ $ - rodata_seg
 
 ; 00000200
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
@@ -920,6 +922,12 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
 ; 00000ff0
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+
+; ___ [/ Read-only data segment ] ______________________________________________
+
+code_seg_off equ $ - BASE
+
+; ___ [ Code segment ] _________________________________________________________
 
 ; 00001000
 db 0xff, 0x35, 0x04, 0xc0, 0x04, 0x08, 0xff, 0x25, 0x08, 0xc0, 0x04, 0x08, 0x00, 0x00, 0x00, 0x00 ; |.5.....%........|
@@ -1689,6 +1697,8 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ; 00001ff0
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
+; ___ [ "hello world" segment ] ________________________________________________
+
 ; 00002000
 db 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0a, 0x00, 0x00, 0x00, 0x00 ; |hello world.....|
 
@@ -2425,7 +2435,12 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
 ; 00002f50
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 ; |................|
+db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+
+; ___ [ Data segment ] _________________________________________________________
+
+; 00002f58
+db 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 ; |................|
 
 ; 00002f60
 db 0x04, 0x00, 0x00, 0x00, 0x48, 0x81, 0x04, 0x08, 0xf5, 0xfe, 0xff, 0x6f, 0x60, 0x81, 0x04, 0x08 ; |....H......o`...|

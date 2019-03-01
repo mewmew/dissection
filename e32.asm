@@ -76,7 +76,9 @@ shstrndx     equ 0x000b     ; TODO: remove
 ; === [ Program headers ] ======================================================
 
 ; Program header entry types.
-PT_PHDR equ 6 ; Location of program header itself.
+PT_LOAD   equ 1 ; Loadable segment.
+PT_INTERP equ 3 ; Pathname of interpreter.
+PT_PHDR   equ 6 ; Location of program header itself.
 
 ; Program header entry flags.
 PF_X equ 0x1 ; Executable.
@@ -109,6 +111,22 @@ phdr_size equ phdr_count*phdr_entsize ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  INTERP         0x000134 0x08048134 0x08048134 0x00013 0x00013 R   0x1
 
+interp_off  equ 0x134             ; TODO: remove
+interp      equ BASE + interp_off ; TODO: remove
+interp_size equ 0x00000013        ; TODO: remove
+
+  .interp:
+	dd      PT_INTERP                ; type:   Entry type.
+	dd      interp - BASE_RODATA     ; off:    File offset of contents.
+	dd      interp                   ; vaddr:  Virtual address in memory image.
+	dd      interp                   ; paddr:  Physical address (not used).
+	;dd      interp.size              ; filesz: Size of contents in file.
+	dd      interp_size              ; filesz: Size of contents in file.
+	;dd      interp.size              ; memsz:  Size of contents in memory.
+	dd      interp_size              ; memsz:  Size of contents in memory.
+	dd      PF_R                     ; flags:  Access permission flags.
+	dd      0x1                      ; align:  Alignment in memory and file.
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x000000 0x08048000 0x08048000 0x00200 0x00200 R   0x1000
 
@@ -124,14 +142,8 @@ phdr_size equ phdr_count*phdr_entsize ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  DYNAMIC        0x002f58 0x0804bf58 0x0804bf58 0x000a8 0x000a8 RW  0x4
 
-; 00000050
-db 0x03, 0x00, 0x00, 0x00, 0x34, 0x01, 0x00, 0x00, 0x34, 0x81, 0x04, 0x08 ; |........4...4...|
-
-; 00000060
-db 0x34, 0x81, 0x04, 0x08, 0x13, 0x00, 0x00, 0x00, 0x13, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 ; |4...............|
-
 ; 00000070
-db 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x04, 0x08 ; |................|
+db 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x04, 0x08 ; |................|
 
 ; 00000080
 db 0x00, 0x80, 0x04, 0x08, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 ; |................|

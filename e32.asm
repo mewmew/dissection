@@ -130,6 +130,20 @@ interp_size equ 0x00000013        ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x000000 0x08048000 0x08048000 0x00200 0x00200 R   0x1000
 
+rodata_seg_size equ 0x00000200 ; TODO: remove
+
+  .rodata_seg:
+	dd      PT_LOAD                  ; type:   Entry type.
+	dd      rodata_seg - BASE_RODATA ; off:    File offset of contents.
+	dd      rodata_seg               ; vaddr:  Virtual address in memory image.
+	dd      rodata_seg               ; paddr:  Physical address (not used).
+	;dd      rodata_seg.size          ; filesz: Size of contents in file.
+	dd      rodata_seg_size          ; filesz: Size of contents in file.
+	;dd      rodata_seg.size          ; memsz:  Size of contents in memory.
+	dd      rodata_seg_size          ; memsz:  Size of contents in memory.
+	dd      PF_R                     ; flags:  Access permission flags.
+	dd      0x1000                   ; align:  Alignment in memory and file.
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x001000 0x08049000 0x08049000 0x00048 0x00048 R E 0x1000
 
@@ -142,14 +156,8 @@ interp_size equ 0x00000013        ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  DYNAMIC        0x002f58 0x0804bf58 0x0804bf58 0x000a8 0x000a8 RW  0x4
 
-; 00000070
-db 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x04, 0x08 ; |................|
-
-; 00000080
-db 0x00, 0x80, 0x04, 0x08, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 ; |................|
-
 ; 00000090
-db 0x00, 0x10, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x90, 0x04, 0x08 ; |................|
+db 0x01, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x90, 0x04, 0x08 ; |................|
 
 ; 000000a0
 db 0x00, 0x90, 0x04, 0x08, 0x48, 0x00, 0x00, 0x00, 0x48, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00 ; |....H...H.......|

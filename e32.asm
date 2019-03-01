@@ -75,16 +75,57 @@ shstrndx     equ 0x000b     ; TODO: remove
 
 ; === [ Program headers ] ======================================================
 
+; Program header entry types.
+PT_PHDR equ 6 ; Location of program header itself.
+
+; Program header entry flags.
+PF_X equ 0x1 ; Executable.
+PF_W equ 0x2 ; Writable.
+PF_R equ 0x4 ; Readable.
+
 phdr:
 
-; 00000030
-db 0x06, 0x00, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00, 0x34, 0x80, 0x04, 0x08 ; |........4...4...|
+; --- [ Interpreter program header ] -------------------------------------------
 
-; 00000040
-db 0x34, 0x80, 0x04, 0x08, 0xe0, 0x00, 0x00, 0x00, 0xe0, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 ; |4...............|
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  PHDR           0x000034 0x08048034 0x08048034 0x000e0 0x000e0 R   0x4
+
+phdr_size equ phdr_count*phdr_entsize ; TODO: remove
+
+  .phdr:
+	dd      PT_PHDR                  ; type:   Entry type.
+	dd      phdr - BASE_RODATA       ; off:    File offset of contents.
+	dd      phdr                     ; vaddr:  Virtual address in memory image.
+	dd      phdr                     ; paddr:  Physical address (not used).
+	;dd      phdr.size                ; filesz: Size of contents in file.
+	dd      phdr_size                ; filesz: Size of contents in file.
+	;dd      phdr.size                ; memsz:  Size of contents in memory.
+	dd      phdr_size                ; memsz:  Size of contents in memory.
+	dd      PF_R                     ; flags:  Access permission flags.
+	dd      0x4                      ; align:  Alignment in memory and file.
+
+.entsize equ $ - phdr
+
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  INTERP         0x000134 0x08048134 0x08048134 0x00013 0x00013 R   0x1
+
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  LOAD           0x000000 0x08048000 0x08048000 0x00200 0x00200 R   0x1000
+
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  LOAD           0x001000 0x08049000 0x08049000 0x00048 0x00048 R E 0x1000
+
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  LOAD           0x002000 0x0804a000 0x0804a000 0x0000d 0x0000d R   0x1000
+
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  LOAD           0x002f58 0x0804bf58 0x0804bf58 0x000bc 0x000bc RW  0x1000
+
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  DYNAMIC        0x002f58 0x0804bf58 0x0804bf58 0x000a8 0x000a8 RW  0x4
 
 ; 00000050
-db 0x04, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x34, 0x01, 0x00, 0x00, 0x34, 0x81, 0x04, 0x08 ; |........4...4...|
+db 0x03, 0x00, 0x00, 0x00, 0x34, 0x01, 0x00, 0x00, 0x34, 0x81, 0x04, 0x08 ; |........4...4...|
 
 ; 00000060
 db 0x34, 0x81, 0x04, 0x08, 0x13, 0x00, 0x00, 0x00, 0x13, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 ; |4...............|

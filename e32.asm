@@ -33,16 +33,15 @@ ET_EXEC equ 2 ; Executable file
 ; Architecture.
 EM_386 equ 3 ; Intel i386
 
-ehdr:
-
 text_start   equ 0x08049030 ; TODO: remove
 shoff        equ 0x00003070 ; TODO: remove
 ehdr_size    equ 0x0034     ; TODO: remove
-phdr_entsize equ 0x0020     ; TODO: remove
 phdr_count   equ 0x0007     ; TODO: remove
 shentsize    equ 0x0028     ; TODO: remove
 shnum        equ 0x000c     ; TODO: remove
 shstrndx     equ 0x000b     ; TODO: remove
+
+ehdr:
 
 	db      0x7F, "ELF"               ; ident.magic: ELF magic number
 	db      ELFCLASS32                ; ident.class: File class
@@ -54,14 +53,12 @@ shstrndx     equ 0x000b     ; TODO: remove
 	dd      1                         ; version: Object file version
 	;dd      text.start                ; entry: Entry point virtual address
 	dd      text_start                ; entry: Entry point virtual address
-	dd      phdr - BASE_RODATA        ; phoff: Program header table file offset
+	dd      phdr_off                  ; phoff: Program header table file offset
 	;dd      0                         ; shoff: Section header table file offset
 	dd      shoff                     ; shoff: Section header table file offset
 	dd      0                         ; flags: Processor-specific flags
-	;dw      ehdr.size                 ; ehsize: ELF header size in bytes
-	dw      ehdr_size                 ; ehsize: ELF header size in bytes
-	;dw      phdr.entsize              ; phentsize: Program header table entry size
-	dw      phdr_entsize              ; phentsize: Program header table entry size
+	dw      ehdr.size                 ; ehsize: ELF header size in bytes
+	dw      phdr.entsize              ; phentsize: Program header table entry size
 	;dw      phdr.count                ; phnum: Program header table entry count
 	dw      phdr_count                ; phnum: Program header table entry count
 	;dw      0                         ; shentsize: Section header table entry size
@@ -72,44 +69,46 @@ shstrndx     equ 0x000b     ; TODO: remove
 	;dw      0                         ; shstrndx: Section header string table index
 	dw      shstrndx                  ; shstrndx: Section header string table index
 
-.size equ $ - ehdr
+ehdr.size equ $ - ehdr
 
 ; === [/ ELF file header ] =====================================================
 
 ; === [ Program headers ] ======================================================
 
 ; Program header entry types.
-PT_LOAD   equ 1 ; Loadable segment.
-PT_INTERP equ 3 ; Pathname of interpreter.
-PT_PHDR   equ 6 ; Location of program header itself.
+PT_NULL    equ 0 ; Unused entry.
+PT_LOAD    equ 1 ; Loadable segment.
+PT_DYNAMIC equ 2 ; Dynamic linking information segment.
+PT_INTERP  equ 3 ; Pathname of interpreter.
+PT_PHDR    equ 6 ; Location of program header itself.
 
 ; Program header entry flags.
 PF_X equ 0x1 ; Executable.
 PF_W equ 0x2 ; Writable.
 PF_R equ 0x4 ; Readable.
 
+phdr_off equ $ - BASE
+
 phdr:
 
-; --- [ Interpreter program header ] -------------------------------------------
+; --- [ Program header ] -------------------------------------------------------
 
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  PHDR           0x000034 0x08048034 0x08048034 0x000e0 0x000e0 R   0x4
-
-phdr_size equ phdr_count*phdr_entsize ; TODO: remove
 
   .phdr:
 	dd      PT_PHDR                  ; type:   Entry type.
 	dd      phdr - BASE_RODATA       ; off:    File offset of contents.
 	dd      phdr                     ; vaddr:  Virtual address in memory image.
 	dd      phdr                     ; paddr:  Physical address (not used).
-	;dd      phdr.size                ; filesz: Size of contents in file.
-	dd      phdr_size                ; filesz: Size of contents in file.
-	;dd      phdr.size                ; memsz:  Size of contents in memory.
-	dd      phdr_size                ; memsz:  Size of contents in memory.
+	dd      phdr.size                ; filesz: Size of contents in file.
+	dd      phdr.size                ; memsz:  Size of contents in memory.
 	dd      PF_R                     ; flags:  Access permission flags.
 	dd      0x4                      ; align:  Alignment in memory and file.
 
-.entsize equ $ - phdr
+; --- [ Interpreter program header ] -------------------------------------------
+
+phdr.entsize equ $ - phdr
 
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  INTERP         0x000134 0x08048134 0x08048134 0x00013 0x00013 R   0x1
@@ -124,6 +123,8 @@ phdr_size equ phdr_count*phdr_entsize ; TODO: remove
 	dd      PF_R                     ; flags:  Access permission flags.
 	dd      0x1                      ; align:  Alignment in memory and file.
 
+; --- [ Read-only data segment program header ] --------------------------------
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x000000 0x08048000 0x08048000 0x00200 0x00200 R   0x1000
 
@@ -136,6 +137,8 @@ phdr_size equ phdr_count*phdr_entsize ; TODO: remove
 	dd      rodata_seg.size          ; memsz:  Size of contents in memory.
 	dd      PF_R                     ; flags:  Access permission flags.
 	dd      0x1000                   ; align:  Alignment in memory and file.
+
+; --- [ Code segment program header ] ------------------------------------------
 
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x001000 0x08049000 0x08049000 0x00048 0x00048 R E 0x1000
@@ -155,6 +158,8 @@ code_seg_size equ 0x00000048 ; TODO: remove
 	dd      code_seg_size            ; memsz:  Size of contents in memory.
 	dd      PF_R | PF_X              ; flags:  Access permission flags.
 	dd      0x1000                   ; align:  Alignment in memory and file.
+
+; --- [ "hello world" segment program header ] ---------------------------------
 
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x002000 0x0804a000 0x0804a000 0x0000d 0x0000d R   0x1000
@@ -177,6 +182,8 @@ hello_seg_size equ 0x0000000d    ; TODO: remove
 	dd      PF_R                     ; flags:  Access permission flags.
 	dd      0x1000                   ; align:  Alignment in memory and file.
 
+; --- [ Data segment program header ] ------------------------------------------
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x002f58 0x0804bf58 0x0804bf58 0x000bc 0x000bc RW  0x1000
 
@@ -196,23 +203,43 @@ data_seg_size equ 0x000000bc ; TODO: remove
 	dd      PF_R | PF_W              ; flags:  Access permission flags.
 	dd      0x1000                   ; align:  Alignment in memory and file.
 
+; --- [ Dynamic array program header ] -----------------------------------------
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  DYNAMIC        0x002f58 0x0804bf58 0x0804bf58 0x000a8 0x000a8 RW  0x4
 
-; 000000f0
-db 0x02, 0x00, 0x00, 0x00, 0x58, 0x2f, 0x00, 0x00, 0x58, 0xbf, 0x04, 0x08 ; |........X/..X...|
+;dynamic_off  equ 0x00002f58 ; TODO: remove
+dynamic      equ 0x0804bf58 ; TODO: remove
+dynamic_size equ 0x000000a8 ; TODO: remove
 
-; 00000100
-db 0x58, 0xbf, 0x04, 0x08, 0xa8, 0x00, 0x00, 0x00, 0xa8, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00 ; |X...............|
+  .dynamic:
+	dd      PT_DYNAMIC               ; type:   Entry type.
+	dd      dynamic_off              ; off:    File offset of contents.
+	dd      dynamic                  ; vaddr:  Virtual address in memory image.
+	dd      dynamic                  ; paddr:  Physical address (not used).
+	;dd      dynamic.size             ; filesz: Size of contents in file.
+	dd      dynamic_size             ; filesz: Size of contents in file.
+	;dd      dynamic.size             ; memsz:  Size of contents in memory.
+	dd      dynamic_size             ; memsz:  Size of contents in memory.
+	dd      PF_R | PF_W              ; flags:  Access permission flags.
+	dd      0x4                      ; align:  Alignment in memory and file.
 
-; 00000110
-db 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+phdr.size  equ $ - phdr
+phdr.count equ phdr.size / phdr.entsize
 
-; 00000120
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+; --- [ NULL program header ] --------------------------------------------------
 
-; 00000130
-db 0x00, 0x00, 0x00, 0x00
+  .null:
+	dd      PT_NULL                  ; type:   Entry type.
+	dd      0                        ; off:    File offset of contents.
+	dd      0                        ; vaddr:  Virtual address in memory image.
+	dd      0                        ; paddr:  Physical address (not used).
+	dd      0                        ; filesz: Size of contents in file.
+	dd      0                        ; memsz:  Size of contents in memory.
+	dd      0                        ; flags:  Access permission flags.
+	dd      0                        ; align:  Alignment in memory and file.
+
+; === [/ Program headers ] =====================================================
 
 ; --- [ .interp section ] ------------------------------------------------------
 
@@ -2452,6 +2479,9 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 ; ___ [ Data segment ] _________________________________________________________
 
 data_seg_off equ $ - BASE
+dynamic_off equ $ - BASE
+
+;dynamic:
 
 ;data_seg:
 

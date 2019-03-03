@@ -295,11 +295,20 @@ dynstr.size equ $ - dynstr
 ; 000001c9
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.......|
 
+; --- [ .gnu.version_r section ] -----------------------------------------------
+
+gnu_version_r_off equ $ - BASE
+
 ; 000001d0
+
+gnu_version_r:
+
 db 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
 ; 000001e0
 db 0x10, 0x69, 0x69, 0x0d, 0x00, 0x00, 0x02, 0x00, 0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.ii.............|
+
+gnu_version_r.size equ $ - gnu_version_r
 
 ; 000001f0
 db 0x0c, 0xc0, 0x04, 0x08, 0x07, 0x01, 0x00, 0x00, 0x10, 0xc0, 0x04, 0x08, 0x07, 0x02, 0x00, 0x00 ; |................|
@@ -2654,6 +2663,22 @@ dynstr_idx  equ 27 ; TODO: remove
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 4] .gnu.version_r    VERNEED         080481d0 0001d0 000020 00   A  3   1  4
 
+gnu_version_r_idx equ 35
+gnu_version_r_link equ 3
+gnu_version_r_info equ 1
+
+  .gnu_version_r:
+	dd      gnu_version_r_idx           ; name:      Section name (index into the section header string table).
+	dd      SHT_GNU_VERNEED             ; type:      Section type.
+	dd      SHF_ALLOC                   ; flags:     Section flags.
+	dd      gnu_version_r               ; addr:      Address in memory image.
+	dd      gnu_version_r_off           ; off:       Offset in file.
+	dd      gnu_version_r.size          ; size:      Size in bytes.
+	dd      gnu_version_r_link          ; link:      Index of a related section.
+	dd      gnu_version_r_info          ; info:      Depends on section type.
+	dd      0x4                         ; addralign: Alignment in bytes.
+	dd      0                           ; entsize:   Size of each entry in section.
+
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 5] .rel.plt          REL             080481f0 0001f0 000010 08  AI  2  10  4
 
@@ -2675,14 +2700,8 @@ dynstr_idx  equ 27 ; TODO: remove
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [11] .shstrtab         STRTAB          00000000 003014 00005b 00      0   0  1
 
-; 00003110
-db 0x23, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0x6f, 0x02, 0x00, 0x00, 0x00, 0xd0, 0x81, 0x04, 0x08 ; |#......o........|
-
-; 00003120
-db 0xd0, 0x01, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 ; |.... ...........|
-
 ; 00003130
-db 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x32, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00 ; |........2.......|
+db 0x32, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00 ; |........2.......|
 
 ; 00003140
 db 0x42, 0x00, 0x00, 0x00, 0xf0, 0x81, 0x04, 0x08, 0xf0, 0x01, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00 ; |B...............|

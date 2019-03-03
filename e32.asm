@@ -5,8 +5,11 @@ BASE        equ 0x08048000
 PAGE        equ 0x1000
 BASE_RODATA equ BASE
 BASE_CODE   equ BASE + 1*PAGE
-;BASE_DATA   equ BASE + 1*PAGE + rodata_seg.size
+BASE_HELLO  equ BASE + 2*PAGE
+BASE_DATA   equ 0x0804BF58
 ;BASE_CODE   equ BASE + 2*PAGE + rodata_seg.size + data_seg.size
+
+%define round(n, r)     (((n + (r - 1)) / r) * r)
 
 ; ___ [ Read-only data segment ] _______________________________________________
 
@@ -143,19 +146,13 @@ phdr.entsize equ $ - phdr
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x001000 0x08049000 0x08049000 0x00048 0x00048 R E 0x1000
 
-code_seg      equ BASE_CODE  ; TODO: remove
-code_seg_size equ 0x00000048 ; TODO: remove
-
   .code_seg:
 	dd      PT_LOAD                  ; type:   Entry type.
-	;dd      code_seg - BASE_CODE     ; off:    File offset of contents.
 	dd      code_seg_off             ; off:    File offset of contents.
 	dd      code_seg                 ; vaddr:  Virtual address in memory image.
 	dd      code_seg                 ; paddr:  Physical address (not used).
-	;dd      code_seg.size            ; filesz: Size of contents in file.
-	dd      code_seg_size            ; filesz: Size of contents in file.
-	;dd      code_seg.size            ; memsz:  Size of contents in memory.
-	dd      code_seg_size            ; memsz:  Size of contents in memory.
+	dd      code_seg.size            ; filesz: Size of contents in file.
+	dd      code_seg.size            ; memsz:  Size of contents in memory.
 	dd      PF_R | PF_X              ; flags:  Access permission flags.
 	dd      0x1000                   ; align:  Alignment in memory and file.
 
@@ -164,21 +161,13 @@ code_seg_size equ 0x00000048 ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x002000 0x0804a000 0x0804a000 0x0000d 0x0000d R   0x1000
 
-hello_seg_off  equ 0x00002000    ; TODO: remove
-BASE_HELLO     equ BASE + 2*PAGE ; TODO: remove
-hello_seg      equ BASE_HELLO    ; TODO: remove
-hello_seg_size equ 0x0000000d    ; TODO: remove
-
   .hello_seg:
 	dd      PT_LOAD                  ; type:   Entry type.
-	;dd      hello_seg - BASE_hello     ; off:    File offset of contents.
 	dd      hello_seg_off             ; off:    File offset of contents.
 	dd      hello_seg                 ; vaddr:  Virtual address in memory image.
 	dd      hello_seg                 ; paddr:  Physical address (not used).
-	;dd      hello_seg.size            ; filesz: Size of contents in file.
-	dd      hello_seg_size            ; filesz: Size of contents in file.
-	;dd      hello_seg.size            ; memsz:  Size of contents in memory.
-	dd      hello_seg_size            ; memsz:  Size of contents in memory.
+	dd      hello_seg.size            ; filesz: Size of contents in file.
+	dd      hello_seg.size            ; memsz:  Size of contents in memory.
 	dd      PF_R                     ; flags:  Access permission flags.
 	dd      0x1000                   ; align:  Alignment in memory and file.
 
@@ -187,19 +176,13 @@ hello_seg_size equ 0x0000000d    ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x002f58 0x0804bf58 0x0804bf58 0x000bc 0x000bc RW  0x1000
 
-;data_seg_off  equ 0x00002f58 ; TODO: remove
-data_seg      equ 0x0804bf58 ; TODO: remove
-data_seg_size equ 0x000000bc ; TODO: remove
-
   .data_seg:
 	dd      PT_LOAD                  ; type:   Entry type.
 	dd      data_seg_off             ; off:    File offset of contents.
 	dd      data_seg                 ; vaddr:  Virtual address in memory image.
 	dd      data_seg                 ; paddr:  Physical address (not used).
-	;dd      data_seg.size            ; filesz: Size of contents in file.
-	dd      data_seg_size            ; filesz: Size of contents in file.
-	;dd      data_seg.size            ; memsz:  Size of contents in memory.
-	dd      data_seg_size            ; memsz:  Size of contents in memory.
+	dd      data_seg.size            ; filesz: Size of contents in file.
+	dd      data_seg.size            ; memsz:  Size of contents in memory.
 	dd      PF_R | PF_W              ; flags:  Access permission flags.
 	dd      0x1000                   ; align:  Alignment in memory and file.
 
@@ -208,19 +191,13 @@ data_seg_size equ 0x000000bc ; TODO: remove
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  DYNAMIC        0x002f58 0x0804bf58 0x0804bf58 0x000a8 0x000a8 RW  0x4
 
-;dynamic_off  equ 0x00002f58 ; TODO: remove
-dynamic      equ 0x0804bf58 ; TODO: remove
-dynamic_size equ 0x000000a8 ; TODO: remove
-
   .dynamic:
 	dd      PT_DYNAMIC               ; type:   Entry type.
 	dd      dynamic_off              ; off:    File offset of contents.
 	dd      dynamic                  ; vaddr:  Virtual address in memory image.
 	dd      dynamic                  ; paddr:  Physical address (not used).
-	;dd      dynamic.size             ; filesz: Size of contents in file.
-	dd      dynamic_size             ; filesz: Size of contents in file.
-	;dd      dynamic.size             ; memsz:  Size of contents in memory.
-	dd      dynamic_size             ; memsz:  Size of contents in memory.
+	dd      dynamic.size             ; filesz: Size of contents in file.
+	dd      dynamic.size             ; memsz:  Size of contents in memory.
 	dd      PF_R | PF_W              ; flags:  Access permission flags.
 	dd      0x4                      ; align:  Alignment in memory and file.
 
@@ -310,12 +287,23 @@ db 0x10, 0x69, 0x69, 0x0d, 0x00, 0x00, 0x02, 0x00, 0x17, 0x00, 0x00, 0x00, 0x00,
 
 gnu_version_r.size equ $ - gnu_version_r
 
+; --- [ .rel.plt section ] -----------------------------------------------------
+
+rel_plt_off equ $ - BASE
+
 ; 000001f0
+
+rel_plt:
+
 db 0x0c, 0xc0, 0x04, 0x08, 0x07, 0x01, 0x00, 0x00, 0x10, 0xc0, 0x04, 0x08, 0x07, 0x02, 0x00, 0x00 ; |................|
+
+rel_plt.size equ $ - rel_plt
 
 ; 00000200
 
 rodata_seg.size equ $ - rodata_seg
+
+; ___ [/ Read-only data segment ] ______________________________________________
 
 ; 00000200
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
@@ -989,13 +977,25 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ; 00000ff0
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
-; ___ [/ Read-only data segment ] ______________________________________________
+; ___ [ Code segment ] _________________________________________________________
+
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  LOAD           0x001000 0x08049000 0x08049000 0x00048 0x00048 R E 0x1000
+
+SECTION .code vstart=BASE_CODE align=1 follows=.rdata
 
 code_seg_off equ $ - BASE
 
-; ___ [ Code segment ] _________________________________________________________
+code_seg:
+
+; --- [ .plt section ] ---------------------------------------------------------
+
+plt_off equ $ - BASE
 
 ; 00001000
+
+plt:
+
 db 0xff, 0x35, 0x04, 0xc0, 0x04, 0x08, 0xff, 0x25, 0x08, 0xc0, 0x04, 0x08, 0x00, 0x00, 0x00, 0x00 ; |.5.....%........|
 
 ; 00001010
@@ -1004,11 +1004,29 @@ db 0xff, 0x25, 0x0c, 0xc0, 0x04, 0x08, 0x68, 0x00, 0x00, 0x00, 0x00, 0xe9, 0xe0,
 ; 00001020
 db 0xff, 0x25, 0x10, 0xc0, 0x04, 0x08, 0x68, 0x08, 0x00, 0x00, 0x00, 0xe9, 0xd0, 0xff, 0xff, 0xff ; |.%....h.........|
 
+plt.size equ $ - plt
+
+; --- [ .text section ] --------------------------------------------------------
+
+text_off equ $ - BASE
+
 ; 00001030
+
+text:
+
 db 0x68, 0x00, 0xa0, 0x04, 0x08, 0xe8, 0xd6, 0xff, 0xff, 0xff, 0x83, 0xc4, 0x04, 0x6a, 0x00, 0xe8 ; |h............j..|
 
 ; 00001040
-db 0xdc, 0xff, 0xff, 0xff, 0x83, 0xc4, 0x04, 0xc3, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+db 0xdc, 0xff, 0xff, 0xff, 0x83, 0xc4, 0x04, 0xc3 ; |................|
+
+text.size equ $ - text
+
+code_seg.size equ $ - code_seg
+
+; ___ [/ Code segment ] ________________________________________________________
+
+; 00001048
+db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 
 ; 00001050
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
@@ -1765,8 +1783,32 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
 ; ___ [ "hello world" segment ] ________________________________________________
 
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  LOAD           0x002000 0x0804a000 0x0804a000 0x0000d 0x0000d R   0x1000
+
+SECTION .hello vstart=BASE_HELLO align=1 follows=.code
+
+hello_seg_off equ $ - BASE
+
+hello_seg:
+
+; --- [ .rodata section ] ------------------------------------------------------
+
+rodata_off equ $ - BASE
+
 ; 00002000
-db 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0a, 0x00, 0x00, 0x00, 0x00 ; |hello world.....|
+
+rodata:
+
+	db      "hello world", 10, 0
+
+rodata.size equ $ - rodata
+
+hello_seg.size equ $ - hello_seg
+
+; ___ [/ "hello world" segment ] _______________________________________________
+
+db 0x00, 0x00, 0x00
 
 ; 00002010
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
@@ -2506,13 +2548,22 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 ; ___ [ Data segment ] _________________________________________________________
 
 data_seg_off equ $ - BASE
-dynamic_off equ $ - BASE
 
-;dynamic:
+;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+;  LOAD           0x002f58 0x0804bf58 0x0804bf58 0x000bc 0x000bc RW  0x1000
 
-;data_seg:
+SECTION .data vstart=BASE_DATA align=1
+
+data_seg:
+
+; --- [ .dynamic section ] -----------------------------------------------------
+
+dynamic_off equ data_seg_off + ($ - $$)
 
 ; 00002f58
+
+dynamic:
+
 db 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 ; |................|
 
 ; 00002f60
@@ -2545,11 +2596,18 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ; 00002ff0
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
+dynamic.size equ $ - dynamic
+
 ; 00003000
 db 0x58, 0xbf, 0x04, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x90, 0x04, 0x08 ; |X...............|
 
 ; 00003010
-db 0x26, 0x90, 0x04, 0x08, 0x00, 0x2e, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, 0x2e ; |&.....shstrtab..|
+db 0x26, 0x90, 0x04, 0x08 ; |&...|
+
+data_seg.size equ $ - data_seg
+
+; 00003014
+db 0x00, 0x2e, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, 0x2e ; |..shstrtab..|
 
 ; 00003020
 db 0x69, 0x6e, 0x74, 0x65, 0x72, 0x70, 0x00, 0x2e, 0x64, 0x79, 0x6e, 0x73, 0x79, 0x6d, 0x00, 0x2e ; |interp..dynsym..|
@@ -2682,62 +2740,99 @@ gnu_version_r_info equ 1
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 5] .rel.plt          REL             080481f0 0001f0 000010 08  AI  2  10  4
 
+rel_plt_idx equ 50
+rel_plt_link equ 2
+rel_plt_info equ 10
+rel_plt_entsize equ 8
+
+  .rel_plt:
+	dd      rel_plt_idx                 ; name:      Section name (index into the section header string table).
+	dd      SHT_REL                     ; type:      Section type.
+	dd      SHF_ALLOC | SHF_INFO_LINK   ; flags:     Section flags.
+	dd      rel_plt                     ; addr:      Address in memory image.
+	dd      rel_plt_off                 ; off:       Offset in file.
+	dd      rel_plt.size                ; size:      Size in bytes.
+	dd      rel_plt_link                ; link:      Index of a related section.
+	dd      rel_plt_info                ; info:      Depends on section type.
+	dd      0x4                         ; addralign: Alignment in bytes.
+	dd      rel_plt_entsize             ; entsize:   Size of each entry in section.
+
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 6] .plt              PROGBITS        08049000 001000 000030 04  AX  0   0 16
+
+plt_idx     equ 54
+plt_entsize equ 4
+
+  .plt:
+	dd      plt_idx                     ; name:      Section name (index into the section header string table).
+	dd      SHT_PROGBITS                ; type:      Section type.
+	dd      SHF_ALLOC | SHF_EXECINSTR   ; flags:     Section flags.
+	dd      plt                         ; addr:      Address in memory image.
+	dd      plt_off                     ; off:       Offset in file.
+	dd      plt.size                    ; size:      Size in bytes.
+	dd      0                           ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0x10                        ; addralign: Alignment in bytes.
+	dd      plt_entsize                 ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 7] .text             PROGBITS        08049030 001030 000018 00  AX  0   0 16
 
+text_idx equ 59
+
+  .text:
+	dd      text_idx                    ; name:      Section name (index into the section header string table).
+	dd      SHT_PROGBITS                ; type:      Section type.
+	dd      SHF_ALLOC | SHF_EXECINSTR   ; flags:     Section flags.
+	dd      text                        ; addr:      Address in memory image.
+	dd      text_off                    ; off:       Offset in file.
+	dd      text.size                   ; size:      Size in bytes.
+	dd      0                           ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0x10                        ; addralign: Alignment in bytes.
+	dd      0                           ; entsize:   Size of each entry in section.
+
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 8] .rodata           PROGBITS        0804a000 002000 00000d 00   A  0   0  4
 
+rodata_idx equ 65
+
+  .rodata:
+	dd      rodata_idx                  ; name:      Section name (index into the section header string table).
+	dd      SHT_PROGBITS                ; type:      Section type.
+	dd      SHF_ALLOC                   ; flags:     Section flags.
+	dd      rodata                      ; addr:      Address in memory image.
+	dd      rodata_off                  ; off:       Offset in file.
+	dd      rodata.size                 ; size:      Size in bytes.
+	dd      0                           ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0x4                         ; addralign: Alignment in bytes.
+	dd      0                           ; entsize:   Size of each entry in section.
+
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 9] .dynamic          DYNAMIC         0804bf58 002f58 0000a8 08  WA  3   0  4
+
+dynamic_idx     equ 73
+dynamic_link    equ 3
+dynamic_entsize equ 8
+
+  .dynamic:
+	dd      dynamic_idx                 ; name:      Section name (index into the section header string table).
+	dd      SHT_DYNAMIC                 ; type:      Section type.
+	dd      SHF_WRITE | SHF_ALLOC       ; flags:     Section flags.
+	dd      dynamic                     ; addr:      Address in memory image.
+	dd      dynamic_off                 ; off:       Offset in file.
+	dd      dynamic.size                ; size:      Size in bytes.
+	dd      dynamic_link                ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0x4                         ; addralign: Alignment in bytes.
+	dd      dynamic_entsize             ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [10] .got.plt          PROGBITS        0804c000 003000 000014 04  WA  0   0  4
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [11] .shstrtab         STRTAB          00000000 003014 00005b 00      0   0  1
-
-; 00003130
-db 0x32, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00 ; |........2.......|
-
-; 00003140
-db 0x42, 0x00, 0x00, 0x00, 0xf0, 0x81, 0x04, 0x08, 0xf0, 0x01, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00 ; |B...............|
-
-; 00003150
-db 0x02, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 ; |................|
-
-; 00003160
-db 0x36, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x90, 0x04, 0x08 ; |6...............|
-
-; 00003170
-db 0x00, 0x10, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |....0...........|
-
-; 00003180
-db 0x10, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3b, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 ; |........;.......|
-
-; 00003190
-db 0x06, 0x00, 0x00, 0x00, 0x30, 0x90, 0x04, 0x08, 0x30, 0x10, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00 ; |....0...0.......|
-
-; 000031a0
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
-
-; 000031b0
-db 0x41, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0xa0, 0x04, 0x08 ; |A...............|
-
-; 000031c0
-db 0x00, 0x20, 0x00, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |. ..............|
-
-; 000031d0
-db 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x49, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00 ; |........I.......|
-
-; 000031e0
-db 0x03, 0x00, 0x00, 0x00, 0x58, 0xbf, 0x04, 0x08, 0x58, 0x2f, 0x00, 0x00, 0xa8, 0x00, 0x00, 0x00 ; |....X...X/......|
-
-; 000031f0
-db 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 ; |................|
 
 ; 00003200
 db 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x04, 0x08 ; |R...............|

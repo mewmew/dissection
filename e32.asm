@@ -7,18 +7,17 @@ BASE_RODATA equ BASE
 BASE_CODE   equ BASE + 1*PAGE
 BASE_HELLO  equ BASE + 2*PAGE
 BASE_DATA   equ 0x0804BF58
-;BASE_CODE   equ BASE + 2*PAGE + rodata_seg.size + data_seg.size
 
 %define round(n, r)     (((n + (r - 1)) / r) * r)
 
 ; ___ [ Read-only data segment ] _______________________________________________
 
+rodata_seg_off equ 0
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x000000 0x08048000 0x08048000 0x00200 0x00200 R   0x1000
 
 SECTION .rdata vstart=BASE_RODATA align=1
-
-rodata_seg_off equ $ - BASE
 
 rodata_seg:
 
@@ -979,12 +978,12 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
 ; ___ [ Code segment ] _________________________________________________________
 
+code_seg_off equ $ - BASE
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x001000 0x08049000 0x08049000 0x00048 0x00048 R E 0x1000
 
 SECTION .code vstart=BASE_CODE align=1 follows=.rdata
-
-code_seg_off equ $ - BASE
 
 code_seg:
 
@@ -1783,12 +1782,12 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
 ; ___ [ "hello world" segment ] ________________________________________________
 
+hello_seg_off equ $ - BASE
+
 ;  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 ;  LOAD           0x002000 0x0804a000 0x0804a000 0x0000d 0x0000d R   0x1000
 
 SECTION .hello vstart=BASE_HELLO align=1 follows=.code
-
-hello_seg_off equ $ - BASE
 
 hello_seg:
 
@@ -2598,15 +2597,33 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
 dynamic.size equ $ - dynamic
 
+; --- [ .got.plt section ] -----------------------------------------------------
+
+got_plt_off equ data_seg_off + ($ - $$)
+
 ; 00003000
+
+got_plt:
+
 db 0x58, 0xbf, 0x04, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x90, 0x04, 0x08 ; |X...............|
 
 ; 00003010
 db 0x26, 0x90, 0x04, 0x08 ; |&...|
 
+got_plt.size equ $ - got_plt
+
 data_seg.size equ $ - data_seg
 
+; ___ [/ Data segment ] ________________________________________________________
+
+; --- [ .shstrtab section ] ----------------------------------------------------
+
+shstrtab_off equ data_seg_off + ($ - $$)
+
 ; 00003014
+
+shstrtab:
+
 db 0x00, 0x2e, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, 0x2e ; |..shstrtab..|
 
 ; 00003020
@@ -2622,11 +2639,16 @@ db 0x69, 0x6f, 0x6e, 0x5f, 0x72, 0x00, 0x2e, 0x72, 0x65, 0x6c, 0x2e, 0x70, 0x6c,
 db 0x74, 0x65, 0x78, 0x74, 0x00, 0x2e, 0x72, 0x6f, 0x64, 0x61, 0x74, 0x61, 0x00, 0x2e, 0x64, 0x79 ; |text..rodata..dy|
 
 ; 00003060
-db 0x6e, 0x61, 0x6d, 0x69, 0x63, 0x00, 0x2e, 0x67, 0x6f, 0x74, 0x2e, 0x70, 0x6c, 0x74, 0x00, 0x00 ; |namic..got.plt..|
+db 0x6e, 0x61, 0x6d, 0x69, 0x63, 0x00, 0x2e, 0x67, 0x6f, 0x74, 0x2e, 0x70, 0x6c, 0x74, 0x00 ; |namic..got.plt.|
 
-; 00003070
+shstrtab.size equ $ - shstrtab
+
+; 0000306F
+db 0x00
 
 ; === [ Section headers ] ======================================================
+
+; 00003070
 
 ; Section header types.
 SHT_NULL        equ 0          ; inactive
@@ -2831,20 +2853,34 @@ dynamic_entsize equ 8
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [10] .got.plt          PROGBITS        0804c000 003000 000014 04  WA  0   0  4
 
+got_plt_idx     equ 82
+got_plt_entsize equ 4
+
+  .got_plt:
+	dd      got_plt_idx                 ; name:      Section name (index into the section header string table).
+	dd      SHT_PROGBITS                ; type:      Section type.
+	dd      SHF_WRITE | SHF_ALLOC       ; flags:     Section flags.
+	dd      got_plt                     ; addr:      Address in memory image.
+	dd      got_plt_off                 ; off:       Offset in file.
+	dd      got_plt.size                ; size:      Size in bytes.
+	dd      0                           ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0x4                         ; addralign: Alignment in bytes.
+	dd      got_plt_entsize             ; entsize:   Size of each entry in section.
+
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [11] .shstrtab         STRTAB          00000000 003014 00005b 00      0   0  1
 
-; 00003200
-db 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x04, 0x08 ; |R...............|
+shstrtab_idx  equ 1
 
-; 00003210
-db 0x00, 0x30, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.0..............|
-
-; 00003220
-db 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00 ; |................|
-
-; 00003230
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14, 0x30, 0x00, 0x00, 0x5b, 0x00, 0x00, 0x00 ; |.........0..[...|
-
-; 00003240
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+  .shstrtab:
+	dd      shstrtab_idx                ; name:      Section name (index into the section header string table).
+	dd      SHT_STRTAB                  ; type:      Section type.
+	dd      0x0                         ; flags:     Section flags.
+	dd      0                           ; addr:      Address in memory image.
+	dd      shstrtab_off                ; off:       Offset in file.
+	dd      shstrtab.size               ; size:      Size in bytes.
+	dd      0                           ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0x1                         ; addralign: Alignment in bytes.
+	dd      0                           ; entsize:   Size of each entry in section.

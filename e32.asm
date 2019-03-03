@@ -270,13 +270,30 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
 db 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
 ; 000001a0
-db 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x00, 0x6c, 0x69, 0x62, 0x63, 0x2e, 0x73, 0x6f ; |.........libc.so|
+db 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00 ; |........|
 
-; 000001b0
-db 0x2e, 0x36, 0x00, 0x65, 0x78, 0x69, 0x74, 0x00, 0x70, 0x72, 0x69, 0x6e, 0x74, 0x66, 0x00, 0x47 ; |.6.exit.printf.G|
+; --- [ .dynstr section ] ------------------------------------------------------
 
-; 000001c0
-db 0x4c, 0x49, 0x42, 0x43, 0x5f, 0x32, 0x2e, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |LIBC_2.0........|
+dynstr_off equ $ - BASE
+
+; 000001a8
+
+dynstr:
+
+	db      0
+
+	db      "libc.so.6", 0
+
+	db      "exit", 0
+
+	db      "printf", 0
+
+	db      "GLIBC_2.0", 0
+
+dynstr.size equ $ - dynstr
+
+; 000001c9
+db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.......|
 
 ; 000001d0
 db 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
@@ -2579,7 +2596,7 @@ shdr:
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 1] .interp           PROGBITS        08048134 000134 000013 00   A  0   0  1
 
-interp_idx equ 0x0000000b ; .interp string index
+interp_idx equ 11 ; TODO: remove
 
   .interp:
 	dd      interp_idx                  ; name:      Section name (index into the section header string table).
@@ -2596,11 +2613,12 @@ interp_idx equ 0x0000000b ; .interp string index
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 2] .dynsym           DYNSYM          08048178 000178 000030 10   A  3   1  4
 
-dynsym_idx     equ 0x00000013 ; .dynsym string index
+dynsym_idx     equ 19         ; TODO: remove
 dynsym         equ 0x08048178 ; TODO: remove
 dynsym_off     equ 0x00000178 ; TODO: remove
-dynsym_size    equ 0x00000030 ; TODO: remove
+dynsym_size    equ 48         ; TODO: remove
 dynsym_link    equ 3          ; TODO: remove
+dynsym_info    equ 1          ; TODO: remove
 dynsym_entsize equ 0x10       ; TODO: remove
 
   .dynsym:
@@ -2612,12 +2630,26 @@ dynsym_entsize equ 0x10       ; TODO: remove
 	;dd      dynsym.size                 ; size:      Size in bytes.
 	dd      dynsym_size                 ; size:      Size in bytes.
 	dd      dynsym_link                 ; link:      Index of a related section.
-	dd      1                           ; info:      Depends on section type.
+	dd      dynsym_info                 ; info:      Depends on section type.
 	dd      0x4                         ; addralign: Alignment in bytes.
 	dd      dynsym_entsize              ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 3] .dynstr           STRTAB          080481a8 0001a8 000021 00   A  0   0  1
+
+dynstr_idx  equ 27 ; TODO: remove
+
+  .dynstr:
+	dd      dynstr_idx                  ; name:      Section name (index into the section header string table).
+	dd      SHT_STRTAB                  ; type:      Section type.
+	dd      SHF_ALLOC                   ; flags:     Section flags.
+	dd      dynstr                      ; addr:      Address in memory image.
+	dd      dynstr_off                  ; off:       Offset in file.
+	dd      dynstr.size                 ; size:      Size in bytes.
+	dd      0                           ; link:      Index of a related section.
+	dd      0                           ; info:      Depends on section type.
+	dd      0x1                         ; addralign: Alignment in bytes.
+	dd      0                           ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 4] .gnu.version_r    VERNEED         080481d0 0001d0 000020 00   A  3   1  4
@@ -2642,15 +2674,6 @@ dynsym_entsize equ 0x10       ; TODO: remove
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [11] .shstrtab         STRTAB          00000000 003014 00005b 00      0   0  1
-
-; 000030e0
-db 0x1b, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00 ; |................|
-
-; 000030f0
-db 0x02, 0x00, 0x00, 0x00, 0xa8, 0x81, 0x04, 0x08, 0xa8, 0x01, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00 ; |............!...|
-
-; 00003100
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
 ; 00003110
 db 0x23, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0x6f, 0x02, 0x00, 0x00, 0x00, 0xd0, 0x81, 0x04, 0x08 ; |#......o........|

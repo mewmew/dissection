@@ -324,6 +324,15 @@ gnu_version_r_off equ $ - BASE
 
 gnu_version_r:
 
+; Version needs section '.gnu.version_r' contains 1 entry:
+;  Addr: 0x00000000080481d0  Offset: 0x0001d0  Link: 3 (.dynstr)
+;   000000: Version: 1  File: libc.so.6  Cnt: 1
+;   0x0010:   Name: GLIBC_2.0  Flags: none  Version: 2
+
+;  .ver:
+;	dw      1               ; version
+;	dw      dynstr.libc_off ; file: String table offset of a needed shared library.
+
 db 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
 ; 000001e0

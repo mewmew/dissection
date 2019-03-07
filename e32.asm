@@ -216,8 +216,19 @@ interp.size equ $ - interp
 
 ; 00000147
 
-; TODO: cleanup padding.
-times (0x178 - 0x147)   db 0x00
+align 0x8, db 0x00
+
+; 00000148
+
+hash:
+
+times (0x160 - 0x148)   db 0x00
+
+; 00000160
+
+gnu_hash:
+
+times (0x178 - 0x160)   db 0x00
 
 ; --- [ Dynamic symbols ] ------------------------------------------------------
 
@@ -269,7 +280,13 @@ dynstr:
 
 dynstr.size equ $ - dynstr
 
-align 0x10, db 0x00
+align 2, db 0x00
+
+; 000001ca
+
+versym:
+
+times (0x1d0 - 0x1ca) db 0x00
 
 ; --- [ .gnu.version_r section ] -----------------------------------------------
 
@@ -436,16 +453,12 @@ dynamic:
 ;  Tag        Type                         Name/Value
 ; 0x00000004 (HASH)                       0x8048148
 
-hash equ 0x08048148 ; TODO: remove
-
   .hash:
 	dd      DT_HASH                ; tag: Dynamic entry type
 	dd      hash                   ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x6ffffef5 (GNU_HASH)                   0x8048160
-
-gnu_hash equ 0x08048160 ; TODO: remove
 
   .gnu_hash:
 	dd      DT_GNU_HASH            ; tag: Dynamic entry type
@@ -454,29 +467,23 @@ gnu_hash equ 0x08048160 ; TODO: remove
 ;  Tag        Type                         Name/Value
 ; 0x00000005 (STRTAB)                     0x80481a8
 
-strtab equ 0x080481a8 ; TODO: remove
-
   .strtab:
 	dd      DT_STRTAB              ; tag: Dynamic entry type
-	dd      strtab                 ; val: Integer or address value
+	dd      dynstr                 ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x00000006 (SYMTAB)                     0x8048178
 
-symtab equ 0x08048178 ; TODO: remove
-
   .symtab:
 	dd      DT_SYMTAB              ; tag: Dynamic entry type
-	dd      symtab                 ; val: Integer or address value
+	dd      dynsym                 ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x0000000a (STRSZ)                      33 (bytes)
 
-strsz equ 33 ; TODO: remove
-
   .strsz:
 	dd      DT_STRSZ               ; tag: Dynamic entry type
-	dd      strsz                  ; val: Integer or address value
+	dd      dynstr.size            ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x0000000b (SYMENT)                     16 (bytes)
@@ -522,20 +529,16 @@ pltrelsz equ 16 ; TODO: remove
 ;  Tag        Type                         Name/Value
 ; 0x00000017 (JMPREL)                     0x80481f0
 
-jmprel equ 0x080481f0 ; TODO: remove
-
   .jmprel:
 	dd      DT_JMPREL              ; tag: Dynamic entry type
-	dd      jmprel                 ; val: Integer or address value
+	dd      rel_plt                ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x6ffffffe (VERNEED)                    0x80481d0
 
-verneed equ 0x080481d0 ; TODO: remove
-
   .verneed:
 	dd      DT_VERNEED             ; tag: Dynamic entry type
-	dd      verneed                ; val: Integer or address value
+	dd      gnu_version_r          ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x6fffffff (VERNEEDNUM)                 1
@@ -548,9 +551,6 @@ verneednum equ 1 ; TODO: remove
 
 ;  Tag        Type                         Name/Value
 ; 0x6ffffff0 (VERSYM)                     0x80481ca
-
-; 00002fc0
-versym equ 0x080481ca ; TODO: remove
 
   .versym:
 	dd      DT_VERSYM              ; tag: Dynamic entry type

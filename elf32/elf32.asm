@@ -11,6 +11,8 @@ BASE_CODE   equ BASE + 2*PAGE + rodata_seg.size + data_seg.size
 
 SECTION .rdata vstart=BASE_RODATA align=1
 
+rodata_seg_off equ rodata_seg - BASE_RODATA
+
 rodata_seg:
 
 ; === [ ELF file header ] ======================================================
@@ -38,10 +40,10 @@ ehdr:
 	dw      EM_386                    ; machine: Architecture
 	dd      1                         ; version: Object file version
 	dd      text.start                ; entry: Entry point virtual address
-	dd      phdr - BASE_RODATA        ; phoff: Program header table file offset
+	dd      phdr_off                  ; phoff: Program header table file offset
 	dd      0                         ; shoff: Section header table file offset
 	dd      0                         ; flags: Processor-specific flags
-	dw      .size                     ; ehsize: ELF header size in bytes
+	dw      ehdr.size                 ; ehsize: ELF header size in bytes
 	dw      phdr.entsize              ; phentsize: Program header table entry size
 	dw      phdr.count                ; phnum: Program header table entry count
 	dw      0                         ; shentsize: Section header table entry size
@@ -64,13 +66,15 @@ PF_X equ 0x1 ; Segment is executable
 PF_W equ 0x2 ; Segment is writable
 PF_R equ 0x4 ; Segment is readable
 
+phdr_off equ phdr - BASE_RODATA
+
 phdr:
 
 ; --- [ Interpreter program header ] -------------------------------------------
 
   .interp:
 	dd      PT_INTERP                ; type: Segment type
-	dd      interp - BASE_RODATA     ; offset: Segment file offset
+	dd      interp_off               ; offset: Segment file offset
 	dd      interp                   ; vaddr: Segment virtual address
 	dd      interp                   ; paddr: Segment physical address
 	dd      interp.size              ; filesz: Segment size in file
@@ -84,19 +88,19 @@ phdr:
 
   .dynamic:
 	dd      PT_DYNAMIC             ; type: Segment type
-	dd      dynamic - BASE_RODATA  ; offset: Segment file offset
+	dd      dynamic_off            ; offset: Segment file offset
 	dd      dynamic                ; vaddr: Segment virtual address
 	dd      dynamic                ; paddr: Segment physical address
 	dd      dynamic.size           ; filesz: Segment size in file
 	dd      dynamic.size           ; memsz: Segment size in memory
 	dd      PF_R                   ; flags: Segment flags
-	dd      0x8                    ; align: Segment alignment
+	dd      0x4                    ; align: Segment alignment
 
 ; --- [ Read-only data segment program header ] --------------------------------
 
   .rodata_seg:
 	dd      PT_LOAD                  ; type: Segment type
-	dd      rodata_seg - BASE_RODATA ; offset: Segment file offset
+	dd      rodata_seg_off           ; offset: Segment file offset
 	dd      rodata_seg               ; vaddr: Segment virtual address
 	dd      rodata_seg               ; paddr: Segment physical address
 	dd      rodata_seg.size          ; filesz: Segment size in file
@@ -105,8 +109,6 @@ phdr:
 	dd      PAGE                     ; align: Segment alignment
 
 ; --- [ Data segment program header ] ------------------------------------------
-
-data_seg_off equ data_seg - BASE_DATA + rodata_seg.size
 
   .data_seg:
 	dd      PT_LOAD                  ; type: Segment type
@@ -119,8 +121,6 @@ data_seg_off equ data_seg - BASE_DATA + rodata_seg.size
 	dd      PAGE                     ; align: Segment alignment
 
 ; --- [ Code segment program header ] ------------------------------------------
-
-code_seg_off equ code_seg - BASE_CODE + rodata_seg.size + data_seg.size
 
   .code_seg:
 	dd      PT_LOAD                  ; type: Segment type
@@ -141,6 +141,8 @@ code_seg_off equ code_seg - BASE_CODE + rodata_seg.size + data_seg.size
 
 ; --- [ .interp section ] ------------------------------------------------------
 
+interp_off equ interp - BASE_RODATA
+
 interp:
 
 	db      "/lib/ld-linux.so.2", 0
@@ -158,6 +160,8 @@ DT_PLTGOT   equ 3  ; Address of the PLT and/or GOT
 DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
+
+dynamic_off equ dynamic - BASE_RODATA
 
 dynamic:
 
@@ -280,6 +284,8 @@ rodata_seg.size equ $ - rodata_seg
 
 SECTION .data vstart=BASE_DATA follows=.rdata align=1
 
+data_seg_off equ data_seg - BASE_DATA + rodata_seg.size
+
 data_seg:
 
 ; --- [ .got.plt section ] -----------------------------------------------------
@@ -310,6 +316,8 @@ data_seg.size equ $ - data_seg
 ; ___ [ Code segment ] _________________________________________________________
 
 SECTION .text vstart=BASE_CODE follows=.data align=1
+
+code_seg_off equ code_seg - BASE_CODE + rodata_seg.size + data_seg.size
 
 code_seg:
 

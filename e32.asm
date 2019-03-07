@@ -247,15 +247,25 @@ dynstr_off equ $ - BASE
 
 dynstr:
 
+  .null:
 	db      0
 
+  .libc:
 	db      "libc.so.6", 0
 
+  .exit:
 	db      "exit", 0
 
+  .printf:
 	db      "printf", 0
 
+  .glibc:
 	db      "GLIBC_2.0", 0
+
+.libc_off   equ .libc - dynstr
+.exit_off   equ .exit - dynstr
+.printf_off equ .printf - dynstr
+.glibc_off  equ .glibc - dynstr
 
 dynstr.size equ $ - dynstr
 
@@ -393,33 +403,170 @@ dynamic_off equ data_seg_off + ($ - $$)
 
 ; 00002f58
 
+; Dynamic tags.
+DT_NULL       equ 0          ; Terminating entry.
+DT_NEEDED     equ 1          ; String table offset of a needed shared library.
+DT_PLTRELSZ   equ 2          ; Total size in bytes of PLT relocations.
+DT_PLTGOT     equ 3          ; Processor-dependent address.
+DT_HASH       equ 4          ; Address of symbol hash table.
+DT_STRTAB     equ 5          ; Address of string table.
+DT_SYMTAB     equ 6          ; Address of symbol table.
+DT_STRSZ      equ 10         ; Size of string table.
+DT_SYMENT     equ 11         ; Size of each symbol table entry.
+DT_REL        equ 17         ; Address of ElfNN_Rel relocations.
+DT_PLTREL     equ 20         ; Type of relocation used for PLT.
+DT_DEBUG      equ 21         ; Reserved (not used).
+DT_JMPREL     equ 23         ; Address of PLT relocations.
+DT_GNU_HASH   equ 0x6FFFFEF5 ; Address of GNU symbol hash table.
+DT_VERSYM     equ 0x6FFFFFF0 ; GNU version symbol.
+DT_VERNEED    equ 0x6FFFFFFE ; GNU version needed.
+DT_VERNEEDNUM equ 0x6FFFFFFF ; GNU version needed count.
+
 dynamic:
 
-db 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 ; |................|
+;  Tag        Type                         Name/Value
+; 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
 
-; 00002f60
-db 0x04, 0x00, 0x00, 0x00, 0x48, 0x81, 0x04, 0x08, 0xf5, 0xfe, 0xff, 0x6f, 0x60, 0x81, 0x04, 0x08 ; |....H......o`...|
+  .libc:
+	dd      DT_NEEDED              ; tag: Dynamic entry type
+	dd      dynstr.libc_off        ; val: Integer or address value
 
-; 00002f70
-db 0x05, 0x00, 0x00, 0x00, 0xa8, 0x81, 0x04, 0x08, 0x06, 0x00, 0x00, 0x00, 0x78, 0x81, 0x04, 0x08 ; |............x...|
+.entsize equ $ - dynamic
 
-; 00002f80
-db 0x0a, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00 ; |....!...........|
+;  Tag        Type                         Name/Value
+; 0x00000004 (HASH)                       0x8048148
 
-; 00002f90
-db 0x15, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x04, 0x08 ; |................|
+hash equ 0x08048148 ; TODO: remove
 
-; 00002fa0
-db 0x02, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00 ; |................|
+  .hash:
+	dd      DT_HASH                ; tag: Dynamic entry type
+	dd      hash                   ; val: Integer or address value
 
-; 00002fb0
-db 0x17, 0x00, 0x00, 0x00, 0xf0, 0x81, 0x04, 0x08, 0xfe, 0xff, 0xff, 0x6f, 0xd0, 0x81, 0x04, 0x08 ; |...........o....|
+;  Tag        Type                         Name/Value
+; 0x6ffffef5 (GNU_HASH)                   0x8048160
+
+gnu_hash equ 0x08048160 ; TODO: remove
+
+  .gnu_hash:
+	dd      DT_GNU_HASH            ; tag: Dynamic entry type
+	dd      gnu_hash               ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000005 (STRTAB)                     0x80481a8
+
+strtab equ 0x080481a8 ; TODO: remove
+
+  .strtab:
+	dd      DT_STRTAB              ; tag: Dynamic entry type
+	dd      strtab                 ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000006 (SYMTAB)                     0x8048178
+
+symtab equ 0x08048178 ; TODO: remove
+
+  .symtab:
+	dd      DT_SYMTAB              ; tag: Dynamic entry type
+	dd      symtab                 ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x0000000a (STRSZ)                      33 (bytes)
+
+strsz equ 33 ; TODO: remove
+
+  .strsz:
+	dd      DT_STRSZ               ; tag: Dynamic entry type
+	dd      strsz                  ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x0000000b (SYMENT)                     16 (bytes)
+
+syment equ 16 ; TODO: remove
+
+  .syment:
+	dd      DT_SYMENT              ; tag: Dynamic entry type
+	dd      syment                 ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000015 (DEBUG)                      0x0
+
+  .debug:
+	dd      DT_DEBUG               ; tag: Dynamic entry type
+	dd      0                      ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000003 (PLTGOT)                     0x804c000
+
+plt_got equ 0x0804c000 ; TODO: remove
+
+  .plt_got:
+	dd      DT_PLTGOT              ; tag: Dynamic entry type
+	dd      plt_got                ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000002 (PLTRELSZ)                   16 (bytes)
+
+pltrelsz equ 16 ; TODO: remove
+
+  .pltrelsz:
+	dd      DT_PLTRELSZ            ; tag: Dynamic entry type
+	dd      pltrelsz               ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000014 (PLTREL)                     REL
+
+  .pltrel:
+	dd      DT_PLTREL              ; tag: Dynamic entry type
+	dd      DT_REL                 ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000017 (JMPREL)                     0x80481f0
+
+jmprel equ 0x080481f0 ; TODO: remove
+
+  .jmprel:
+	dd      DT_JMPREL              ; tag: Dynamic entry type
+	dd      jmprel                 ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x6ffffffe (VERNEED)                    0x80481d0
+
+verneed equ 0x080481d0 ; TODO: remove
+
+  .verneed:
+	dd      DT_VERNEED             ; tag: Dynamic entry type
+	dd      verneed                ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x6fffffff (VERNEEDNUM)                 1
+
+verneednum equ 1 ; TODO: remove
+
+  .verneednum:
+	dd      DT_VERNEEDNUM          ; tag: Dynamic entry type
+	dd      verneednum             ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x6ffffff0 (VERSYM)                     0x80481ca
 
 ; 00002fc0
-db 0xff, 0xff, 0xff, 0x6f, 0x01, 0x00, 0x00, 0x00, 0xf0, 0xff, 0xff, 0x6f, 0xca, 0x81, 0x04, 0x08 ; |...o.......o....|
+versym equ 0x080481ca ; TODO: remove
 
-; 00002fd0
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+  .versym:
+	dd      DT_VERSYM              ; tag: Dynamic entry type
+	dd      versym                 ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000000 (NULL)                       0x0
+
+  .null:
+	dd      DT_NULL                ; tag: Dynamic entry type
+	dd      0                      ; val: Integer or address value
+
+;align 0x1000, db 0x00
+
+; 00002fd8
+db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
 ; 00002fe0
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|

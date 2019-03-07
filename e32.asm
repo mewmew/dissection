@@ -35,13 +35,7 @@ ET_EXEC equ 2 ; Executable file
 ; Architecture.
 EM_386 equ 3 ; Intel i386
 
-text_start   equ 0x08049030 ; TODO: remove
-shoff        equ 0x00003070 ; TODO: remove
-ehdr_size    equ 0x0034     ; TODO: remove
-phdr_count   equ 0x0007     ; TODO: remove
-shentsize    equ 0x0028     ; TODO: remove
-shnum        equ 0x000c     ; TODO: remove
-shstrndx     equ 0x000b     ; TODO: remove
+shstrndx equ 0x000b ; TODO: remove
 
 ehdr:
 
@@ -53,22 +47,15 @@ ehdr:
 	dw      ET_EXEC                   ; type: Object file type
 	dw      EM_386                    ; machine: Architecture
 	dd      1                         ; version: Object file version
-	;dd      text.start                ; entry: Entry point virtual address
-	dd      text_start                ; entry: Entry point virtual address
+	dd      text.start                ; entry: Entry point virtual address
 	dd      phdr_off                  ; phoff: Program header table file offset
-	;dd      0                         ; shoff: Section header table file offset
-	dd      shoff                     ; shoff: Section header table file offset
+	dd      shdr_off                  ; shoff: Section header table file offset
 	dd      0                         ; flags: Processor-specific flags
 	dw      ehdr.size                 ; ehsize: ELF header size in bytes
 	dw      phdr.entsize              ; phentsize: Program header table entry size
-	;dw      phdr.count                ; phnum: Program header table entry count
-	dw      phdr_count                ; phnum: Program header table entry count
-	;dw      0                         ; shentsize: Section header table entry size
-	dw      shentsize                 ; shentsize: Section header table entry size
-	;dw      0                         ; shnum: Section header table entry count
-	dw      shnum                     ; shnum: Section header table entry count
-	;dw      0                         ; shstrndx: Section header string table index
-	;dw      0                         ; shstrndx: Section header string table index
+	dw      phdr.count                ; phnum: Program header table entry count
+	dw      shdr.entsize              ; shentsize: Section header table entry size
+	dw      shdr.count                ; shnum: Section header table entry count
 	dw      shstrndx                  ; shstrndx: Section header string table index
 
 ehdr.size equ $ - ehdr
@@ -228,16 +215,9 @@ interp:
 interp.size equ $ - interp
 
 ; 00000147
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.........|
 
-; 00000150
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
-
-; 00000160
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
-
-; 00000170
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+; TODO: cleanup padding.
+times (0x178 - 0x147)   db 0x00
 
 ; --- [ Dynamic symbols ] ------------------------------------------------------
 
@@ -245,6 +225,7 @@ dynsym_off equ $ - BASE
 
 dynsym:
 
+; 00000178
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
 ; 00000180
@@ -278,8 +259,7 @@ dynstr:
 
 dynstr.size equ $ - dynstr
 
-; 000001c9
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.......|
+align 0x10, db 0x00
 
 ; --- [ .gnu.version_r section ] -----------------------------------------------
 
@@ -353,6 +333,7 @@ text_off equ $ - BASE
 
 text:
 
+  .start:
 db 0x68, 0x00, 0xa0, 0x04, 0x08, 0xe8, 0xd6, 0xff, 0xff, 0xff, 0x83, 0xc4, 0x04, 0x6a, 0x00, 0xe8 ; |h............j..|
 
 ; 00001040
@@ -533,6 +514,8 @@ SHF_ALLOC     equ 0x02 ; Section occupies memory.
 SHF_EXECINSTR equ 0x04 ; Section contains instructions.
 SHF_INFO_LINK equ 0x40 ; sh_info holds section index.
 
+shdr_off equ data_seg_off + ($ - $$)
+
 shdr:
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
@@ -549,6 +532,8 @@ shdr:
 	dd      0                           ; info:      Depends on section type.
 	dd      0                           ; addralign: Alignment in bytes.
 	dd      0                           ; entsize:   Size of each entry in section.
+
+shdr.entsize equ $ - shdr
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 1] .interp           PROGBITS        08048134 000134 000013 00   A  0   0  1
@@ -732,3 +717,6 @@ got_plt_entsize equ 4 ; TODO: remove
 	dd      0                           ; info:      Depends on section type.
 	dd      0x1                         ; addralign: Alignment in bytes.
 	dd      0                           ; entsize:   Size of each entry in section.
+
+shdr.size  equ $ - shdr
+shdr.count equ shdr.size / shdr.entsize

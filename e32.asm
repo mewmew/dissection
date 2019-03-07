@@ -234,19 +234,46 @@ times (0x178 - 0x160)   db 0x00
 
 dynsym_off equ $ - BASE
 
-dynsym:
+STT_NOTYPE equ 0 ; Unspecified type.
+STT_FUNC   equ 2 ; Function.
+
+STB_LOCAL  equ 0 ; Local symbol
+STB_GLOBAL equ 1 ; Global symbol
+
+STV_DEFAULT equ 0 ; Default visibility (see binding).
 
 ; 00000178
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 
-; 00000180
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+dynsym:
 
-; 00000190
-db 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+  .null:
+	dd      dynstr.null_off           ; name: String table index of name.
+	dd      0                         ; value: Symbol value.
+	dd      0                         ; size: Size of associated object.
+	db      STB_LOCAL<<4 | STT_NOTYPE ; info: Type and binding information.
+	db      STV_DEFAULT               ; other: Reserved (not used).
+	dw      0                         ; shndx: Section index of symbol.
 
-; 000001a0
-db 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00 ; |........|
+.entsize equ $ - dynsym
+
+  .printf:
+	dd      dynstr.printf_off         ; name: String table index of name.
+	dd      0                         ; value: Symbol value.
+	dd      0                         ; size: Size of associated object.
+	db      STB_GLOBAL<<4 | STT_FUNC  ; info: Type and binding information.
+	db      STV_DEFAULT               ; other: Reserved (not used).
+	dw      0                         ; shndx: Section index of symbol.
+
+  .exit:
+	dd      dynstr.exit_off           ; name: String table index of name.
+	dd      0                         ; value: Symbol value.
+	dd      0                         ; size: Size of associated object.
+	db      STB_GLOBAL<<4 | STT_FUNC  ; info: Type and binding information.
+	db      STV_DEFAULT               ; other: Reserved (not used).
+	dw      0                         ; shndx: Section index of symbol.
+
+.printf_idx equ (.printf - dynsym) / .entsize
+.exit_idx   equ (.exit - dynsym) / .entsize
 
 dynsym.size equ $ - dynsym
 
@@ -273,10 +300,11 @@ dynstr:
   .glibc:
 	db      "GLIBC_2.0", 0
 
-.libc_off   equ .libc - dynstr
-.exit_off   equ .exit - dynstr
-.printf_off equ .printf - dynstr
-.glibc_off  equ .glibc - dynstr
+.null_off   equ .null - dynstr   ; 0
+.libc_off   equ .libc - dynstr   ; 1
+.exit_off   equ .exit - dynstr   ; 11
+.printf_off equ .printf - dynstr ; 16
+.glibc_off  equ .glibc - dynstr  ; 23
 
 dynstr.size equ $ - dynstr
 
@@ -488,11 +516,9 @@ dynamic:
 ;  Tag        Type                         Name/Value
 ; 0x0000000b (SYMENT)                     16 (bytes)
 
-syment equ 16 ; TODO: remove
-
   .syment:
 	dd      DT_SYMENT              ; tag: Dynamic entry type
-	dd      syment                 ; val: Integer or address value
+	dd      dynsym.entsize         ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x00000015 (DEBUG)                      0x0
@@ -694,7 +720,6 @@ shdr.entsize equ $ - shdr
 
 dynsym_link    equ 3
 dynsym_info    equ 1
-dynsym_entsize equ 0x10 ; TODO: remove
 
   .dynsym:
 	dd      shstrtab.dynsym_idx         ; name:      Section name (index into the section header string table).
@@ -706,7 +731,7 @@ dynsym_entsize equ 0x10 ; TODO: remove
 	dd      dynsym_link                 ; link:      Index of a related section.
 	dd      dynsym_info                 ; info:      Depends on section type.
 	dd      0x4                         ; addralign: Alignment in bytes.
-	dd      dynsym_entsize              ; entsize:   Size of each entry in section.
+	dd      dynsym.entsize              ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 3] .dynstr           STRTAB          080481a8 0001a8 000021 00   A  0   0  1

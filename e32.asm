@@ -346,9 +346,20 @@ rel_plt_off equ $ - BASE
 
 ; 000001f0
 
+R_386_JMP_SLOT equ 7 ; Set GOT entry to code address.
+
 rel_plt:
 
-db 0x0c, 0xc0, 0x04, 0x08, 0x07, 0x01, 0x00, 0x00, 0x10, 0xc0, 0x04, 0x08, 0x07, 0x02, 0x00, 0x00 ; |................|
+  .printf:
+	dd      got_plt.printf                         ; off: Location to be relocated.
+	dd      dynsym.printf_idx<<8 | R_386_JMP_SLOT  ; info: Relocation type and symbol index.
+
+  .exit:
+	dd      got_plt.exit                           ; off: Location to be relocated.
+	dd      dynsym.exit_idx<<8 | R_386_JMP_SLOT    ; info: Relocation type and symbol index.
+
+.printf_off equ .printf - rel_plt
+.exit_off   equ .exit - rel_plt
 
 rel_plt.size equ $ - rel_plt
 
@@ -379,13 +390,32 @@ plt_off equ $ - BASE
 
 plt:
 
-db 0xff, 0x35, 0x04, 0xc0, 0x04, 0x08, 0xff, 0x25, 0x08, 0xc0, 0x04, 0x08, 0x00, 0x00, 0x00, 0x00 ; |.5.....%........|
+  .resolve:
+	push    dword [got_plt.link_map]
+	jmp     [got_plt.dl_runtime_resolve]
 
-; 00001010
-db 0xff, 0x25, 0x0c, 0xc0, 0x04, 0x08, 0x68, 0x00, 0x00, 0x00, 0x00, 0xe9, 0xe0, 0xff, 0xff, 0xff ; |.%....h.........|
+align 0x10, db 0x00
+
+  .printf:
+	jmp     [got_plt.printf]
+
+; 00001016
+  .resolve_printf:
+; 8049016:	68 00 00 00 00       	push   $0x0
+	db      0x68, 0x00, 0x00, 0x00, 0x00 ; TODO: remove. used to force 0x68 push opcode
+	;push    dword rel_plt.printf_off
+	jmp     near .resolve
 
 ; 00001020
-db 0xff, 0x25, 0x10, 0xc0, 0x04, 0x08, 0x68, 0x08, 0x00, 0x00, 0x00, 0xe9, 0xd0, 0xff, 0xff, 0xff ; |.%....h.........|
+
+  .exit:
+	jmp     [got_plt.exit]
+
+  .resolve_exit:
+; 8049026:	68 08 00 00 00       	push   $0x8
+	db      0x68, 0x08, 0x00, 0x00, 0x00 ; TODO: remove. used to force 0x68 push opcode
+	;push    dword rel_plt.exit_off
+	jmp     near .resolve
 
 plt.size equ $ - plt
 
@@ -611,10 +641,24 @@ got_plt_off equ data_seg_off + ($ - $$)
 
 got_plt:
 
-db 0x58, 0xbf, 0x04, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x90, 0x04, 0x08 ; |X...............|
+  .dynamic:
+	dd      dynamic
+
+; 00003004
+  .link_map:
+	dd      0
+
+; 00003008
+  .dl_runtime_resolve:
+	dd      0
+
+; 0000300C
+  .printf:
+	dd      plt.resolve_printf
 
 ; 00003010
-db 0x26, 0x90, 0x04, 0x08 ; |&...|
+  .exit:
+	dd      plt.resolve_exit
 
 got_plt.size equ $ - got_plt
 

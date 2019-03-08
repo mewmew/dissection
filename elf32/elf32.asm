@@ -265,6 +265,9 @@ rela_plt:
 	dd      dynsym.exit_idx<<8 | R_386_JMP_SLOT    ; info: Relocation type and symbol index
 	dd      0                                      ; addend: Addend
 
+.printf_off equ .printf - rela_plt
+.exit_off   equ .exit - rela_plt
+
 ; --- [/ .rela.plt section ] ---------------------------------------------------
 
 ; --- [ .rodata section ] ------------------------------------------------------
@@ -333,14 +336,14 @@ plt:
 	jmp     [got_plt.printf]
 
   .resolve_printf:
-	push    dword dynsym.printf_idx
+	push    dword rela_plt.printf_off
 	jmp     near .resolve
 
   .exit:
 	jmp     [got_plt.exit]
 
   .resolve_exit:
-	push    dword dynsym.exit_idx
+	push    dword rela_plt.exit_off
 	jmp     near .resolve
 
 ; --- [/ .plt section ] --------------------------------------------------------

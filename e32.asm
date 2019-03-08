@@ -428,10 +428,14 @@ text_off equ $ - BASE
 text:
 
   .start:
-db 0x68, 0x00, 0xa0, 0x04, 0x08, 0xe8, 0xd6, 0xff, 0xff, 0xff, 0x83, 0xc4, 0x04, 0x6a, 0x00, 0xe8 ; |h............j..|
 
-; 00001040
-db 0xdc, 0xff, 0xff, 0xff, 0x83, 0xc4, 0x04, 0xc3 ; |................|
+	push    hello
+	call    plt.printf
+	add     esp, 4
+	push    0
+	call    plt.exit
+	add     esp, 4
+	ret
 
 text.size equ $ - text
 
@@ -460,6 +464,7 @@ rodata_off equ $ - BASE
 
 rodata:
 
+hello:
 	db      "hello world", 10, 0
 
 rodata.size equ $ - rodata

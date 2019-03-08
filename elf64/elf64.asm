@@ -41,7 +41,7 @@ ehdr:
 	dq      phdr - BASE_RODATA        ; phoff: Program header table file offset
 	dq      0                         ; shoff: Section header table file offset
 	dd      0                         ; flags: Processor-specific flags
-	dw      .size                     ; ehsize: ELF header size in bytes
+	dw      ehdr.size                 ; ehsize: ELF header size in bytes
 	dw      phdr.entsize              ; phentsize: Program header table entry size
 	dw      phdr.count                ; phnum: Program header table entry count
 	dw      0                         ; shentsize: Section header table entry size

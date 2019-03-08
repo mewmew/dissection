@@ -35,8 +35,6 @@ ET_EXEC equ 2 ; Executable file
 ; Architecture.
 EM_386 equ 3 ; Intel i386
 
-shstrndx equ 0x000b ; TODO: remove
-
 ehdr:
 
 	db      0x7F, "ELF"               ; ident.magic: ELF magic number
@@ -56,7 +54,7 @@ ehdr:
 	dw      phdr.count                ; phnum: Program header table entry count
 	dw      shdr.entsize              ; shentsize: Section header table entry size
 	dw      shdr.count                ; shnum: Section header table entry count
-	dw      shstrndx                  ; shstrndx: Section header string table index
+	dw      shdr.shstrtab_idx         ; shstrndx: Section header string table index
 
 ehdr.size equ $ - ehdr
 
@@ -354,6 +352,8 @@ rel_plt:
 	dd      got_plt.printf                         ; off: Location to be relocated.
 	dd      dynsym.printf_idx<<8 | R_386_JMP_SLOT  ; info: Relocation type and symbol index.
 
+rel_plt.entsize equ $ - rel_plt
+
   .exit:
 	dd      got_plt.exit                           ; off: Location to be relocated.
 	dd      dynsym.exit_idx<<8 | R_386_JMP_SLOT    ; info: Relocation type and symbol index.
@@ -574,20 +574,16 @@ dynamic:
 ;  Tag        Type                         Name/Value
 ; 0x00000003 (PLTGOT)                     0x804c000
 
-plt_got equ 0x0804c000 ; TODO: remove
-
   .plt_got:
 	dd      DT_PLTGOT              ; tag: Dynamic entry type
-	dd      plt_got                ; val: Integer or address value
+	dd      got_plt                ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x00000002 (PLTRELSZ)                   16 (bytes)
 
-pltrelsz equ 16 ; TODO: remove
-
   .pltrelsz:
 	dd      DT_PLTRELSZ            ; tag: Dynamic entry type
-	dd      pltrelsz               ; val: Integer or address value
+	dd      rel_plt.size           ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
 ; 0x00000014 (PLTREL)                     REL
@@ -649,6 +645,8 @@ got_plt:
   .dynamic:
 	dd      dynamic
 
+got_plt.entsize equ $ - got_plt
+
 ; 00003004
   .link_map:
 	dd      0
@@ -679,6 +677,7 @@ shstrtab_off equ data_seg_off + ($ - $$)
 
 shstrtab:
 
+  .null:
 	db 0
 
   .shstrtab_idx equ $ - shstrtab
@@ -829,7 +828,6 @@ gnu_version_r_info equ 1
 
 rel_plt_link    equ 2
 rel_plt_info    equ 10
-rel_plt_entsize equ 8  ; TODO: remove
 
   .rel_plt:
 	dd      shstrtab.rel_plt_idx        ; name:      Section name (index into the section header string table).
@@ -841,7 +839,7 @@ rel_plt_entsize equ 8  ; TODO: remove
 	dd      rel_plt_link                ; link:      Index of a related section.
 	dd      rel_plt_info                ; info:      Depends on section type.
 	dd      0x4                         ; addralign: Alignment in bytes.
-	dd      rel_plt_entsize             ; entsize:   Size of each entry in section.
+	dd      rel_plt.entsize             ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 6] .plt              PROGBITS        08049000 001000 000030 04  AX  0   0 16
@@ -894,7 +892,6 @@ plt_entsize equ 4 ; TODO: remove
 ;  [ 9] .dynamic          DYNAMIC         0804bf58 002f58 0000a8 08  WA  3   0  4
 
 dynamic_link    equ 3
-dynamic_entsize equ 8 ; TODO: remove
 
   .dynamic:
 	dd      shstrtab.dynamic_idx        ; name:      Section name (index into the section header string table).
@@ -906,12 +903,10 @@ dynamic_entsize equ 8 ; TODO: remove
 	dd      dynamic_link                ; link:      Index of a related section.
 	dd      0                           ; info:      Depends on section type.
 	dd      0x4                         ; addralign: Alignment in bytes.
-	dd      dynamic_entsize             ; entsize:   Size of each entry in section.
+	dd      dynamic.entsize             ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [10] .got.plt          PROGBITS        0804c000 003000 000014 04  WA  0   0  4
-
-got_plt_entsize equ 4 ; TODO: remove
 
   .got_plt:
 	dd      shstrtab.got_plt_idx        ; name:      Section name (index into the section header string table).
@@ -923,7 +918,7 @@ got_plt_entsize equ 4 ; TODO: remove
 	dd      0                           ; link:      Index of a related section.
 	dd      0                           ; info:      Depends on section type.
 	dd      0x4                         ; addralign: Alignment in bytes.
-	dd      got_plt_entsize             ; entsize:   Size of each entry in section.
+	dd      got_plt.entsize             ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [11] .shstrtab         STRTAB          00000000 003014 00005b 00      0   0  1
@@ -939,6 +934,19 @@ got_plt_entsize equ 4 ; TODO: remove
 	dd      0                           ; info:      Depends on section type.
 	dd      0x1                         ; addralign: Alignment in bytes.
 	dd      0                           ; entsize:   Size of each entry in section.
+
+.null_idx          equ (.null - shdr) / .entsize
+.interp_idx        equ (.interp - shdr) / .entsize
+.dynsym_idx        equ (.dynsym - shdr) / .entsize
+.dynstr_idx        equ (.dynstr - shdr) / .entsize
+.gnu_version_r_idx equ (.gnu_version_r - shdr) / .entsize
+.rel_plt_idx       equ (.rel_plt - shdr) / .entsize
+.plt_idx           equ (.plt - shdr) / .entsize
+.text_idx          equ (.text - shdr) / .entsize
+.rodata_idx        equ (.rodata - shdr) / .entsize
+.dynamic_idx       equ (.dynamic - shdr) / .entsize
+.got_plt_idx       equ (.got_plt - shdr) / .entsize
+.shstrtab_idx      equ (.shstrtab - shdr) / .entsize
 
 shdr.size  equ $ - shdr
 shdr.count equ shdr.size / shdr.entsize

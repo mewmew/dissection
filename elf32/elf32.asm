@@ -62,9 +62,9 @@ PT_DYNAMIC equ 2 ; Dynamic linking information
 PT_INTERP  equ 3 ; Program interpreter
 
 ; Segment flags.
-PF_X equ 0x1 ; Segment is executable
-PF_W equ 0x2 ; Segment is writable
 PF_R equ 0x4 ; Segment is readable
+PF_W equ 0x2 ; Segment is writable
+PF_X equ 0x1 ; Segment is executable
 
 phdr_off equ phdr - BASE_RODATA
 
@@ -181,7 +181,7 @@ dynamic:
 
   .jmprel:
 	dd      DT_JMPREL              ; tag: Dynamic entry type
-	dd      rela_plt               ; val: Integer or address value
+	dd      rel_plt                ; val: Integer or address value
 
   .pltgot:
 	dd      DT_PLTGOT              ; tag: Dynamic entry type
@@ -248,27 +248,25 @@ dynsym:
 
 ; --- [/ .dynsym section ] -----------------------------------------------------
 
-; --- [ .rela.plt section ] ----------------------------------------------------
+; --- [ .rel.plt section ] -----------------------------------------------------
 
 ; Relocation types.
 R_386_JMP_SLOT equ 7
 
-rela_plt:
+rel_plt:
 
   .printf:
 	dd      got_plt.printf                         ; offset: Address
 	dd      dynsym.printf_idx<<8 | R_386_JMP_SLOT  ; info: Relocation type and symbol index
-	dd      0                                      ; addend: Addend
 
   .exit:
 	dd      got_plt.exit                           ; offset: Address
 	dd      dynsym.exit_idx<<8 | R_386_JMP_SLOT    ; info: Relocation type and symbol index
-	dd      0                                      ; addend: Addend
 
-.printf_off equ .printf - rela_plt
-.exit_off   equ .exit - rela_plt
+.printf_off equ .printf - rel_plt
+.exit_off   equ .exit - rel_plt
 
-; --- [/ .rela.plt section ] ---------------------------------------------------
+; --- [/ .rel.plt section ] ----------------------------------------------------
 
 ; --- [ .rodata section ] ------------------------------------------------------
 
@@ -336,14 +334,14 @@ plt:
 	jmp     [got_plt.printf]
 
   .resolve_printf:
-	push    dword rela_plt.printf_off
+	push    dword rel_plt.printf_off
 	jmp     near .resolve
 
   .exit:
 	jmp     [got_plt.exit]
 
   .resolve_exit:
-	push    dword rela_plt.exit_off
+	push    dword rel_plt.exit_off
 	jmp     near .resolve
 
 ; --- [/ .plt section ] --------------------------------------------------------

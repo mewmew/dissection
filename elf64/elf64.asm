@@ -161,15 +161,11 @@ DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
 
 dynamic:
 
-  .libc:
-	dq      DT_NEEDED              ; tag: Dynamic entry type
-	dq      dynstr.libc_off        ; val: Integer or address value
-
-.entsize equ $ - dynamic
-
   .strtab:
 	dq      DT_STRTAB              ; tag: Dynamic entry type
 	dq      dynstr                 ; val: Integer or address value
+
+.entsize equ $ - dynamic
 
   .symtab:
 	dq      DT_SYMTAB              ; tag: Dynamic entry type
@@ -182,6 +178,10 @@ dynamic:
   .pltgot:
 	dq      DT_PLTGOT              ; tag: Dynamic entry type
 	dq      got_plt                ; val: Integer or address value
+
+  .libc:
+	dq      DT_NEEDED              ; tag: Dynamic entry type
+	dq      dynstr.libc_off        ; val: Integer or address value
 
   .null:
 	dq      DT_NULL                ; tag: Dynamic entry type

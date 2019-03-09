@@ -165,15 +165,11 @@ dynamic_off equ dynamic - BASE_RODATA
 
 dynamic:
 
-  .libc:
-	dd      DT_NEEDED              ; tag: Dynamic entry type
-	dd      dynstr.libc_off        ; val: Integer or address value
-
-.entsize equ $ - dynamic
-
   .strtab:
 	dd      DT_STRTAB              ; tag: Dynamic entry type
 	dd      dynstr                 ; val: Integer or address value
+
+.entsize equ $ - dynamic
 
   .symtab:
 	dd      DT_SYMTAB              ; tag: Dynamic entry type
@@ -186,6 +182,10 @@ dynamic:
   .pltgot:
 	dd      DT_PLTGOT              ; tag: Dynamic entry type
 	dd      got_plt                ; val: Integer or address value
+
+  .libc:
+	dd      DT_NEEDED              ; tag: Dynamic entry type
+	dd      dynstr.libc_off        ; val: Integer or address value
 
   .null:
 	dd      DT_NULL                ; tag: Dynamic entry type

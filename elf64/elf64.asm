@@ -3,15 +3,17 @@ BITS 64
 ; Base addresses.
 BASE        equ 0x400000
 PAGE        equ 0x1000
-BASE_RODATA equ BASE
-BASE_DATA   equ BASE + 1*PAGE + rodata_seg.size
-BASE_CODE   equ BASE + 2*PAGE + rodata_seg.size + data_seg.size
+BASE_R_SEG  equ BASE
+BASE_RW_SEG equ BASE + 1*PAGE + r_seg.size
+BASE_RX_SEG equ BASE + 2*PAGE + r_seg.size + rw_seg.size
 
-; ___ [ Read-only data segment ] _______________________________________________
+; ___ [ Read-only segment ] ____________________________________________________
 
-SECTION .rdata vstart=BASE_RODATA align=1
+SECTION .rdata vstart=BASE_R_SEG align=1
 
-rodata_seg:
+r_seg_off equ r_seg - BASE_R_SEG
+
+r_seg:
 
 ; === [ ELF file header ] ======================================================
 
@@ -38,7 +40,7 @@ ehdr:
 	dw      EM_X86_64                 ; machine: Architecture
 	dd      1                         ; version: Object file version
 	dq      text.start                ; entry: Entry point virtual address
-	dq      phdr - BASE_RODATA        ; phoff: Program header table file offset
+	dq      phdr_off                  ; phoff: Program header table file offset
 	dq      0                         ; shoff: Section header table file offset
 	dd      0                         ; flags: Processor-specific flags
 	dw      ehdr.size                 ; ehsize: ELF header size in bytes
@@ -60,9 +62,11 @@ PT_DYNAMIC equ 2 ; Dynamic linking information
 PT_INTERP  equ 3 ; Program interpreter
 
 ; Segment flags.
-PF_X equ 0x1 ; Segment is executable
-PF_W equ 0x2 ; Segment is writable
 PF_R equ 0x4 ; Segment is readable
+PF_W equ 0x2 ; Segment is writable
+PF_X equ 0x1 ; Segment is executable
+
+phdr_off equ phdr - BASE_R_SEG
 
 phdr:
 
@@ -71,7 +75,7 @@ phdr:
   .interp:
 	dd      PT_INTERP                ; type: Segment type
 	dd      PF_R                     ; flags: Segment flags
-	dq      interp - BASE_RODATA     ; offset: Segment file offset
+	dq      interp_off               ; offset: Segment file offset
 	dq      interp                   ; vaddr: Segment virtual address
 	dq      interp                   ; paddr: Segment physical address
 	dq      interp.size              ; filesz: Segment size in file
@@ -85,7 +89,7 @@ phdr:
   .dynamic:
 	dd      PT_DYNAMIC             ; type: Segment type
 	dd      PF_R                   ; flags: Segment flags
-	dq      dynamic - BASE_RODATA  ; offset: Segment file offset
+	dq      dynamic_off            ; offset: Segment file offset
 	dq      dynamic                ; vaddr: Segment virtual address
 	dq      dynamic                ; paddr: Segment physical address
 	dq      dynamic.size           ; filesz: Segment size in file
@@ -94,42 +98,38 @@ phdr:
 
 ; --- [ Read-only data segment program header ] --------------------------------
 
-  .rodata_seg:
+  .r_seg:
 	dd      PT_LOAD                  ; type: Segment type
 	dd      PF_R                     ; flags: Segment flags
-	dq      rodata_seg - BASE_RODATA ; offset: Segment file offset
-	dq      rodata_seg               ; vaddr: Segment virtual address
-	dq      rodata_seg               ; paddr: Segment physical address
-	dq      rodata_seg.size          ; filesz: Segment size in file
-	dq      rodata_seg.size          ; memsz: Segment size in memory
+	dq      r_seg_off                ; offset: Segment file offset
+	dq      r_seg                    ; vaddr: Segment virtual address
+	dq      r_seg                    ; paddr: Segment physical address
+	dq      r_seg.size               ; filesz: Segment size in file
+	dq      r_seg.size               ; memsz: Segment size in memory
 	dq      PAGE                     ; align: Segment alignment
 
 ; --- [ Data segment program header ] ------------------------------------------
 
-data_seg_off equ data_seg - BASE_DATA + rodata_seg.size
-
-  .data_seg:
+  .rw_seg:
 	dd      PT_LOAD                  ; type: Segment type
 	dd      PF_R | PF_W              ; flags: Segment flags
-	dq      data_seg_off             ; offset: Segment file offset
-	dq      data_seg                 ; vaddr: Segment virtual address
-	dq      data_seg                 ; paddr: Segment physical address
-	dq      data_seg.size            ; filesz: Segment size in file
-	dq      data_seg.size            ; memsz: Segment size in memory
+	dq      rw_seg_off               ; offset: Segment file offset
+	dq      rw_seg                   ; vaddr: Segment virtual address
+	dq      rw_seg                   ; paddr: Segment physical address
+	dq      rw_seg.size              ; filesz: Segment size in file
+	dq      rw_seg.size              ; memsz: Segment size in memory
 	dq      PAGE                     ; align: Segment alignment
 
 ; --- [ Code segment program header ] ------------------------------------------
 
-code_seg_off equ code_seg - BASE_CODE + rodata_seg.size + data_seg.size
-
-  .code_seg:
+  .rx_seg:
 	dd      PT_LOAD                  ; type: Segment type
 	dd      PF_R | PF_X              ; flags: Segment flags
-	dq      code_seg_off             ; offset: Segment file offset
-	dq      code_seg                 ; vaddr: Segment virtual address
-	dq      code_seg                 ; paddr: Segment physical address
-	dq      code_seg.size            ; filesz: Segment size in file
-	dq      code_seg.size            ; memsz: Segment size in memory
+	dq      rx_seg_off               ; offset: Segment file offset
+	dq      rx_seg                   ; vaddr: Segment virtual address
+	dq      rx_seg                   ; paddr: Segment physical address
+	dq      rx_seg.size              ; filesz: Segment size in file
+	dq      rx_seg.size              ; memsz: Segment size in memory
 	dq      PAGE                     ; align: Segment alignment
 
 .size  equ $ - phdr
@@ -140,6 +140,8 @@ code_seg_off equ code_seg - BASE_CODE + rodata_seg.size + data_seg.size
 ; === [ Sections ] =============================================================
 
 ; --- [ .interp section ] ------------------------------------------------------
+
+interp_off equ interp - BASE_R_SEG
 
 interp:
 
@@ -158,6 +160,8 @@ DT_PLTGOT   equ 3  ; Address of the PLT and/or GOT
 DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
+
+dynamic_off equ dynamic - BASE_R_SEG
 
 dynamic:
 
@@ -272,15 +276,17 @@ rodata:
 
 ; --- [/ .rodata section ] -----------------------------------------------------
 
-rodata_seg.size equ $ - rodata_seg
+r_seg.size equ $ - r_seg
 
-; ___ [/ Read-only data segment ] ______________________________________________
+; ___ [/ Read-only segment ] ___________________________________________________
 
-; ___ [ Data segment ] _________________________________________________________
+; ___ [ Read-write segment ] ___________________________________________________
 
-SECTION .data vstart=BASE_DATA follows=.rdata align=1
+SECTION .data vstart=BASE_RW_SEG follows=.rdata align=1
 
-data_seg:
+rw_seg_off equ rw_seg - BASE_RW_SEG + r_seg.size
+
+rw_seg:
 
 ; --- [ .got.plt section ] -----------------------------------------------------
 
@@ -303,15 +309,17 @@ got_plt:
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
 
-data_seg.size equ $ - data_seg
+rw_seg.size equ $ - rw_seg
 
-; ___ [/ Data segment ] ________________________________________________________
+; ___ [/ Read-write segment ] __________________________________________________
 
-; ___ [ Code segment ] _________________________________________________________
+; ___ [ Executable segment ] ___________________________________________________
 
-SECTION .text vstart=BASE_CODE follows=.data align=1
+SECTION .text vstart=BASE_RX_SEG follows=.data align=1
 
-code_seg:
+rx_seg_off equ rx_seg - BASE_RX_SEG + r_seg.size + rw_seg.size
+
+rx_seg:
 
 ; --- [ .plt section ] ---------------------------------------------------------
 
@@ -352,6 +360,6 @@ text:
 
 ; === [/ Sections ] ============================================================
 
-code_seg.size equ $ - code_seg
+rx_seg.size equ $ - rx_seg
 
-; ___ [/ Code segment ] ________________________________________________________
+; ___ [/ Executable segment ] __________________________________________________

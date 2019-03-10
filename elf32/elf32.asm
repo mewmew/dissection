@@ -3,17 +3,17 @@ BITS 32
 ; Base addresses.
 BASE        equ 0x400000
 PAGE        equ 0x1000
-BASE_RODATA equ BASE
-BASE_DATA   equ BASE + 1*PAGE + rodata_seg.size
-BASE_CODE   equ BASE + 2*PAGE + rodata_seg.size + data_seg.size
+BASE_R_SEG  equ BASE
+BASE_RW_SEG equ BASE + 1*PAGE + r_seg.size
+BASE_RX_SEG equ BASE + 2*PAGE + r_seg.size + rw_seg.size
 
-; ___ [ Read-only data segment ] _______________________________________________
+; ___ [ Read-only segment ] ____________________________________________________
 
-SECTION .rdata vstart=BASE_RODATA align=1
+SECTION .rdata vstart=BASE_R_SEG align=1
 
-rodata_seg_off equ rodata_seg - BASE_RODATA
+r_seg_off equ r_seg - BASE_R_SEG
 
-rodata_seg:
+r_seg:
 
 ; === [ ELF file header ] ======================================================
 
@@ -66,7 +66,7 @@ PF_R equ 0x4 ; Segment is readable
 PF_W equ 0x2 ; Segment is writable
 PF_X equ 0x1 ; Segment is executable
 
-phdr_off equ phdr - BASE_RODATA
+phdr_off equ phdr - BASE_R_SEG
 
 phdr:
 
@@ -96,39 +96,39 @@ phdr:
 	dd      PF_R                   ; flags: Segment flags
 	dd      0x4                    ; align: Segment alignment
 
-; --- [ Read-only data segment program header ] --------------------------------
+; --- [ Read-only segment program header ] -------------------------------------
 
-  .rodata_seg:
+  .r_seg:
 	dd      PT_LOAD                  ; type: Segment type
-	dd      rodata_seg_off           ; offset: Segment file offset
-	dd      rodata_seg               ; vaddr: Segment virtual address
-	dd      rodata_seg               ; paddr: Segment physical address
-	dd      rodata_seg.size          ; filesz: Segment size in file
-	dd      rodata_seg.size          ; memsz: Segment size in memory
+	dd      r_seg_off                ; offset: Segment file offset
+	dd      r_seg                    ; vaddr: Segment virtual address
+	dd      r_seg                    ; paddr: Segment physical address
+	dd      r_seg.size               ; filesz: Segment size in file
+	dd      r_seg.size               ; memsz: Segment size in memory
 	dd      PF_R                     ; flags: Segment flags
 	dd      PAGE                     ; align: Segment alignment
 
-; --- [ Data segment program header ] ------------------------------------------
+; --- [ Read-write segment program header ] ------------------------------------
 
-  .data_seg:
+  .rw_seg:
 	dd      PT_LOAD                  ; type: Segment type
-	dd      data_seg_off             ; offset: Segment file offset
-	dd      data_seg                 ; vaddr: Segment virtual address
-	dd      data_seg                 ; paddr: Segment physical address
-	dd      data_seg.size            ; filesz: Segment size in file
-	dd      data_seg.size            ; memsz: Segment size in memory
+	dd      rw_seg_off               ; offset: Segment file offset
+	dd      rw_seg                   ; vaddr: Segment virtual address
+	dd      rw_seg                   ; paddr: Segment physical address
+	dd      rw_seg.size              ; filesz: Segment size in file
+	dd      rw_seg.size              ; memsz: Segment size in memory
 	dd      PF_R | PF_W              ; flags: Segment flags
 	dd      PAGE                     ; align: Segment alignment
 
-; --- [ Code segment program header ] ------------------------------------------
+; --- [ Executable segment program header ] ------------------------------------
 
-  .code_seg:
+  .rx_seg:
 	dd      PT_LOAD                  ; type: Segment type
-	dd      code_seg_off             ; offset: Segment file offset
-	dd      code_seg                 ; vaddr: Segment virtual address
-	dd      code_seg                 ; paddr: Segment physical address
-	dd      code_seg.size            ; filesz: Segment size in file
-	dd      code_seg.size            ; memsz: Segment size in memory
+	dd      rx_seg_off               ; offset: Segment file offset
+	dd      rx_seg                   ; vaddr: Segment virtual address
+	dd      rx_seg                   ; paddr: Segment physical address
+	dd      rx_seg.size              ; filesz: Segment size in file
+	dd      rx_seg.size              ; memsz: Segment size in memory
 	dd      PF_R | PF_X              ; flags: Segment flags
 	dd      PAGE                     ; align: Segment alignment
 
@@ -141,7 +141,7 @@ phdr:
 
 ; --- [ .interp section ] ------------------------------------------------------
 
-interp_off equ interp - BASE_RODATA
+interp_off equ interp - BASE_R_SEG
 
 interp:
 
@@ -161,7 +161,7 @@ DT_STRTAB   equ 5  ; Address of the string table
 DT_SYMTAB   equ 6  ; Address of the symbol table
 DT_JMPREL   equ 23 ; Address of the relocation entities of the PLT
 
-dynamic_off equ dynamic - BASE_RODATA
+dynamic_off equ dynamic - BASE_R_SEG
 
 dynamic:
 
@@ -277,17 +277,17 @@ rodata:
 
 ; --- [/ .rodata section ] -----------------------------------------------------
 
-rodata_seg.size equ $ - rodata_seg
+r_seg.size equ $ - r_seg
 
-; ___ [/ Read-only data segment ] ______________________________________________
+; ___ [/ Read-only segment ] ___________________________________________________
 
-; ___ [ Data segment ] _________________________________________________________
+; ___ [ Read-write segment ] ___________________________________________________
 
-SECTION .data vstart=BASE_DATA follows=.rdata align=1
+SECTION .data vstart=BASE_RW_SEG follows=.rdata align=1
 
-data_seg_off equ data_seg - BASE_DATA + rodata_seg.size
+rw_seg_off equ rw_seg - BASE_RW_SEG + r_seg.size
 
-data_seg:
+rw_seg:
 
 ; --- [ .got.plt section ] -----------------------------------------------------
 
@@ -310,17 +310,17 @@ got_plt:
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
 
-data_seg.size equ $ - data_seg
+rw_seg.size equ $ - rw_seg
 
-; ___ [/ Data segment ] ________________________________________________________
+; ___ [/ Read-write segment ] __________________________________________________
 
-; ___ [ Code segment ] _________________________________________________________
+; ___ [ Executable segment ] ___________________________________________________
 
-SECTION .text vstart=BASE_CODE follows=.data align=1
+SECTION .text vstart=BASE_RX_SEG follows=.data align=1
 
-code_seg_off equ code_seg - BASE_CODE + rodata_seg.size + data_seg.size
+rx_seg_off equ rx_seg - BASE_RX_SEG + r_seg.size + rw_seg.size
 
-code_seg:
+rx_seg:
 
 ; --- [ .plt section ] ---------------------------------------------------------
 
@@ -363,6 +363,6 @@ text:
 
 ; === [/ Sections ] ============================================================
 
-code_seg.size equ $ - code_seg
+rx_seg.size equ $ - rx_seg
 
-; ___ [/ Code segment ] ________________________________________________________
+; ___ [/ Executable segment ] __________________________________________________

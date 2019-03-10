@@ -11,7 +11,7 @@ BASE_X_SEG  equ BASE_RW_SEG + round(rw_seg.size, PAGE)
 
 ; ___ [ Read-only segment ] ____________________________________________________
 
-SECTION .rdata vstart=BASE_R_SEG align=1
+SECTION .r_seg vstart=BASE_R_SEG align=1
 
 r_seg_off equ 0
 
@@ -292,7 +292,7 @@ r_seg.size equ $ - r_seg
 
 ; ___ [ Read-write segment ] ___________________________________________________
 
-SECTION .data vstart=BASE_RW_SEG follows=.rdata align=1
+SECTION .rw_seg vstart=BASE_RW_SEG follows=.r_seg align=1
 
 rw_seg_off equ r_seg_off + r_seg.size
 
@@ -327,7 +327,7 @@ rw_seg.size equ $ - rw_seg
 
 ; ___ [ Executable segment ] ___________________________________________________
 
-SECTION .text vstart=BASE_X_SEG follows=.data align=1
+SECTION .x_seg vstart=BASE_X_SEG follows=.rw_seg align=1
 
 x_seg_off equ rw_seg_off + rw_seg.size
 

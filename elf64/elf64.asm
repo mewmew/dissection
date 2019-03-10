@@ -1,17 +1,19 @@
 BITS 64
 
+%define round(n, r)     (((n + (r - 1)) / r) * r)
+
 ; Base addresses.
 BASE        equ 0x400000
 PAGE        equ 0x1000
 BASE_R_SEG  equ BASE
-BASE_RW_SEG equ BASE + 1*PAGE + r_seg.size
-BASE_RX_SEG equ BASE + 2*PAGE + r_seg.size + rw_seg.size
+BASE_RW_SEG equ BASE_R_SEG + round(r_seg.size, PAGE)
+BASE_X_SEG  equ BASE_RW_SEG + round(rw_seg.size, PAGE)
 
 ; ___ [ Read-only segment ] ____________________________________________________
 
 SECTION .rdata vstart=BASE_R_SEG align=1
 
-r_seg_off equ r_seg - BASE_R_SEG
+r_seg_off equ 0
 
 r_seg:
 
@@ -87,14 +89,14 @@ phdr:
 ; --- [ Dynamic array program header ] -----------------------------------------
 
   .dynamic:
-	dd      PT_DYNAMIC   ; type: Segment type
-	dd      PF_R         ; flags: Segment flags
-	dq      dynamic_off  ; offset: Segment file offset
-	dq      dynamic      ; vaddr: Segment virtual address
-	dq      dynamic      ; paddr: Segment physical address
-	dq      dynamic.size ; filesz: Segment size in file
-	dq      dynamic.size ; memsz: Segment size in memory
-	dq      0x8          ; align: Segment alignment
+	dd      PT_DYNAMIC    ; type: Segment type
+	dd      PF_R          ; flags: Segment flags
+	dq      dynamic_off   ; offset: Segment file offset
+	dq      dynamic       ; vaddr: Segment virtual address
+	dq      dynamic       ; paddr: Segment physical address
+	dq      dynamic.size  ; filesz: Segment size in file
+	dq      dynamic.size  ; memsz: Segment size in memory
+	dq      dynamic_align ; align: Segment alignment
 
 ; --- [ Read-only segment program header ] -------------------------------------
 
@@ -122,14 +124,14 @@ phdr:
 
 ; --- [ Executable segment program header ] ------------------------------------
 
-  .rx_seg:
+  .x_seg:
 	dd      PT_LOAD     ; type: Segment type
 	dd      PF_R | PF_X ; flags: Segment flags
-	dq      rx_seg_off  ; offset: Segment file offset
-	dq      rx_seg      ; vaddr: Segment virtual address
-	dq      rx_seg      ; paddr: Segment physical address
-	dq      rx_seg.size ; filesz: Segment size in file
-	dq      rx_seg.size ; memsz: Segment size in memory
+	dq      x_seg_off   ; offset: Segment file offset
+	dq      x_seg       ; vaddr: Segment virtual address
+	dq      x_seg       ; paddr: Segment physical address
+	dq      x_seg.size  ; filesz: Segment size in file
+	dq      x_seg.size  ; memsz: Segment size in memory
 	dq      PAGE        ; align: Segment alignment
 
 .size  equ $ - phdr
@@ -160,6 +162,10 @@ DT_PLTGOT equ 3  ; Processor-dependent address.
 DT_STRTAB equ 5  ; Address of string table.
 DT_SYMTAB equ 6  ; Address of symbol table.
 DT_JMPREL equ 23 ; Address of PLT relocations.
+
+dynamic_align equ 8
+
+align dynamic_align, db 0x00
 
 dynamic_off equ dynamic - BASE_R_SEG
 
@@ -278,6 +284,8 @@ _rdata:
 
 ; --- [/ .rdata section ] ------------------------------------------------------
 
+align PAGE, db 0x00
+
 r_seg.size equ $ - r_seg
 
 ; ___ [/ Read-only segment ] ___________________________________________________
@@ -286,7 +294,7 @@ r_seg.size equ $ - r_seg
 
 SECTION .data vstart=BASE_RW_SEG follows=.rdata align=1
 
-rw_seg_off equ rw_seg - BASE_RW_SEG + r_seg.size
+rw_seg_off equ r_seg_off + r_seg.size
 
 rw_seg:
 
@@ -311,17 +319,19 @@ got_plt:
 
 ; --- [/ .got.plt section ] ----------------------------------------------------
 
+align PAGE, db 0x00
+
 rw_seg.size equ $ - rw_seg
 
 ; ___ [/ Read-write segment ] __________________________________________________
 
 ; ___ [ Executable segment ] ___________________________________________________
 
-SECTION .text vstart=BASE_RX_SEG follows=.data align=1
+SECTION .text vstart=BASE_X_SEG follows=.data align=1
 
-rx_seg_off equ rx_seg - BASE_RX_SEG + r_seg.size + rw_seg.size
+x_seg_off equ rw_seg_off + rw_seg.size
 
-rx_seg:
+x_seg:
 
 ; --- [ .plt section ] ---------------------------------------------------------
 
@@ -360,6 +370,8 @@ _text:
 
 ; === [/ Sections ] ============================================================
 
-rx_seg.size equ $ - rx_seg
+align PAGE, int3
+
+x_seg.size equ $ - x_seg
 
 ; ___ [/ Executable segment ] __________________________________________________

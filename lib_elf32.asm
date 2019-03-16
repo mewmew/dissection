@@ -1,11 +1,55 @@
-; 00000000
-db 0x7f, 0x45, 0x4c, 0x46, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.ELF............|
-; 00000010
-db 0x03, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00 ; |............4...|
-; 00000020
-db 0x40, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34, 0x00, 0x20, 0x00, 0x05, 0x00, 0x28, 0x00 ; |@0......4. ...(.|
-; 00000030
-db 0x08, 0x00, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+; === [ ELF file header ] ======================================================
+
+; ELF classes.
+ELFCLASS32 equ 1 ; 32-bit architecture.
+
+; Data encodings.
+ELFDATA2LSB equ 1 ; 2's complement little-endian.
+
+; Object file types.
+ET_EXEC equ 2 ; Executable.
+ET_DYN  equ 3 ; Shared object.
+
+; CPU architectures.
+EM_386 equ 3 ; Intel i386.
+
+_text.start equ 0x00001000
+
+phdr_off equ 0x34
+shdr_off equ 0x3040
+phdr.entsize equ 0x20
+phdr.count equ 0x05
+shdr.entsize equ 0x28
+shdr.count equ 0x08
+shdr.shstrtab_idx equ 0x07
+
+ehdr:
+
+	db      0x7F, "ELF"               ; ident.magic: ELF magic number.
+	db      ELFCLASS32                ; ident.class: File class.
+	db      ELFDATA2LSB               ; ident.data: Data encoding.
+	db      1                         ; ident.version: ELF header version.
+	db      0, 0, 0, 0, 0, 0, 0, 0, 0 ; ident.pad: Padding.
+	dw      ET_DYN                    ; type: File type.
+	dw      EM_386                    ; machine: Machine architecture.
+	dd      1                         ; version: ELF format version.
+	dd      _text.start               ; entry: Entry point.
+	dd      phdr_off                  ; phoff: Program header file offset.
+	dd      shdr_off                  ; shoff: Section header file offset.
+	dd      0                         ; flags: Architecture-specific flags.
+	dw      ehdr.size                 ; ehsize: Size of ELF header in bytes.
+	dw      phdr.entsize              ; phentsize: Size of program header entry.
+	dw      phdr.count                ; phnum: Number of program header entries.
+	dw      shdr.entsize              ; shentsize: Size of section header entry.
+	dw      shdr.count                ; shnum: Number of section header entries.
+	dw      shdr.shstrtab_idx         ; shstrndx: Section name strings section.
+
+.size equ $ - ehdr
+
+; === [/ ELF file header ] =====================================================
+
+
+db 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 ; 00000040
 db 0x00, 0x00, 0x00, 0x00, 0x4d, 0x01, 0x00, 0x00, 0x4d, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 ; |....M...M.......|
 ; 00000050

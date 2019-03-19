@@ -172,13 +172,56 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
 ; 00000110
 db 0x01, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00 ; |................|
 ; 00000120
-db 0x01, 0x00, 0x00, 0x00, 0x89, 0x73, 0x88, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |.....s..........|
-; 00000130
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00 ; |................|
-; 00000140
-db 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x05, 0x00
+db 0x01, 0x00, 0x00, 0x00, 0x89, 0x73, 0x88, 0x0b
 
-; 00000140
+
+; --- [ .dynsym section ] ------------------------------------------------------
+
+dynsym_off equ $ - BASE_R_SEG
+
+STT_NOTYPE equ 0 ; Unspecified type.
+STT_FUNC   equ 2 ; Function.
+
+STB_LOCAL  equ 0 ; Local symbol
+STB_GLOBAL equ 1 ; Global symbol
+
+STV_DEFAULT equ 0 ; Default visibility (see binding).
+
+; 00000128
+
+dynsym:
+
+;   Num:    Value  Size Type    Bind   Vis      Ndx Name
+;     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND
+
+  .null:
+	dd      dynstr.null_off           ; name: String table index of name.
+	dd      0                         ; value: Symbol value.
+	dd      0                         ; size: Size of associated object.
+	db      STB_LOCAL<<4 | STT_NOTYPE ; info: Type and binding information.
+	db      STV_DEFAULT               ; other: Reserved (not used).
+	dw      0                         ; shndx: Section index of symbol.
+
+.entsize equ $ - dynsym
+
+;   Num:    Value  Size Type    Bind   Vis      Ndx Name
+;     1: 00001000     0 NOTYPE  GLOBAL DEFAULT    5 foo
+
+; TODO: figure out why section index 5 (i.e. .eh_frame_idx) is used.
+
+  .foo:
+	dd      dynstr.foo_off             ; name: String table index of name.
+	dd      0x1000                     ; value: Symbol value.
+	dd      0                          ; size: Size of associated object.
+	db      STB_GLOBAL<<4 | STT_NOTYPE ; info: Type and binding information.
+	db      STV_DEFAULT                ; other: Reserved (not used).
+	dw      shdr.eh_frame_idx          ; shndx: Section index of symbol.
+
+.foo_idx equ (.foo - dynsym) / .entsize
+
+dynsym.size equ $ - dynsym
+
+; --- [/ .dynsym section ] -----------------------------------------------------
 
 ; --- [ .dynstr section ] ------------------------------------------------------
 
@@ -194,8 +237,8 @@ dynstr:
   .foo:
 	db      "foo", 0
 
-.null_off equ .null - dynstr   ; 0
-.foo_off  equ .foo - dynstr   ; 1
+.null_off equ .null - dynstr ; 0
+.foo_off  equ .foo - dynstr  ; 1
 
 dynstr.size equ $ - dynstr
 
@@ -324,8 +367,6 @@ gnu_hash equ 0x108 ; TODO: remove
 ;  Tag        Type                         Name/Value
 ; 0x00000006 (SYMTAB)                     0x128
 
-dynsym equ 0x128 ; TODO: remove
-
   .symtab:
 	dd      DT_SYMTAB ; tag: Entry type.
 	dd      dynsym    ; val: Integer/Address value.
@@ -374,25 +415,25 @@ shstrtab:
   .null:
 	db 0
 
-  .shstrtab_idx equ $ - shstrtab
+  .shstrtab_off equ $ - shstrtab
 	db      ".shstrtab", 0
 
-  .gnu_hash_idx equ $ - shstrtab
+  .gnu_hash_off equ $ - shstrtab
 	db      ".gnu.hash", 0
 
-  .dynsym_idx equ $ - shstrtab
+  .dynsym_off equ $ - shstrtab
 	db      ".dynsym", 0
 
-  .dynstr_idx equ $ - shstrtab
+  .dynstr_off equ $ - shstrtab
 	db      ".dynstr", 0
 
-  .text_idx equ $ - shstrtab
+  .text_off equ $ - shstrtab
 	db      ".text", 0
 
-  .eh_frame_idx equ $ - shstrtab
+  .eh_frame_off equ $ - shstrtab
 	db      ".eh_frame", 0
 
-  .dynamic_idx equ $ - shstrtab
+  .dynamic_off equ $ - shstrtab
 	db      ".dynamic", 0
 
 shstrtab.size equ $ - shstrtab
@@ -449,7 +490,7 @@ gnu_hash.size    equ 0x20 ; TODO: remove
 gnu_hash.entsize equ 4 ; TODO: remove
 
   .gnu_hash:
-	dd      shstrtab.gnu_hash_idx ; name:      Section name (index into the section header string table).
+	dd      shstrtab.gnu_hash_off ; name:      Section name (index into the section header string table).
 	dd      SHT_GNU_HASH          ; type:      Section type.
 	dd      SHF_ALLOC             ; flags:     Section flags.
 	dd      gnu_hash              ; addr:      Address in memory image.
@@ -463,43 +504,38 @@ gnu_hash.entsize equ 4 ; TODO: remove
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 2] .dynsym           DYNSYM          00000128 000128 000020 10   A  3   1  4
 
-dynsym         equ 0x128 ; TODO: remove
-dynsym_off     equ 0x128 ; TODO: remove
-dynsym.size    equ 0x20 ; TODO: remove
-dynsym.entsize equ 0x10 ; TODO: remove
-
   .dynsym:
-	dd      shstrtab.dynsym_idx         ; name:      Section name (index into the section header string table).
-	dd      SHT_DYNSYM                  ; type:      Section type.
-	dd      SHF_ALLOC                   ; flags:     Section flags.
-	dd      dynsym                      ; addr:      Address in memory image.
-	dd      dynsym_off                  ; off:       Offset in file.
-	dd      dynsym.size                 ; size:      Size in bytes.
-	dd      shdr.dynstr_idx             ; link:      Index of a related section.
-	dd      shdr.gnu_hash_idx           ; info:      Depends on section type.
-	dd      0x4                         ; addralign: Alignment in bytes.
-	dd      dynsym.entsize              ; entsize:   Size of each entry in section.
+	dd      shstrtab.dynsym_off ; name:      Section name (index into the section header string table).
+	dd      SHT_DYNSYM          ; type:      Section type.
+	dd      SHF_ALLOC           ; flags:     Section flags.
+	dd      dynsym              ; addr:      Address in memory image.
+	dd      dynsym_off          ; off:       Offset in file.
+	dd      dynsym.size         ; size:      Size in bytes.
+	dd      shdr.dynstr_idx     ; link:      Index of a related section.
+	dd      shdr.gnu_hash_idx   ; info:      Depends on section type.
+	dd      0x4                 ; addralign: Alignment in bytes.
+	dd      dynsym.entsize      ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 3] .dynstr           STRTAB          00000148 000148 000005 00   A  0   0  1
 
   .dynstr:
-	dd      shstrtab.dynstr_idx         ; name:      Section name (index into the section header string table).
-	dd      SHT_STRTAB                  ; type:      Section type.
-	dd      SHF_ALLOC                   ; flags:     Section flags.
-	dd      dynstr                      ; addr:      Address in memory image.
-	dd      dynstr_off                  ; off:       Offset in file.
-	dd      dynstr.size                 ; size:      Size in bytes.
-	dd      0                           ; link:      Index of a related section.
-	dd      0                           ; info:      Depends on section type.
-	dd      0x1                         ; addralign: Alignment in bytes.
-	dd      0                           ; entsize:   Size of each entry in section.
+	dd      shstrtab.dynstr_off ; name:      Section name (index into the section header string table).
+	dd      SHT_STRTAB          ; type:      Section type.
+	dd      SHF_ALLOC           ; flags:     Section flags.
+	dd      dynstr              ; addr:      Address in memory image.
+	dd      dynstr_off          ; off:       Offset in file.
+	dd      dynstr.size         ; size:      Size in bytes.
+	dd      0                   ; link:      Index of a related section.
+	dd      0                   ; info:      Depends on section type.
+	dd      0x1                 ; addralign: Alignment in bytes.
+	dd      0                   ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 4] .text             PROGBITS        00001000 001000 000006 00  AX  0   0 16
 
   .text:
-	dd      shstrtab.text_idx         ; name:      Section name (index into the section header string table).
+	dd      shstrtab.text_off         ; name:      Section name (index into the section header string table).
 	dd      SHT_PROGBITS              ; type:      Section type.
 	dd      SHF_ALLOC | SHF_EXECINSTR ; flags:     Section flags.
 	dd      text                      ; addr:      Address in memory image.
@@ -514,7 +550,7 @@ dynsym.entsize equ 0x10 ; TODO: remove
 ;  [ 5] .eh_frame         PROGBITS        00002000 002000 000000 00   A  0   0  4
 
   .eh_frame:
-	dd      shstrtab.eh_frame_idx ; name:      Section name (index into the section header string table).
+	dd      shstrtab.eh_frame_off ; name:      Section name (index into the section header string table).
 	dd      SHT_PROGBITS          ; type:      Section type.
 	dd      SHF_ALLOC             ; flags:     Section flags.
 	dd      eh_frame              ; addr:      Address in memory image.
@@ -529,7 +565,7 @@ dynsym.entsize equ 0x10 ; TODO: remove
 ;  [ 6] .dynamic          DYNAMIC         00002fa0 002fa0 000060 08  WA  3   0  4
 
   .dynamic:
-	dd      shstrtab.dynamic_idx  ; name:      Section name (index into the section header string table).
+	dd      shstrtab.dynamic_off  ; name:      Section name (index into the section header string table).
 	dd      SHT_DYNAMIC           ; type:      Section type.
 	dd      SHF_WRITE | SHF_ALLOC ; flags:     Section flags.
 	dd      dynamic               ; addr:      Address in memory image.
@@ -544,7 +580,7 @@ dynsym.entsize equ 0x10 ; TODO: remove
 ;  [ 7] .shstrtab         STRTAB          00000000 003000 00003e 00      0   0  1
 
   .shstrtab:
-	dd      shstrtab.shstrtab_idx ; name:      Section name (index into the section header string table).
+	dd      shstrtab.shstrtab_off ; name:      Section name (index into the section header string table).
 	dd      SHT_STRTAB            ; type:      Section type.
 	dd      0x0                   ; flags:     Section flags.
 	dd      0                     ; addr:      Address in memory image.

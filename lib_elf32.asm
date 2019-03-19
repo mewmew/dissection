@@ -168,12 +168,50 @@ db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ; 000000f0
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
 ; 00000100
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 ; |................|
-; 00000110
-db 0x01, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00 ; |................|
-; 00000120
-db 0x01, 0x00, 0x00, 0x00, 0x89, 0x73, 0x88, 0x0b
+db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 
+; --- [ .gnu_hash section ] ----------------------------------------------------
+
+; 00000108
+
+gnu_hash_off equ $ - BASE_R_SEG
+
+gnu_hash:
+
+; ref: https://blogs.oracle.com/solaris/gnu-hash-elf-sections-v2
+
+; Histogram for `.gnu.hash' bucket list length (total of 2 buckets):
+
+  .header:
+	dd      2 ; nbuckets: The number of hash buckets
+	dd      1 ; symndx: The index of the first symbol in the dynamic symbol table (.dynsym) that is to be accessible via the hash table.
+	dd      1 ; maskwords: The number of ELFCLASS sized words in the Bloom filter portion of the hash table section.
+	dd      5 ; shift2:  A shift count used by the Bloom filter.
+
+  .bloom_filter:
+	; Bloom filter
+	dd      0x10000200 ; mask
+
+; Length  Number     % of total  Coverage
+;      0  1          ( 50.0%)
+
+; Length  Number     % of total  Coverage
+;      1  1          ( 50.0%)    100.0%
+
+  .buckets:
+	; Buckets
+	dd      0 ; length
+	dd      1 ; length
+
+  .hashes:
+	; Hashes
+	dd      0x0B887389 ; hash
+
+gnu_hash.entsize equ $ - .hashes ; 0 for 64-bit systems.
+
+gnu_hash.size equ $ - gnu_hash
+
+; --- [/ .gnu_hash section ] ---------------------------------------------------
 
 ; --- [ .dynsym section ] ------------------------------------------------------
 
@@ -351,8 +389,6 @@ hash equ 0xf4 ; TODO: remove
 ;  Tag        Type                         Name/Value
 ; 0x6ffffef5 (GNU_HASH)                   0x108
 
-gnu_hash equ 0x108 ; TODO: remove
-
   .gnu_hash:
 	dd      DT_GNU_HASH ; tag: Entry type.
 	dd      gnu_hash    ; val: Integer/Address value.
@@ -483,11 +519,6 @@ shdr:
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 1] .gnu.hash         GNU_HASH        00000108 000108 000020 04   A  2   0  4
-
-gnu_hash         equ 0x108 ; TODO: remove
-gnu_hash_off     equ 0x108 ; TODO: remove
-gnu_hash.size    equ 0x20 ; TODO: remove
-gnu_hash.entsize equ 4 ; TODO: remove
 
   .gnu_hash:
 	dd      shstrtab.gnu_hash_off ; name:      Section name (index into the section header string table).

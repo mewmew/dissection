@@ -176,7 +176,30 @@ db 0x01, 0x00, 0x00, 0x00, 0x89, 0x73, 0x88, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00,
 ; 00000130
 db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00 ; |................|
 ; 00000140
-db 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x05, 0x00, 0x00, 0x66, 0x6f, 0x6f, 0x00                   ; |.........foo.|
+db 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x05, 0x00
+
+; 00000140
+
+; --- [ .dynstr section ] ------------------------------------------------------
+
+dynstr_off equ $ - BASE_R_SEG
+
+; 000001a8
+
+dynstr:
+
+  .null:
+	db      0
+
+  .foo:
+	db      "foo", 0
+
+.null_off equ .null - dynstr   ; 0
+.foo_off  equ .foo - dynstr   ; 1
+
+dynstr.size equ $ - dynstr
+
+; --- [/ .dynstr section ] -----------------------------------------------------
 
 r_seg.size equ $ - r_seg
 
@@ -192,8 +215,21 @@ x_seg_off equ r_seg_off + round(r_seg.size, PAGE)
 
 x_seg:
 
+; --- [ .text section ] --------------------------------------------------------
+
+text_off equ x_seg_off
+
 ; 00001000
-db 0xb8, 0x2a, 0x00, 0x00, 0x00, 0xc3 ; |.*....|
+
+text:
+
+  .start:
+	mov     eax, 42
+	ret
+
+text.size equ $ - text
+
+; --- [/ .text section ] -------------------------------------------------------
 
 x_seg.size equ $ - x_seg
 
@@ -209,7 +245,18 @@ rdata_seg_off equ x_seg_off + round(x_seg.size, PAGE)
 
 rdata_seg:
 
-; .rdata segment contains no data.
+; --- [ .eh_frame section ] ----------------------------------------------------
+
+eh_frame_off equ rdata_seg_off
+
+; 00002000
+
+eh_frame:
+	; no data
+
+eh_frame.size equ $ - eh_frame
+
+; --- [/ .eh_frame section ] ---------------------------------------------------
 
 rdata_seg.size equ $ - rdata_seg
 
@@ -270,8 +317,6 @@ gnu_hash equ 0x108 ; TODO: remove
 ;  Tag        Type                         Name/Value
 ; 0x00000005 (STRTAB)                     0x148
 
-dynstr equ 0x148 ; TODO: remove
-
   .strtab:
 	dd      DT_STRTAB ; tag: Entry type.
 	dd      dynstr    ; val: Integer/Address value.
@@ -287,8 +332,6 @@ dynsym equ 0x128 ; TODO: remove
 
 ;  Tag        Type                         Name/Value
 ; 0x0000000a (STRSZ)                      5 (bytes)
-
-dynstr.size equ 5 ; TODO: remove
 
   .strsz:
 	dd      DT_STRSZ    ; tag: Entry type.
@@ -354,6 +397,8 @@ shstrtab:
 
 shstrtab.size equ $ - shstrtab
 
+; --- [/ .shstrtab section ] ---------------------------------------------------
+
 align 0x4, db 0x00
 
 ; === [ Section headers ] ======================================================
@@ -401,7 +446,6 @@ shdr:
 gnu_hash         equ 0x108 ; TODO: remove
 gnu_hash_off     equ 0x108 ; TODO: remove
 gnu_hash.size    equ 0x20 ; TODO: remove
-gnu_hash_link    equ 2 ; TODO: remove
 gnu_hash.entsize equ 4 ; TODO: remove
 
   .gnu_hash:
@@ -411,7 +455,7 @@ gnu_hash.entsize equ 4 ; TODO: remove
 	dd      gnu_hash              ; addr:      Address in memory image.
 	dd      gnu_hash_off          ; off:       Offset in file.
 	dd      gnu_hash.size         ; size:      Size in bytes.
-	dd      gnu_hash_link         ; link:      Index of a related section.
+	dd      shdr.dynsym_idx       ; link:      Index of a related section.
 	dd      0                     ; info:      Depends on section type.
 	dd      0x4                   ; addralign: Alignment in bytes.
 	dd      gnu_hash.entsize      ; entsize:   Size of each entry in section.
@@ -422,8 +466,6 @@ gnu_hash.entsize equ 4 ; TODO: remove
 dynsym         equ 0x128 ; TODO: remove
 dynsym_off     equ 0x128 ; TODO: remove
 dynsym.size    equ 0x20 ; TODO: remove
-dynsym_link    equ 3 ; TODO: remove
-dynsym_info    equ 1 ; TODO: remove
 dynsym.entsize equ 0x10 ; TODO: remove
 
   .dynsym:
@@ -433,17 +475,13 @@ dynsym.entsize equ 0x10 ; TODO: remove
 	dd      dynsym                      ; addr:      Address in memory image.
 	dd      dynsym_off                  ; off:       Offset in file.
 	dd      dynsym.size                 ; size:      Size in bytes.
-	dd      dynsym_link                 ; link:      Index of a related section.
-	dd      dynsym_info                 ; info:      Depends on section type.
+	dd      shdr.dynstr_idx             ; link:      Index of a related section.
+	dd      shdr.gnu_hash_idx           ; info:      Depends on section type.
 	dd      0x4                         ; addralign: Alignment in bytes.
 	dd      dynsym.entsize              ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 3] .dynstr           STRTAB          00000148 000148 000005 00   A  0   0  1
-
-dynstr         equ 0x148 ; TODO: remove
-dynstr_off     equ 0x148 ; TODO: remove
-dynstr.size    equ 5 ; TODO: remove
 
   .dynstr:
 	dd      shstrtab.dynstr_idx         ; name:      Section name (index into the section header string table).
@@ -460,69 +498,73 @@ dynstr.size    equ 5 ; TODO: remove
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 4] .text             PROGBITS        00001000 001000 000006 00  AX  0   0 16
 
-text         equ 0x1000 ; TODO: remove
-text_off     equ 0x1000 ; TODO: remove
-text.size    equ 6 ; TODO: remove
-
   .text:
-	dd      shstrtab.text_idx           ; name:      Section name (index into the section header string table).
-	dd      SHT_PROGBITS                ; type:      Section type.
-	dd      SHF_ALLOC | SHF_EXECINSTR   ; flags:     Section flags.
-	dd      text                        ; addr:      Address in memory image.
-	dd      text_off                    ; off:       Offset in file.
-	dd      text.size                   ; size:      Size in bytes.
-	dd      0                           ; link:      Index of a related section.
-	dd      0                           ; info:      Depends on section type.
-	dd      0x10                        ; addralign: Alignment in bytes.
-	dd      0                           ; entsize:   Size of each entry in section.
+	dd      shstrtab.text_idx         ; name:      Section name (index into the section header string table).
+	dd      SHT_PROGBITS              ; type:      Section type.
+	dd      SHF_ALLOC | SHF_EXECINSTR ; flags:     Section flags.
+	dd      text                      ; addr:      Address in memory image.
+	dd      text_off                  ; off:       Offset in file.
+	dd      text.size                 ; size:      Size in bytes.
+	dd      0                         ; link:      Index of a related section.
+	dd      0                         ; info:      Depends on section type.
+	dd      0x10                      ; addralign: Alignment in bytes.
+	dd      0                         ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 5] .eh_frame         PROGBITS        00002000 002000 000000 00   A  0   0  4
 
-eh_frame         equ 0x2000 ; TODO: remove
-eh_frame_off     equ 0x2000 ; TODO: remove
-eh_frame.size    equ 0 ; TODO: remove
-
   .eh_frame:
-	dd      shstrtab.eh_frame_idx        ; name:      Section name (index into the section header string table).
-	dd      SHT_PROGBITS                 ; type:      Section type.
-	dd      SHF_ALLOC       ; flags:     Section flags.
-	dd      eh_frame                     ; addr:      Address in memory image.
-	dd      eh_frame_off                 ; off:       Offset in file.
-	dd      eh_frame.size                ; size:      Size in bytes.
-	dd      0                ; link:      Index of a related section.
-	dd      0                           ; info:      Depends on section type.
-	dd      0x4                         ; addralign: Alignment in bytes.
-	dd      0             ; entsize:   Size of each entry in section.
+	dd      shstrtab.eh_frame_idx ; name:      Section name (index into the section header string table).
+	dd      SHT_PROGBITS          ; type:      Section type.
+	dd      SHF_ALLOC             ; flags:     Section flags.
+	dd      eh_frame              ; addr:      Address in memory image.
+	dd      eh_frame_off          ; off:       Offset in file.
+	dd      eh_frame.size         ; size:      Size in bytes.
+	dd      0                     ; link:      Index of a related section.
+	dd      0                     ; info:      Depends on section type.
+	dd      0x4                   ; addralign: Alignment in bytes.
+	dd      0                     ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 6] .dynamic          DYNAMIC         00002fa0 002fa0 000060 08  WA  3   0  4
 
-dynamic_link    equ 3 ; TODO: remove
-
   .dynamic:
-	dd      shstrtab.dynamic_idx        ; name:      Section name (index into the section header string table).
-	dd      SHT_DYNAMIC                 ; type:      Section type.
-	dd      SHF_WRITE | SHF_ALLOC       ; flags:     Section flags.
-	dd      dynamic                     ; addr:      Address in memory image.
-	dd      dynamic_off                 ; off:       Offset in file.
-	dd      dynamic.size                ; size:      Size in bytes.
-	dd      dynamic_link                ; link:      Index of a related section.
-	dd      0                           ; info:      Depends on section type.
-	dd      0x4                         ; addralign: Alignment in bytes.
-	dd      dynamic.entsize             ; entsize:   Size of each entry in section.
+	dd      shstrtab.dynamic_idx  ; name:      Section name (index into the section header string table).
+	dd      SHT_DYNAMIC           ; type:      Section type.
+	dd      SHF_WRITE | SHF_ALLOC ; flags:     Section flags.
+	dd      dynamic               ; addr:      Address in memory image.
+	dd      dynamic_off           ; off:       Offset in file.
+	dd      dynamic.size          ; size:      Size in bytes.
+	dd      shdr.dynstr_idx       ; link:      Index of a related section.
+	dd      0                     ; info:      Depends on section type.
+	dd      0x4                   ; addralign: Alignment in bytes.
+	dd      dynamic.entsize       ; entsize:   Size of each entry in section.
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 7] .shstrtab         STRTAB          00000000 003000 00003e 00      0   0  1
 
   .shstrtab:
-	dd      shstrtab.shstrtab_idx       ; name:      Section name (index into the section header string table).
-	dd      SHT_STRTAB                  ; type:      Section type.
-	dd      0x0                         ; flags:     Section flags.
-	dd      0                           ; addr:      Address in memory image.
-	dd      shstrtab_off                ; off:       Offset in file.
-	dd      shstrtab.size               ; size:      Size in bytes.
-	dd      0                           ; link:      Index of a related section.
-	dd      0                           ; info:      Depends on section type.
-	dd      0x1                         ; addralign: Alignment in bytes.
-	dd      0                           ; entsize:   Size of each entry in section.
+	dd      shstrtab.shstrtab_idx ; name:      Section name (index into the section header string table).
+	dd      SHT_STRTAB            ; type:      Section type.
+	dd      0x0                   ; flags:     Section flags.
+	dd      0                     ; addr:      Address in memory image.
+	dd      shstrtab_off          ; off:       Offset in file.
+	dd      shstrtab.size         ; size:      Size in bytes.
+	dd      0                     ; link:      Index of a related section.
+	dd      0                     ; info:      Depends on section type.
+	dd      0x1                   ; addralign: Alignment in bytes.
+	dd      0                     ; entsize:   Size of each entry in section.
+
+.null_idx     equ (.null - shdr) / .entsize
+.gnu_hash_idx equ (.gnu_hash - shdr) / .entsize
+.dynsym_idx   equ (.dynsym - shdr) / .entsize
+.dynstr_idx   equ (.dynstr - shdr) / .entsize
+.text_idx     equ (.text - shdr) / .entsize
+.eh_frame_idx equ (.eh_frame - shdr) / .entsize
+.dynamic_idx  equ (.dynamic - shdr) / .entsize
+.shstrtab_idx equ (.shstrtab - shdr) / .entsize
+
+shdr.size  equ $ - shdr
+shdr.count equ shdr.size / shdr.entsize
+
+; === [/ Section headers ] =====================================================

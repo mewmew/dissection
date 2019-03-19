@@ -33,12 +33,6 @@ ET_DYN  equ 3 ; Shared object.
 ; CPU architectures.
 EM_386 equ 3 ; Intel i386.
 
-_text.start equ 0x00001000 ; TODO: remove
-
-shdr.entsize equ 0x28 ; TODO: remove
-shdr.count equ 0x08 ; TODO: remove
-shdr.shstrtab_idx equ 0x07 ; TODO: remove
-
 ehdr:
 
 	db      0x7F, "ELF"               ; ident.magic: ELF magic number.
@@ -49,7 +43,7 @@ ehdr:
 	dw      ET_DYN                    ; type: File type.
 	dw      EM_386                    ; machine: Machine architecture.
 	dd      1                         ; version: ELF format version.
-	dd      _text.start               ; entry: Entry point.
+	dd      text.start                ; entry: Entry point.
 	dd      phdr_off                  ; phoff: Program header file offset.
 	dd      shdr_off                  ; shoff: Section header file offset.
 	dd      0                         ; flags: Architecture-specific flags.
@@ -161,14 +155,27 @@ phdr:
 
 ; === [/ Program headers ] =====================================================
 
-; 000000d4
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
-; 000000e0
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
-; 000000f0
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
-; 00000100
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+times (0xF4 - 0xD4) db 0x00 ; padding
+
+; --- [ Symbol hash table ] ----------------------------------------------------
+
+; 000000f4
+
+hash_off equ $ - BASE_R_SEG
+
+hash:
+
+; ref : https://flapenguin.me/2017/04/24/elf-lookup-dt-hash/
+
+; Histogram for bucket list length (total of 0 buckets):
+;  Length  Number     % of total  Coverage
+
+	dd      0 ; nbucket
+	dd      0 ; nchain
+
+times 12 db 0x00 ; padding
+
+; --- [/ Symbol hash table ] ---------------------------------------------------
 
 ; --- [ .gnu_hash section ] ----------------------------------------------------
 
@@ -378,8 +385,6 @@ dynamic:
 ;  Tag        Type                         Name/Value
 ; 0x00000004 (HASH)                       0xf4
 
-hash equ 0xf4 ; TODO: remove
-
   .hash:
 	dd      DT_HASH ; tag: Entry type.
 	dd      hash    ; val: Integer/Address value.
@@ -416,8 +421,6 @@ hash equ 0xf4 ; TODO: remove
 
 ;  Tag        Type                         Name/Value
 ; 0x0000000b (SYMENT)                     16 (bytes)
-
-dynsym.entsize equ 16 ; TODO: remove
 
   .syment:
 	dd      DT_SYMENT      ; tag: Dynamic entry type
@@ -516,6 +519,8 @@ shdr:
 	dd      0        ; info:      Depends on section type.
 	dd      0        ; addralign: Alignment in bytes.
 	dd      0        ; entsize:   Size of each entry in section.
+
+.entsize equ $ - shdr
 
 ;  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
 ;  [ 1] .gnu.hash         GNU_HASH        00000108 000108 000020 04   A  2   0  4

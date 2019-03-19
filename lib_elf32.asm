@@ -230,12 +230,16 @@ rw_seg:
 ; --- [ .dynamic section ] -----------------------------------------------------
 
 ; Dynamic tags.
-DT_NULL   equ 0  ; Terminating entry.
-DT_NEEDED equ 1  ; String table offset of a needed shared library.
-DT_PLTGOT equ 3  ; Processor-dependent address.
-DT_STRTAB equ 5  ; Address of string table.
-DT_SYMTAB equ 6  ; Address of symbol table.
-DT_JMPREL equ 23 ; Address of PLT relocations.
+DT_NULL     equ 0          ; Terminating entry.
+DT_NEEDED   equ 1          ; String table offset of a needed shared library.
+DT_HASH     equ 4          ; Address of symbol hash table.
+DT_PLTGOT   equ 3          ; Processor-dependent address.
+DT_STRTAB   equ 5          ; Address of string table.
+DT_SYMTAB   equ 6          ; Address of symbol table.
+DT_STRSZ    equ 10         ; Size of string table.
+DT_SYMENT   equ 11         ; Size of each symbol table entry.
+DT_JMPREL   equ 23         ; Address of PLT relocations.
+DT_GNU_HASH equ 0x6FFFFEF5 ; Address of GNU symbol hash table.
 
 dynamic_align equ 4
 
@@ -245,18 +249,70 @@ dynamic_off equ dynamic - BASE_R_SEG
 
 dynamic:
 
-; 00002fa0
-db 0x04, 0x00, 0x00, 0x00, 0xf4, 0x00, 0x00, 0x00, 0xf5, 0xfe, 0xff, 0x6f, 0x08, 0x01, 0x00, 0x00 ; |...........o....|
-; 00002fb0
-db 0x05, 0x00, 0x00, 0x00, 0x48, 0x01, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x28, 0x01, 0x00, 0x00 ; |....H.......(...|
-; 00002fc0
-db 0x0a, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00 ; |................|
-; 00002fd0
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
-; 00002fe0
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
-; 00002ff0
-db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; |................|
+;  Tag        Type                         Name/Value
+; 0x00000004 (HASH)                       0xf4
+
+hash equ 0xf4 ; TODO: remove
+
+  .hash:
+	dd      DT_HASH ; tag: Entry type.
+	dd      hash    ; val: Integer/Address value.
+
+.entsize equ $ - dynamic
+
+;  Tag        Type                         Name/Value
+; 0x6ffffef5 (GNU_HASH)                   0x108
+
+gnu_hash equ 0x108 ; TODO: remove
+
+  .gnu_hash:
+	dd      DT_GNU_HASH ; tag: Entry type.
+	dd      gnu_hash    ; val: Integer/Address value.
+
+;  Tag        Type                         Name/Value
+; 0x00000005 (STRTAB)                     0x148
+
+dynstr equ 0x148 ; TODO: remove
+
+  .strtab:
+	dd      DT_STRTAB ; tag: Entry type.
+	dd      dynstr    ; val: Integer/Address value.
+
+;  Tag        Type                         Name/Value
+; 0x00000006 (SYMTAB)                     0x128
+
+dynsym equ 0x128 ; TODO: remove
+
+  .symtab:
+	dd      DT_SYMTAB ; tag: Entry type.
+	dd      dynsym    ; val: Integer/Address value.
+
+;  Tag        Type                         Name/Value
+; 0x0000000a (STRSZ)                      5 (bytes)
+
+dynstr.size equ 5 ; TODO: remove
+
+  .strsz:
+	dd      DT_STRSZ    ; tag: Entry type.
+	dd      dynstr.size ; val: Integer/Address value.
+
+;  Tag        Type                         Name/Value
+; 0x0000000b (SYMENT)                     16 (bytes)
+
+dynsym.entsize equ 16 ; TODO: remove
+
+  .syment:
+	dd      DT_SYMENT      ; tag: Dynamic entry type
+	dd      dynsym.entsize ; val: Integer or address value
+
+;  Tag        Type                         Name/Value
+; 0x00000000 (NULL)                       0x0
+
+  .null:
+	dd      DT_NULL ; tag: Entry type.
+	dd      0       ; val: Integer/Address value.
+
+times (0x3000 - 0x2FD8) db 0x00 ; padding
 
 .size equ $ - dynamic
 

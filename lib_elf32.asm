@@ -14,6 +14,8 @@ BASE_RW_SEG    equ BASE_RDATA_SEG + 0xFA0
 
 SECTION .r_seg vstart=BASE_R_SEG align=1
 
+; 00000000
+
 r_seg_off equ 0
 
 r_seg:
@@ -68,6 +70,8 @@ PT_DYNAMIC equ 2 ; Dynamic linking information segment.
 PF_R equ 0x4 ; Readable.
 PF_W equ 0x2 ; Writable.
 PF_X equ 0x1 ; Executable.
+
+; 00000034
 
 phdr_off equ phdr - BASE_R_SEG
 
@@ -222,8 +226,6 @@ gnu_hash.size equ $ - gnu_hash
 
 ; --- [ .dynsym section ] ------------------------------------------------------
 
-dynsym_off equ $ - BASE_R_SEG
-
 STT_NOTYPE equ 0 ; Unspecified type.
 STT_FUNC   equ 2 ; Function.
 
@@ -233,6 +235,8 @@ STB_GLOBAL equ 1 ; Global symbol
 STV_DEFAULT equ 0 ; Default visibility (see binding).
 
 ; 00000128
+
+dynsym_off equ $ - BASE_R_SEG
 
 dynsym:
 
@@ -270,9 +274,9 @@ dynsym.size equ $ - dynsym
 
 ; --- [ .dynstr section ] ------------------------------------------------------
 
-dynstr_off equ $ - BASE_R_SEG
+; 00000148
 
-; 000001a8
+dynstr_off equ $ - BASE_R_SEG
 
 dynstr:
 
@@ -299,15 +303,17 @@ align PAGE, db 0x00
 
 SECTION .x_seg vstart=BASE_X_SEG follows=.r_seg align=1
 
+; 00001000
+
 x_seg_off equ r_seg_off + round(r_seg.size, PAGE)
 
 x_seg:
 
 ; --- [ .text section ] --------------------------------------------------------
 
-text_off equ x_seg_off
-
 ; 00001000
+
+text_off equ x_seg_off
 
 text:
 
@@ -329,15 +335,17 @@ align PAGE, db 0x00
 
 SECTION .rdata_seg vstart=BASE_RDATA_SEG follows=.x_seg align=1
 
+; 00002000
+
 rdata_seg_off equ x_seg_off + round(x_seg.size, PAGE)
 
 rdata_seg:
 
 ; --- [ .eh_frame section ] ----------------------------------------------------
 
-eh_frame_off equ rdata_seg_off
-
 ; 00002000
+
+eh_frame_off equ rdata_seg_off
 
 eh_frame:
 	; no data
@@ -356,7 +364,9 @@ times (0x2FA0 - 0x2000) db 0x00 ; padding
 
 SECTION .rw_seg vstart=BASE_RW_SEG follows=.rdata_seg align=1
 
-rw_seg_off equ rdata_seg_off + 0xFA0
+; 00002fa0
+
+rw_seg_off equ rdata_seg_off + 0xFA0 ; TODO: calculate size of padding in rdata_seg.
 
 rw_seg:
 
@@ -377,6 +387,8 @@ DT_GNU_HASH equ 0x6FFFFEF5 ; Address of GNU symbol hash table.
 dynamic_align equ 4
 
 align dynamic_align, db 0x00
+
+; 00002fa0
 
 dynamic_off equ dynamic - BASE_R_SEG
 
@@ -445,9 +457,9 @@ rw_seg.size equ $ - rw_seg
 
 ; --- [ .shstrtab section ] ----------------------------------------------------
 
-shstrtab_off equ rw_seg_off + rw_seg.size
-
 ; 00003000
+
+shstrtab_off equ rw_seg_off + rw_seg.size
 
 shstrtab:
 
@@ -483,23 +495,20 @@ align 0x4, db 0x00
 
 ; === [ Section headers ] ======================================================
 
-; 00003040
-
 ; Section header types.
 SHT_NULL        equ 0          ; inactive
 SHT_PROGBITS    equ 1          ; program defined information
 SHT_STRTAB      equ 3          ; string table section
 SHT_DYNAMIC     equ 6          ; dynamic section
-SHT_REL         equ 9          ; relocation section - no addends
 SHT_DYNSYM      equ 11         ; dynamic symbol table section
 SHT_GNU_HASH    equ 0x6FFFFFF6 ; GNU hash table
-SHT_GNU_VERNEED equ 0x6FFFFFFE ; GNU version needs section
 
 ; Section header flags.
 SHF_WRITE     equ 0x01 ; Section contains writable data.
 SHF_ALLOC     equ 0x02 ; Section occupies memory.
 SHF_EXECINSTR equ 0x04 ; Section contains instructions.
-SHF_INFO_LINK equ 0x40 ; sh_info holds section index.
+
+; 00003040
 
 shdr_off equ shstrtab_off + round(shstrtab.size, 4)
 

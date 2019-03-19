@@ -4,3 +4,4 @@ hello/hello_32
 hello/hello_64
 hello/hello_elf32
 hello/hello_elf64
+*.so

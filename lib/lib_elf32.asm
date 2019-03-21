@@ -395,7 +395,7 @@ dynamic_off equ dynamic - BASE_R_SEG
 dynamic:
 
 ;  Tag        Type                         Name/Value
-; 0x00000004 (HASH)                       0xf4
+;  0x00000004 (HASH)                       0xf4
 
   .hash:
 	dd      DT_HASH ; tag: Entry type.
@@ -404,42 +404,42 @@ dynamic:
 .entsize equ $ - dynamic
 
 ;  Tag        Type                         Name/Value
-; 0x6ffffef5 (GNU_HASH)                   0x108
+;  0x6ffffef5 (GNU_HASH)                   0x108
 
   .gnu_hash:
 	dd      DT_GNU_HASH ; tag: Entry type.
 	dd      gnu_hash    ; val: Integer/Address value.
 
 ;  Tag        Type                         Name/Value
-; 0x00000005 (STRTAB)                     0x148
+;  0x00000005 (STRTAB)                     0x148
 
   .strtab:
 	dd      DT_STRTAB ; tag: Entry type.
 	dd      dynstr    ; val: Integer/Address value.
 
 ;  Tag        Type                         Name/Value
-; 0x00000006 (SYMTAB)                     0x128
+;  0x00000006 (SYMTAB)                     0x128
 
   .symtab:
 	dd      DT_SYMTAB ; tag: Entry type.
 	dd      dynsym    ; val: Integer/Address value.
 
 ;  Tag        Type                         Name/Value
-; 0x0000000a (STRSZ)                      5 (bytes)
+;  0x0000000a (STRSZ)                      5 (bytes)
 
   .strsz:
 	dd      DT_STRSZ    ; tag: Entry type.
 	dd      dynstr.size ; val: Integer/Address value.
 
 ;  Tag        Type                         Name/Value
-; 0x0000000b (SYMENT)                     16 (bytes)
+;  0x0000000b (SYMENT)                     16 (bytes)
 
   .syment:
 	dd      DT_SYMENT      ; tag: Dynamic entry type
 	dd      dynsym.entsize ; val: Integer or address value
 
 ;  Tag        Type                         Name/Value
-; 0x00000000 (NULL)                       0x0
+;  0x00000000 (NULL)                       0x0
 
   .null:
 	dd      DT_NULL ; tag: Entry type.

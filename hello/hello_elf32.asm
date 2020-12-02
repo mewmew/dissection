@@ -680,37 +680,37 @@ shstrtab:
   .null:
 	db 0
 
-  .shstrtab_idx equ $ - shstrtab
+  .shstrtab_off equ $ - shstrtab
 	db      ".shstrtab", 0
 
-  .interp_idx equ $ - shstrtab
+  .interp_off equ $ - shstrtab
 	db      ".interp", 0
 
-  .dynsym_idx equ $ - shstrtab
+  .dynsym_off equ $ - shstrtab
 	db      ".dynsym", 0
 
-  .dynstr_idx equ $ - shstrtab
+  .dynstr_off equ $ - shstrtab
 	db      ".dynstr", 0
 
-  .gnu_version_r_idx equ $ - shstrtab
+  .gnu_version_r_off equ $ - shstrtab
 	db      ".gnu.version_r", 0
 
-  .rel_plt_idx equ $ - shstrtab
+  .rel_plt_off equ $ - shstrtab
 	db      ".rel"
 
-  .plt_idx equ $ - shstrtab
+  .plt_off equ $ - shstrtab
 	db      ".plt", 0
 
-  .text_idx equ $ - shstrtab
+  .text_off equ $ - shstrtab
 	db      ".text", 0
 
-  .rodata_idx equ $ - shstrtab
+  .rodata_off equ $ - shstrtab
 	db      ".rodata", 0
 
-  .dynamic_idx equ $ - shstrtab
+  .dynamic_off equ $ - shstrtab
 	db      ".dynamic", 0
 
-  .got_plt_idx equ $ - shstrtab
+  .got_plt_off equ $ - shstrtab
 	db      ".got.plt", 0
 
 shstrtab.size equ $ - shstrtab
@@ -761,7 +761,7 @@ shdr.entsize equ $ - shdr
 ;  [ 1] .interp           PROGBITS        08048134 000134 000013 00   A  0   0  1
 
   .interp:
-	dd      shstrtab.interp_idx         ; name:      Section name (index into the section header string table).
+	dd      shstrtab.interp_off         ; name:      Section name (index into the section header string table).
 	dd      SHT_PROGBITS                ; type:      Section type.
 	dd      SHF_ALLOC                   ; flags:     Section flags.
 	dd      interp                      ; addr:      Address in memory image.
@@ -779,7 +779,7 @@ dynsym_link    equ 3
 dynsym_info    equ 1
 
   .dynsym:
-	dd      shstrtab.dynsym_idx         ; name:      Section name (index into the section header string table).
+	dd      shstrtab.dynsym_off         ; name:      Section name (index into the section header string table).
 	dd      SHT_DYNSYM                  ; type:      Section type.
 	dd      SHF_ALLOC                   ; flags:     Section flags.
 	dd      dynsym                      ; addr:      Address in memory image.
@@ -794,7 +794,7 @@ dynsym_info    equ 1
 ;  [ 3] .dynstr           STRTAB          080481a8 0001a8 000021 00   A  0   0  1
 
   .dynstr:
-	dd      shstrtab.dynstr_idx         ; name:      Section name (index into the section header string table).
+	dd      shstrtab.dynstr_off         ; name:      Section name (index into the section header string table).
 	dd      SHT_STRTAB                  ; type:      Section type.
 	dd      SHF_ALLOC                   ; flags:     Section flags.
 	dd      dynstr                      ; addr:      Address in memory image.
@@ -812,7 +812,7 @@ gnu_version_r_link equ 3
 gnu_version_r_info equ 1
 
   .gnu_version_r:
-	dd      shstrtab.gnu_version_r_idx  ; name:      Section name (index into the section header string table).
+	dd      shstrtab.gnu_version_r_off  ; name:      Section name (index into the section header string table).
 	dd      SHT_GNU_VERNEED             ; type:      Section type.
 	dd      SHF_ALLOC                   ; flags:     Section flags.
 	dd      gnu_version_r               ; addr:      Address in memory image.
@@ -830,7 +830,7 @@ rel_plt_link    equ 2
 rel_plt_info    equ 10
 
   .rel_plt:
-	dd      shstrtab.rel_plt_idx        ; name:      Section name (index into the section header string table).
+	dd      shstrtab.rel_plt_off        ; name:      Section name (index into the section header string table).
 	dd      SHT_REL                     ; type:      Section type.
 	dd      SHF_ALLOC | SHF_INFO_LINK   ; flags:     Section flags.
 	dd      rel_plt                     ; addr:      Address in memory image.
@@ -847,7 +847,7 @@ rel_plt_info    equ 10
 plt_entsize equ 4 ; TODO: remove
 
   .plt:
-	dd      shstrtab.plt_idx            ; name:      Section name (index into the section header string table).
+	dd      shstrtab.plt_off            ; name:      Section name (index into the section header string table).
 	dd      SHT_PROGBITS                ; type:      Section type.
 	dd      SHF_ALLOC | SHF_EXECINSTR   ; flags:     Section flags.
 	dd      plt                         ; addr:      Address in memory image.
@@ -862,7 +862,7 @@ plt_entsize equ 4 ; TODO: remove
 ;  [ 7] .text             PROGBITS        08049030 001030 000018 00  AX  0   0 16
 
   .text:
-	dd      shstrtab.text_idx           ; name:      Section name (index into the section header string table).
+	dd      shstrtab.text_off           ; name:      Section name (index into the section header string table).
 	dd      SHT_PROGBITS                ; type:      Section type.
 	dd      SHF_ALLOC | SHF_EXECINSTR   ; flags:     Section flags.
 	dd      text                        ; addr:      Address in memory image.
@@ -877,7 +877,7 @@ plt_entsize equ 4 ; TODO: remove
 ;  [ 8] .rodata           PROGBITS        0804a000 002000 00000d 00   A  0   0  4
 
   .rodata:
-	dd      shstrtab.rodata_idx        ; name:      Section name (index into the section header string table).
+	dd      shstrtab.rodata_off        ; name:      Section name (index into the section header string table).
 	dd      SHT_PROGBITS                ; type:      Section type.
 	dd      SHF_ALLOC                   ; flags:     Section flags.
 	dd      rodata                      ; addr:      Address in memory image.
@@ -894,7 +894,7 @@ plt_entsize equ 4 ; TODO: remove
 dynamic_link    equ 3
 
   .dynamic:
-	dd      shstrtab.dynamic_idx        ; name:      Section name (index into the section header string table).
+	dd      shstrtab.dynamic_off        ; name:      Section name (index into the section header string table).
 	dd      SHT_DYNAMIC                 ; type:      Section type.
 	dd      SHF_WRITE | SHF_ALLOC       ; flags:     Section flags.
 	dd      dynamic                     ; addr:      Address in memory image.
@@ -909,7 +909,7 @@ dynamic_link    equ 3
 ;  [10] .got.plt          PROGBITS        0804c000 003000 000014 04  WA  0   0  4
 
   .got_plt:
-	dd      shstrtab.got_plt_idx        ; name:      Section name (index into the section header string table).
+	dd      shstrtab.got_plt_off        ; name:      Section name (index into the section header string table).
 	dd      SHT_PROGBITS                ; type:      Section type.
 	dd      SHF_WRITE | SHF_ALLOC       ; flags:     Section flags.
 	dd      got_plt                     ; addr:      Address in memory image.
@@ -924,7 +924,7 @@ dynamic_link    equ 3
 ;  [11] .shstrtab         STRTAB          00000000 003014 00005b 00      0   0  1
 
   .shstrtab:
-	dd      shstrtab.shstrtab_idx       ; name:      Section name (index into the section header string table).
+	dd      shstrtab.shstrtab_off       ; name:      Section name (index into the section header string table).
 	dd      SHT_STRTAB                  ; type:      Section type.
 	dd      0x0                         ; flags:     Section flags.
 	dd      0                           ; addr:      Address in memory image.

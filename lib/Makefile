@@ -11,7 +11,7 @@ all: lib_32.so lib_elf32.so
 	nasm -f elf64 -o $@ $<
 
 %_32.so: %_32.o
-	ld -m elf_i386 -shared -I /lib/ld-linux.so.2 -s -o $@ -L/usr/lib32 $<
+	ld -m elf_i386 -shared -Ttext-segment=0x00400000 -I /lib/ld-linux.so.2 -s -o $@ -L/usr/lib32 $<
 	strip -R .hash $@
 	#strip -R .gnu.hash $@
 	strip -R .gnu.version $@
